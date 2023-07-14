@@ -1,0 +1,8 @@
+cmake-build-release
+cmake-build-debug
+.idea
+*.log
+*.sh
+!scripts/*.sh
+build/*
+build2/*

@@ -1,0 +1,25 @@
+set(headers
+        model.h
+        solvers.h
+        soil_water_model.h
+        root_distribution_model.h
+        input.h
+        parameters.h
+        csv_reader.h
+        output.h
+        param_examples.h
+        )
+set(source
+        model.cpp
+        solvers.cpp
+        soil_water_model.cpp
+        root_distribution_model.cpp
+        csv_reader.cpp
+        parameters.cpp
+        input.cpp
+        output.cpp
+        main.cpp
+        param_examples.cpp
+        )
+
+include(add_model_sources)
