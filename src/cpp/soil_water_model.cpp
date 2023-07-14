@@ -52,11 +52,11 @@ void Campbell_Water_Uptake::CalculatePsiAndKs() {
     }
 }
 
-vector<vector<double>> Campbell_Water_Uptake::Get_psi() {
+vector<vector<double> > Campbell_Water_Uptake::Get_psi() {
     return psi_s_array;
 }
 
-vector<vector<double>> Campbell_Water_Uptake::Get_ks() {
+vector<vector<double> > Campbell_Water_Uptake::Get_ks() {
     return ks_array;
 }
 

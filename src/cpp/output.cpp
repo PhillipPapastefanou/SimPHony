@@ -93,7 +93,7 @@ const vector<float> &Output::Get_psi_stem() const {
     return psi_stem_a;
 }
 
-const vector<vector<float>> &Output::Get_psi_soil_indiv() const {
+const vector<vector<float> > &Output::Get_psi_soil_indiv() const {
     return psi_soil_aa;
 }
 
@@ -109,7 +109,7 @@ const vector<float> &Output::Get_vpd() const {
     return vpd_a;
 }
 
-const vector<vector<float>> &Output::Get_ks_soil() const {
+const vector<vector<float> > &Output::Get_ks_soil() const {
     return k_soil_aa;
 }
 

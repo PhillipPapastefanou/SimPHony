@@ -15,6 +15,9 @@ public:
 
     void Parse();
 
+    const vector<Parameters> &Get_parameter_list() const;
+
+
 private:
     CSV_Reader reader;
 

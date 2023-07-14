@@ -40,13 +40,13 @@ public:
 
     const vector<float> &Get_G() const;
 
-    const vector<vector<float>> &Get_G_indiv() const;
+    const vector<vector<float> > &Get_G_indiv() const;
 
     const vector<float> &Get_psi_leaf() const;
 
     const vector<float> &Get_psi_stem() const;
 
-    const vector<vector<float>> &Get_psi_soil_indiv() const;
+    const vector<vector<float> > &Get_psi_soil_indiv() const;
 
     const vector<float> &Get_gs() const;
 
@@ -54,7 +54,7 @@ public:
 
     const vector<float> &Get_vpd() const;
 
-    const vector<vector<float>> &Get_ks_soil() const;
+    const vector<vector<float> > &Get_ks_soil() const;
 
     const vector<int> &Get_steps_psi_leaf() const;
 

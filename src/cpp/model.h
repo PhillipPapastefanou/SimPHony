@@ -22,6 +22,8 @@ public:
     double psi_stem_root(double psi_stem_target);
     double psi_leaf_root(double psi_leaf_target);
 
+    Output Get_output();
+
 private:
 
     // Input

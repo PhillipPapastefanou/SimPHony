@@ -194,6 +194,10 @@ double Leaf_Stem_Implicit_Model::psi_leaf_root(double psi_leaf_target) {
     return psi_leaf + d_psi_leaf_rec * steplength - psi_leaf_target;
 }
 
+Output Leaf_Stem_Implicit_Model::Get_output() {
+    return output;
+}
+
 
 double Bisection_psi_leaf::f(double x) {
     return model.psi_leaf_root(x);

@@ -7,6 +7,7 @@
 #include "model.h"
 #include <chrono>
 #include "parameter_csv_reader.h"
+//#include "simulation.h"
 
 
 using std::cout;
@@ -33,6 +34,9 @@ int main(int argc, char* argv[]) {
 
     // Default parameters
     Parameters params;
+
+
+
 
     params.huber_value  = 1.0/3600.0;
     params.canopy_height  = 20.0;

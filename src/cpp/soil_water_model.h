@@ -38,8 +38,8 @@ public:
     ~Campbell_Water_Uptake();
     void CalculatePsiAndKs() override;
 
-    vector<vector<double>> Get_psi() override;
-    vector<vector<double>> Get_ks() override;
+    vector<vector<double> > Get_psi() override;
+    vector<vector<double> >  Get_ks() override;
 
 };
 

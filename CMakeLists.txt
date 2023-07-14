@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 3.4)
 #set(CMAKE_C_COMPILER "gcc")
 #set(CMAKE_CXX_COMPILER "g++")
 
+set(USE_PYBIND11 ON)
+
+set(PYTHON_EXECUTABLE /Users/pp/opt/anaconda3/bin/python3.9)
+
+find_package(pybind11 CONFIG REQUIRED)
+message(STATUS "Found pybind11 v${pybind11_VERSION}: ${pybind11_INCLUDE_DIRS}")
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -11,8 +18,12 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 add_subdirectory(src/cpp)
 
-
-set(USE_OPTION ON)
-
 # Specify the executable to build, and which sources to build it from
-add_executable(hydro_model ${sources})
+
+
+pybind11_add_module(hydro_standalone src/cpp/pybind_interface.cpp ${sources})
+
+
+project(hydro_standalone_run)
+
+add_executable(hydro_standalone_run ${sources})

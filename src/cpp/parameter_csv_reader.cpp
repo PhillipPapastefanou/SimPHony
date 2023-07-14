@@ -179,3 +179,7 @@ int Parameter_CSV_Reader::get_position(std::string value) {
     n_conversion ++;
     return pos;
 }
+
+const vector<Parameters> &Parameter_CSV_Reader::Get_parameter_list() const {
+    return parameters_list;
+}

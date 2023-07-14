@@ -1,5 +1,6 @@
 set(headers
         model.h
+        simulation.h
         solvers.h
         soil_water_model.h
         root_distribution_model.h
@@ -12,6 +13,7 @@ set(headers
         )
 set(source
         model.cpp
+        simulation.cpp
         solvers.cpp
         soil_water_model.cpp
         root_distribution_model.cpp

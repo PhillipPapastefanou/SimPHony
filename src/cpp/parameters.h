@@ -33,13 +33,13 @@ public:
     // From Meinzer et al. 2011 Figure 13.2
     // Range: 10 - 500 kg m-3 MPa-1
     double _c_kg = 300;
-    double stem_hydraulic_capacitance = _c_kg * 1000.0 / 18.0;
+    double stem_hydraulic_capacitance = 20.0*1000/18.0;
 
     // Xylem saturated Hydraulic conductivity [mol m-2 s-1 MPa]
     // from xu et al 2016: 1.7 - 7.5 kg H2O m-2 s-1
     // 1 mole of water equals 18g
     // equals to 93 - 450
-    double k_xylem_sat = 400;
+    double k_xylem_sat = 300;
     // Huber value [m2 m-2] equals 1/klatosa
     // From sperry et al
     double huber_value = 1.0/3600.0;
@@ -59,7 +59,7 @@ public:
     double leaf_area_index = 4.8;
     // Leaf water potential at which plants close stomates to 50 % [MPa]
     // Something like this can be made up here...
-    double psi_leaf_50_close = -3.0;
+    double psi_leaf_50_close = -2.1;
     // Slope parameter of stomatal closure
     //  No reference here yet, be careful with the sign
     double d_50_close = 10.0;
@@ -87,10 +87,10 @@ public:
     // Saturated soil hydraulic conductance [m s-1]
     // Van Looy et al 4.8 - 62 [cm/d]
     double _k_soil_sat_cm_d = 15.0;
-    double k_soil_sat = _k_soil_sat_cm_d / 100.0 / 86400.0;
+    double k_soil_sat = _k_soil_sat_cm_d * 100.0 / 86400.0;
 
     // Saturated volumetric water content [m3 m-3]
-    double theta_s = 0.43;
+    double theta_s = 0.8;
 
     // Van Genuchten parameters
     double theta_r = 0.105;
@@ -99,7 +99,7 @@ public:
     double neta_genucht = 0.5;
 
     // Campbell 1974 / Clapp and STuff 1978 shape parameter [1]
-    double camp_b = 10.4;
+    double camp_b = 8.4;
     // Reference Soil water potential [MPa]
     // from Clapp 1978: -15.3 cm
     double camp_psi_soil_ref = -1.50042 * std::pow(10, -6);
