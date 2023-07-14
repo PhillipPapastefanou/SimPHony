@@ -8,6 +8,4 @@ Parameters::~Parameters() {
 
 }
 
-void Parameters::init() {
 
-}

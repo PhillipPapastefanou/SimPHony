@@ -9,7 +9,6 @@ class Parameters
 public:
     Parameters();
     ~Parameters();
-    void init();
 
     // Root zone depth [m]
     double root_zone_depth = 0.3;
@@ -54,7 +53,7 @@ public:
 
     // Leaf hydraulic conductance [mol m-2 MPa]
     // range 0.2 - 1.2 from Blackmann and Brodribb 2011
-    double leaf_hytdraulic_capacitance = 1.0;
+    double leaf_hydraulic_capacitance = 1.0;
     // Leaf area index [m2 m-2]
     // Data from the swiss site (half hemispherical)
     double leaf_area_index = 4.8;
@@ -91,10 +90,10 @@ public:
     double k_soil_sat = _k_soil_sat_cm_d / 100.0 / 86400.0;
 
     // Saturated volumetric water content [m3 m-3]
-    double theta_S = 0.43;
+    double theta_s = 0.43;
 
     // Van Genuchten parameters
-    double theta_R = 0.105;
+    double theta_r = 0.105;
     double alpha_genucht = 1.0;
     double n_genucht = 6.0;
     double neta_genucht = 0.5;
@@ -111,7 +110,7 @@ public:
     const double PI = std::numbers::pi;
 
 
-    double precision_eps = 1E-10;
+    double solver_precision = 1E-10;
 
 
 

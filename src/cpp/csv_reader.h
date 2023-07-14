@@ -25,7 +25,7 @@ public:
     vector<string> header;
 
     template<typename T>
-    vector<vector<T> > Get(vector<int> indexes) {
+    vector<vector<T> > Get(vector<int> indexes ) {
 
         string line, word;
 
@@ -49,6 +49,37 @@ public:
                 row.push_back(Convert<T>(row_vec[itr]));
             }
 
+
+            //vector<T> slice = vector<T>(row.begin() + col_min, row.begin() + col_max);
+
+            data.push_back(row);
+        }
+
+        if(file->is_open()){
+            file->close();
+        }
+
+        return data;
+    };
+    template<typename T>
+    vector<vector<T> > Get() {
+
+        string line, word;
+
+        vector<vector<T> > data;
+        vector<T> row;
+        vector<string> row_vec;
+
+
+        // Read rows
+        while(getline(*file, line)){
+            row.clear();
+            row_vec.clear();
+            std::stringstream row_str(line);
+
+            while(getline(row_str, word, delimiter)){
+                row.push_back(word);
+            }
 
             //vector<T> slice = vector<T>(row.begin() + col_min, row.begin() + col_max);
 

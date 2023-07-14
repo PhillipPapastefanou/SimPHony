@@ -6,6 +6,7 @@
 #include "input.h"
 #include "model.h"
 #include <chrono>
+#include "parameter_csv_reader.h"
 
 
 using std::cout;
@@ -19,6 +20,17 @@ int main(int argc, char* argv[]) {
     string forcing_file = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Forcing_Inter.csv";
 
 
+    Parameter_CSV_Reader reader("/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/Model/Model_setups.csv");
+
+    auto start0 = std::chrono::high_resolution_clock::now();
+
+    reader.Parse();
+
+    auto end0 = std::chrono::high_resolution_clock::now();
+    auto ms0 = std::chrono::duration_cast<std::chrono::milliseconds>( end0 - start0);
+    std::cout << "Elapsed time: " << ms0.count() << " ms\n";
+
+
     // Default parameters
     Parameters params;
 
@@ -29,7 +41,7 @@ int main(int argc, char* argv[]) {
     params.psi_leaf_50_close = -2.1;
     params.d_50_close = 10.0;
     params.leaf_area_index = 4.8;
-    params.leaf_hytdraulic_capacitance = 1.0;
+    params.leaf_hydraulic_capacitance = 1.0;
     params.stem_hydraulic_capacitance = 20.0*1000/18.0;
     params.k_xylem_sat = 300;
 
@@ -41,13 +53,13 @@ int main(int argc, char* argv[]) {
     params.min_soil_layer_depth = 0.0;
     params.max_soil_layer_depth = 1.0;
     params.jackson_root_beta = 0.96;
-    params.theta_R = 0.0972;
+    params.theta_r = 0.0972;
     params.alpha_genucht = 1.0;
     params.n_genucht = 5.0;
     params.neta_genucht = 0.5;
 
 
-    params.theta_S = 0.8;
+    params.theta_s = 0.8;
     params.camp_b = 8.4;
     params.camp_psi_soil_ref = -1.5E-6;
     params.k_soil_sat = 100.0 * 15.0/86400.0;

@@ -8,6 +8,7 @@ set(headers
         csv_reader.h
         output.h
         param_examples.h
+        parameter_csv_reader.h
         )
 set(source
         model.cpp
@@ -20,6 +21,7 @@ set(source
         output.cpp
         main.cpp
         param_examples.cpp
+        parameter_csv_reader.cpp
         )
 
 include(add_model_sources)

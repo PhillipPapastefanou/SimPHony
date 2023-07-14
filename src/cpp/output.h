@@ -4,6 +4,7 @@
 
 #pragma once
 #include <vector>
+#include <string>
 
 using std::vector;
 class Output {
@@ -30,6 +31,36 @@ public:
 
     void Add_steps_psi_leaf(int steps_psi_leaf);
     void Add_steps_psi_stem(int steps_psi_stem);
+
+    const vector<float> &Get_times() const;
+
+    const vector<float> &Get_T() const;
+
+    const vector<float> &Get_J() const;
+
+    const vector<float> &Get_G() const;
+
+    const vector<vector<float>> &Get_G_indiv() const;
+
+    const vector<float> &Get_psi_leaf() const;
+
+    const vector<float> &Get_psi_stem() const;
+
+    const vector<vector<float>> &Get_psi_soil_indiv() const;
+
+    const vector<float> &Get_gs() const;
+
+    const vector<float> &Get_beta() const;
+
+    const vector<float> &Get_vpd() const;
+
+    const vector<vector<float>> &Get_ks_soil() const;
+
+    const vector<int> &Get_steps_psi_leaf() const;
+
+    const vector<int> &Get_steps_psi_stem() const;
+
+    void Export_CSV(std::string filename);
 
 
 private:

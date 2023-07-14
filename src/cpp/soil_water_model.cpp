@@ -17,7 +17,7 @@ void Campbell_Water_Uptake::CalculatePsiAndKs() {
 
     double b = parameters.camp_b;
     double ksat = parameters.k_soil_sat;
-    double theta_s = parameters.theta_S;
+    double theta_s = parameters.theta_s;
     double psi_s_ref = parameters.camp_psi_soil_ref;
     int nsoil = parameters.nsoil;
 

@@ -41,7 +41,7 @@ double Leaf_Stem_Implicit_Model::d_psi_leaf(double psi_leaf, double psi_stem) {
 
     T = gs * params.leaf_area_index * ts_vpd / ts_pressure;
 
-    return ((J - T)/ params.leaf_hytdraulic_capacitance);
+    return ((J - T)/ params.leaf_hydraulic_capacitance);
 }
 
 double Leaf_Stem_Implicit_Model::d_psi_stem(double psi_leaf, double psi_stem) {

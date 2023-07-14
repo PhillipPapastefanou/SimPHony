@@ -13,7 +13,7 @@ void Parameter_Examples::Define() {
     Baseline_one.psi_leaf_50_close = -2.1;
     Baseline_one.d_50_close = 10.0;
     Baseline_one.leaf_area_index = 4.8;
-    Baseline_one.leaf_hytdraulic_capacitance = 1.0;
+    Baseline_one.leaf_hydraulic_capacitance = 1.0;
     Baseline_one.stem_hydraulic_capacitance = 30*1000/18.0;
     Baseline_one.k_xylem_sat = 300;
 
@@ -25,13 +25,13 @@ void Parameter_Examples::Define() {
     Baseline_one.min_soil_layer_depth = 0.0;
     Baseline_one.max_soil_layer_depth = 1.0;
     Baseline_one.jackson_root_beta = 0.96;
-    Baseline_one.theta_R = 0.0972;
+    Baseline_one.theta_r = 0.0972;
     Baseline_one.alpha_genucht = 1.0;
     Baseline_one.n_genucht = 5.0;
     Baseline_one.neta_genucht = 0.5;
 
 
-    Baseline_one.theta_S = 0.426;
+    Baseline_one.theta_s = 0.426;
     Baseline_one.camp_b = 10.4;
     Baseline_one.camp_psi_soil_ref = -1.5E-6;
     Baseline_one.k_soil_sat = 100.0 * 1.0/86400.0;

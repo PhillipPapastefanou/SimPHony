@@ -3,6 +3,7 @@
 //
 
 #include "output.h"
+#include <iostream>
 
 Output::Output() {
 
@@ -67,3 +68,67 @@ void Output::Add_steps_psi_stem(int steps_psi_stem) {
 void Output::Add_steps_psi_leaf(int steps_psi_leaf) {
     steps_psi_leaf_a.push_back(steps_psi_leaf);
 }
+
+const vector<float> &Output::Get_times() const {
+    return times;
+}
+
+const vector<float> &Output::Get_J() const {
+    return Ja;
+}
+
+const vector<float> &Output::Get_G() const {
+    return Ga;
+}
+
+const vector<vector<float>> &Output::Get_G_indiv() const {
+    return Gaa;
+}
+
+const vector<float> &Output::Get_psi_leaf() const {
+    return psi_leaf_a;
+}
+
+const vector<float> &Output::Get_psi_stem() const {
+    return psi_stem_a;
+}
+
+const vector<vector<float>> &Output::Get_psi_soil_indiv() const {
+    return psi_soil_aa;
+}
+
+const vector<float> &Output::Get_gs() const {
+    return gs_a;
+}
+
+const vector<float> &Output::Get_beta() const {
+    return beta_a;
+}
+
+const vector<float> &Output::Get_vpd() const {
+    return vpd_a;
+}
+
+const vector<vector<float>> &Output::Get_ks_soil() const {
+    return k_soil_aa;
+}
+
+const vector<int> &Output::Get_steps_psi_leaf() const {
+    return steps_psi_leaf_a;
+}
+
+const vector<int> &Output::Get_steps_psi_stem() const {
+    return steps_psi_stem_a;
+}
+
+const vector<float> &Output::Get_T() const {
+    return Ta;
+}
+
+
+void Output::Export_CSV(std::string filename) {
+
+    std::cout << "CSV export is not yet available!";
+    throw;
+}
+
