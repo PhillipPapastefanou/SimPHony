@@ -30,12 +30,17 @@ void Simulation::Set_water_pot_initials(double psi_leaf, double psi_stem) {
 
     model->Set_initial_conditions(psi_leaf, psi_stem);
 
+
+
 }
 
 void Simulation::Run(double steplen, double timestart, double timeend) {
 
     model->Run(steplen,timestart,timeend);
 
+    analysis = std::make_unique<Analysis>(model.get());
+
+    analysis->Run();
 }
 
 Output Simulation::Get_output() {
@@ -52,5 +57,9 @@ void Simulation::Init_parameters_filename(std::string filename) {
 
     parameters = std::make_unique<Parameters>(list[0]);
 
+}
+
+Analysis* Simulation::Get_analysis() {
+    return analysis.get();
 }
 

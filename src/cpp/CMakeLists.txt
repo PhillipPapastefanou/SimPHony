@@ -10,6 +10,8 @@ set(headers
         output.h
         param_examples.h
         parameter_csv_reader.h
+        analysis.h
+        swiss_drought_trees.h
         )
 set(source
         model.cpp
@@ -24,6 +26,8 @@ set(source
         main.cpp
         param_examples.cpp
         parameter_csv_reader.cpp
+        analysis.cpp
+        swiss_drought_trees.cpp
         )
 
 include(add_model_sources)

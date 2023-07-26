@@ -7,6 +7,7 @@
 #include "model.h"
 #include "parameters.h"
 #include <memory>
+#include "analysis.h"
 
 class Simulation {
 
@@ -21,6 +22,7 @@ public:
     void Run(double stepleng, double timestart, double timeend);
 
     Output Get_output();
+    Analysis* Get_analysis();
 private:
     std::string theta_file;
     std::string forcing_file;
@@ -29,6 +31,7 @@ private:
     std::unique_ptr<Input> input;
 
     std::unique_ptr<Leaf_Stem_Implicit_Model> model;
+    std::unique_ptr<Analysis> analysis;
 
 };
 

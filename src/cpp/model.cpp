@@ -134,7 +134,7 @@ void Leaf_Stem_Implicit_Model::Run(double steplength, double time_start, double 
         this->psi_stem = solver_psi_stem->Solve(s0, s1);
 
         if(psi_stem < - 7.0){
-            break;
+            //break;
         }
 
 
@@ -194,7 +194,7 @@ double Leaf_Stem_Implicit_Model::psi_leaf_root(double psi_leaf_target) {
     return psi_leaf + d_psi_leaf_rec * steplength - psi_leaf_target;
 }
 
-Output Leaf_Stem_Implicit_Model::Get_output() {
+const Output& Leaf_Stem_Implicit_Model::Get_output() {
     return output;
 }
 

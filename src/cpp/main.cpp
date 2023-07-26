@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <string>
 
@@ -7,7 +8,7 @@
 #include "model.h"
 #include <chrono>
 #include "parameter_csv_reader.h"
-//#include "simulation.h"
+#include "analysis.h"
 
 
 using std::cout;
@@ -90,9 +91,16 @@ int main(int argc, char* argv[]) {
 
     double steplen      = 30;
     double timestart    = 30*2*24 * 0.0;
-    double timeend      = 30*2*24 * 200;
+    double timeend      = 30*2*24 * 213;
 
     model.Run(steplen,timestart,timeend);
+
+
+
+    Analysis analysis(&model);
+
+
+    analysis.Run();
 
 
     auto end = std::chrono::high_resolution_clock::now();

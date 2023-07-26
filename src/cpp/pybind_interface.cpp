@@ -1,12 +1,13 @@
 //
 // Created by Phillip on 14.07.23.
 //
-
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <vector>
 
 #include "simulation.h"
+#include "analysis.h"
+
 
 
 namespace py = pybind11;
@@ -20,6 +21,7 @@ PYBIND11_MODULE(hydro_standalone, handle){
             def("Set_water_pot_initials", &Simulation::Set_water_pot_initials).
             def("Run", &Simulation::Run).
             def("Get_output", &Simulation::Get_output).
+            def("Get_analysis", &Simulation::Get_analysis).
             def(py::init<>());
 
     py::class_<Output>(handle, "Output").
@@ -43,6 +45,20 @@ PYBIND11_MODULE(hydro_standalone, handle){
             def("Get_steps_psi_stem", &Output::Get_steps_psi_stem).
 
             def("Get_times", &Output::Get_times).
+            def(py::init<>());
+
+
+    py::class_<Analysis>(handle, "Analysis").
+            def("Run", &Analysis::Run).
+            def("Get_rmse", &Analysis::Get_rmse).
+            def("Get_time_slices", &Analysis::Get_time_slices).
+            def(py::init<Leaf_Stem_Implicit_Model* >());
+
+    py::class_<TimeSlice>(handle, "TimeSlice").
+            def_readwrite("Min", &TimeSlice::minimum).
+            def_readwrite("Max", &TimeSlice::maximum).
+            def_readwrite("Name", &TimeSlice::name).
+            def_readwrite("Day_min", &TimeSlice::day_min).
             def(py::init<>());
 
     handle.doc() = "PHS setup and running via python";
