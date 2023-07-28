@@ -21,9 +21,9 @@ add_subdirectory(src/cpp)
 # Specify the executable to build, and which sources to build it from
 
 
-pybind11_add_module(hydro_standalone src/cpp/pybind_interface.cpp ${sources})
-
+pybind11_add_module(hydro_standalone src/cpp/pybind_interface.cpp ${sources} src/Tests/single_test.h src/Tests/single_test.cpp src/Tests/multi_test.h src/Tests/multi_test.cpp)
 
 project(hydro_standalone_run)
 
-add_executable(hydro_standalone_run ${sources})
+add_executable(hydro_standalone_run ${sources} src/Tests/single_test.h src/Tests/single_test.cpp src/Tests/multi_test.h src/Tests/multi_test.cpp)
+

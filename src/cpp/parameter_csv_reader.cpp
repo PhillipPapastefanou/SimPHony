@@ -12,7 +12,6 @@ Parameter_CSV_Reader::Parameter_CSV_Reader(std::string filename): reader(filenam
 
 void Parameter_CSV_Reader::Parse() {
 
-
     vector<vector<string>> values = reader.Get<string>();
     size_t nfiles = values.size();
 

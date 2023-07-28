@@ -5,10 +5,12 @@
 #include "analysis.h"
 #include <algorithm>
 #include "model.h"
+#include "swiss_drought_trees.h"
 
-Analysis::Analysis(Leaf_Stem_Implicit_Model* model ): output(model->Get_output()) {
+Analysis::Analysis(Leaf_Stem_Implicit_Model* model, const Swiss_Drought_Trees& swiss_drought_trees):
+output(model->Get_output()), swiss_drought_trees(swiss_drought_trees) {
 
-    swiss_psi_leaf_states = std::make_unique<Tree_Psi_Leaf_State>(path_of_the_trees);
+    this->swiss_psi_leaf_states = std::make_shared<Tree_Psi_Leaf_State>(swiss_drought_trees);
 }
 
 void Analysis::run_peak_analysis() {
@@ -64,7 +66,6 @@ void Analysis::run_peak_analysis() {
 
         int timestart_local = ts_of_interest[running_index].first;
         int timeend_local = ts_of_interest[running_index].second;
-
 
         TimeSlice slice;
         slice.Init("psi_leaf_" + s, output.Get_psi_leaf(), timestart_local,  timeend_local);
@@ -155,7 +156,8 @@ void TimeSlice::Init(std::string name, const vector<float> &values, double ts_mi
 
 
 
-Tree_Psi_Leaf_State::Tree_Psi_Leaf_State(std::string path): swiss_drought_trees(path){
+Tree_Psi_Leaf_State::Tree_Psi_Leaf_State(const Swiss_Drought_Trees& swiss_drought_trees):
+swiss_drought_trees(swiss_drought_trees){
 
 }
 
@@ -178,7 +180,7 @@ void Tree_Psi_Leaf_State::Calculate_rmse(const vector<float> &values) {
 
             // Allow for some temporal variation
             // the maximum of the model can also be some days earlier or later
-            int number_of_days_off_from_obs = 2;
+            const int number_of_days_off_from_obs = 0;
 
             // Get the water potential of this day
             std::vector<float> day_slice(values.begin() + timestart - number_of_days_off_from_obs,
@@ -201,9 +203,7 @@ void Tree_Psi_Leaf_State::Calculate_rmse(const vector<float> &values) {
         }
 
         rmse /= diffs.size();
-
         rmse = std::sqrt(rmse);
-
         rmse_data.push_back(rmse);
 
     }

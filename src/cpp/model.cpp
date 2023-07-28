@@ -145,8 +145,6 @@ void Leaf_Stem_Implicit_Model::Run(double steplength, double time_start, double 
         ts += this->steplength;
     }
 
-    std::cout << psi_leaf << std::endl;
-    std::cout << psi_stem << std::endl;
 }
 
 

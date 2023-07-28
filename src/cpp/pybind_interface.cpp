@@ -5,8 +5,10 @@
 #include <pybind11/stl.h>
 #include <vector>
 
-#include "simulation.h"
+#include "simulation_single.h"
+#include "simulation_multi.h"
 #include "analysis.h"
+#include "swiss_drought_trees.h"
 
 
 
@@ -14,14 +16,22 @@ namespace py = pybind11;
 using std::vector;
 
 PYBIND11_MODULE(hydro_standalone, handle){
-    py::class_<Simulation>(handle, "Simulation").
-            def("Init_parameters_def", &Simulation::Init_parameters_default).
-            def("Init_parameters_fn_single", &Simulation::Init_parameters_filename).
-            def("Init_input", &Simulation::Init_input).
-            def("Set_water_pot_initials", &Simulation::Set_water_pot_initials).
-            def("Run", &Simulation::Run).
-            def("Get_output", &Simulation::Get_output).
-            def("Get_analysis", &Simulation::Get_analysis).
+    py::class_<Simulation_Single>(handle, "Simulation_Single").
+            def("Init_parameters_def", &Simulation_Single::Init_parameters_default).
+            def("Init_parameters_fn_single", &Simulation_Single::Init_parameters_filename).
+            def("Init_input", &Simulation_Single::Init_input).
+            def("Set_water_pot_initials", &Simulation_Single::Set_water_pot_initials).
+            def("Run", &Simulation_Single::Run).
+            def("Get_output", &Simulation_Single::Get_output).
+            def("Get_analysis", &Simulation_Single::Get_analysis).
+            def(py::init<>());
+
+    py::class_<Simulation_Multi>(handle, "Simulation_Multi").
+            def("Init_parameters_filename_and_ids", &Simulation_Multi::Init_parameters_filename_and_ids).
+            def("Init_input", &Simulation_Multi::Init_input).
+            def("Set_water_pot_initials", &Simulation_Multi::Set_water_pot_initials).
+            def("Run", &Simulation_Multi::Run).
+            def("Get_analysis_list", &Simulation_Multi::Get_analysis_list).
             def(py::init<>());
 
     py::class_<Output>(handle, "Output").
@@ -52,7 +62,7 @@ PYBIND11_MODULE(hydro_standalone, handle){
             def("Run", &Analysis::Run).
             def("Get_rmse", &Analysis::Get_rmse).
             def("Get_time_slices", &Analysis::Get_time_slices).
-            def(py::init<Leaf_Stem_Implicit_Model* >());
+            def(py::init<Leaf_Stem_Implicit_Model*, Swiss_Drought_Trees >());
 
     py::class_<TimeSlice>(handle, "TimeSlice").
             def_readwrite("Min", &TimeSlice::minimum).

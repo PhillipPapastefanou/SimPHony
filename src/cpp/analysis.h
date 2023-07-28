@@ -3,16 +3,17 @@
 //
 #pragma once
 #include "output.h"
-#include "swiss_drought_trees.h"
+
 
 class Leaf_Stem_Implicit_Model;
 class TimeSlice;
+class Swiss_Drought_Trees;
 class Tree_Psi_Leaf_State;
 
 class Analysis {
 
 public:
-    Analysis(Leaf_Stem_Implicit_Model* model);
+    Analysis(Leaf_Stem_Implicit_Model* model, const Swiss_Drought_Trees& swiss_drought_trees);
 
     void Run();
 
@@ -34,10 +35,10 @@ private:
 
 
     std::vector<TimeSlice> slices;
-    std::unique_ptr<Tree_Psi_Leaf_State> swiss_psi_leaf_states;
+    const Swiss_Drought_Trees& swiss_drought_trees;
+    std::shared_ptr<Tree_Psi_Leaf_State> swiss_psi_leaf_states;
 
 
-    std::string path_of_the_trees = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Trees";
 
 };
 
@@ -79,14 +80,14 @@ private:
 class Tree_Psi_Leaf_State{
 
 public:
-    Tree_Psi_Leaf_State(std::string path);
+    Tree_Psi_Leaf_State(const Swiss_Drought_Trees& swiss_drought_trees);
 
     void Calculate_rmse(const std::vector<float>& values);
 
     std::vector<double> Get_rmse_data();
 
 private:
-    Swiss_Drought_Trees swiss_drought_trees;
+    const Swiss_Drought_Trees& swiss_drought_trees;
 
     std::vector<double> rmse_data;
 

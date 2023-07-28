@@ -1,6 +1,7 @@
 set(headers
         model.h
-        simulation.h
+        simulation_single.h
+        simulation_multi.h
         solvers.h
         soil_water_model.h
         root_distribution_model.h
@@ -13,9 +14,11 @@ set(headers
         analysis.h
         swiss_drought_trees.h
         )
+
 set(source
         model.cpp
-        simulation.cpp
+        simulation_single.cpp
+        simulation_multi.cpp
         solvers.cpp
         soil_water_model.cpp
         root_distribution_model.cpp
