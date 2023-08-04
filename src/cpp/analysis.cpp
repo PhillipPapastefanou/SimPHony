@@ -180,7 +180,7 @@ void Tree_Psi_Leaf_State::Calculate_rmse(const vector<float> &values) {
 
             // Allow for some temporal variation
             // the maximum of the model can also be some days earlier or later
-            const int number_of_days_off_from_obs = 0;
+            const int number_of_days_off_from_obs = 1;
 
             // Get the water potential of this day
             std::vector<float> day_slice(values.begin() + timestart - number_of_days_off_from_obs,

@@ -6,6 +6,7 @@
 #include "parameter_csv_reader.h"
 #include "model.h"
 #include <iostream>
+#include <chrono>
 
 Simulation_Multi::Simulation_Multi() {
 
@@ -50,33 +51,42 @@ void Simulation_Multi::Set_water_pot_initials(double psi_leaf, double psi_stem) 
 
 void Simulation_Multi::Run(double steplen, double timestart, double timeend) {
 
-    std::cout << "Peforming " << parameter_list.size() << " simulations." << std:: endl;
+    std::cout << "Performing " << parameter_list.size() << " simulations." << std:: endl;
+
+    auto start_simulatio = std::chrono::high_resolution_clock::now();
+    auto start_timer = std::chrono::high_resolution_clock::now();
 
     for (int r = 0; r < parameter_list.size(); ++r) {
 
-
         Parameters& parameters = std::get<0>(parameter_list[r]);
-
         int parameter_index = std::get<1>(parameter_list[r]);
 
-        std::cout << "Running id " << std::to_string(parameter_index) << " ...";
-
         Leaf_Stem_Implicit_Model model(parameters, *input);
-
         model.Set_derived_parameters();
-
         model.Set_initial_conditions(init_psi_leaf, init_psi_stem);
-
         model.Run(steplen,timestart,timeend);
 
-        // Data analysis after
+        // Data analysis after simulation
         Analysis analysis(&model, *swiss_trees);
 
         analysis.Run();
-
         analysis_list.push_back(analysis);
 
-        std::cout << "Done!" <<std::endl;
+        auto end_timer = std::chrono::high_resolution_clock::now();
+        auto elapsed_timer = std::chrono::duration_cast<std::chrono::milliseconds>( end_timer - start_timer);
+
+        if (elapsed_timer.count() > 2000.0){
+
+            auto elapsed_simulation = std::chrono::duration_cast<std::chrono::milliseconds>( end_timer - start_simulatio);
+
+            std::cout << "Elapsed time: " << format_duration(elapsed_simulation) << " ";
+            std::cout << "performed " << r << " out of " << parameter_list.size() << " simulations. "<< std::endl;
+            start_timer = std::chrono::high_resolution_clock::now();
+        }
+
+
+
+
     }
 
 
