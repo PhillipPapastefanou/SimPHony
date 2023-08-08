@@ -16,6 +16,23 @@
 using std::string;
 using std::vector;
 
+namespace conversion{
+
+    template<typename TC>
+    TC Convert(string);
+
+    template<>
+    double Convert(string);
+
+    template<>
+    float Convert(string);
+
+    template<>
+    int Convert(string);
+
+}
+
+
 namespace io {
     class CSV_Reader {
 
@@ -98,8 +115,8 @@ namespace io {
         }
 
 
-        template<typename T>
-        T Convert(string s);
+        template<typename TL>
+        TL Convert(string s);
 
         template<>
         double Convert(string s);
