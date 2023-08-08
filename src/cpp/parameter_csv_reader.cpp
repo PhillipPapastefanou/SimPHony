@@ -4,6 +4,7 @@
 
 #include "parameter_csv_reader.h"
 #include <iostream>
+#include <algorithm>
 using std::string;
 
 Parameter_CSV_Reader::Parameter_CSV_Reader(std::string filename): reader(filename, true, ',') {
