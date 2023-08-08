@@ -16,23 +16,6 @@
 using std::string;
 using std::vector;
 
-namespace conversion{
-
-    template<typename TC>
-    TC Convert(string);
-
-    template<>
-    double Convert(string);
-
-    template<>
-    float Convert(string);
-
-    template<>
-    int Convert(string);
-
-}
-
-
 namespace io {
     class CSV_Reader {
 
@@ -116,22 +99,26 @@ namespace io {
 
 
         template<typename TL>
-        TL Convert(string s);
+        TL Convert(string s){
+            return nullptr;
+        }
 
-        template<>
-        double Convert(string s);
-
-        template<>
-        float Convert(string s);
-
-        template<>
-        int Convert(string s);
 
     private:
         std::unique_ptr<std::fstream> file;
         char delimiter;
 
 
+    };
+
+    template<>
+    inline float CSV_Reader::Convert(std::string s) {
+            return std::stof(s);
+        };
+
+    template<>
+    inline double CSV_Reader::Convert(std::string s) {
+        return std::stod(s);
     };
 
 

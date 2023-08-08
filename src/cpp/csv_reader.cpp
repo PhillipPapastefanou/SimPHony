@@ -39,28 +39,6 @@ io::CSV_Reader::CSV_Reader(string filename, bool has_header, char delimiter) {
 
 }
 
-
-template<typename T>
-T io::CSV_Reader::Convert(std::string s) {
-    return nullptr;
-}
-
-template<>
-double io::CSV_Reader::Convert(std::string s) {
-    return std::stod(s);
-}
-
-template<>
-float io::CSV_Reader::Convert(std::string s) {
-    return std::stof(s);
-}
-
-template<>
-int io::CSV_Reader::Convert(std::string s) {
-    return std::stoi(s);
-}
-
-
 io::CSV_Reader::~CSV_Reader() {
 
     if(file->is_open()){
