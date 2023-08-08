@@ -4,6 +4,7 @@
 
 #include "analysis.h"
 #include <algorithm>
+#include <memory>
 #include "model.h"
 #include "swiss_drought_trees.h"
 
