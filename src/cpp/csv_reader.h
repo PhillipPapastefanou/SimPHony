@@ -98,29 +98,26 @@ namespace io {
         }
 
 
+        template<typename T>
+        T Convert(string s);
+
+        template<>
+        double Convert(string s);
+
+        template<>
+        float Convert(string s);
+
+        template<>
+        int Convert(string s);
+
     private:
         std::unique_ptr<std::fstream> file;
         char delimiter;
 
-        template<typename T>
-        T Convert(string s) {
-            return nullptr;
-        }
 
-        template<>
-        double Convert(string s) {
-            return std::stod(s);
-        }
-
-        template<>
-        float Convert(string s) {
-            return std::stof(s);
-        }
-
-        template<>
-        int Convert(string s) {
-            return std::stoi(s);
-        }
     };
+
+
+
 
 };
