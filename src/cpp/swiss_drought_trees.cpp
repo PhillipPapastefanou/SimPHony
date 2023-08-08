@@ -21,7 +21,7 @@ Swiss_Drought_Trees::Swiss_Drought_Trees(std::string path) {
     for (const auto & entry : sorted_by_name){
         std::string filepath = entry.string();
 
-        CSV_Reader reader(filepath, true, ',');
+        io::CSV_Reader reader(filepath, true, ',');
 
         std::vector<int> indexes = {2,3};
 

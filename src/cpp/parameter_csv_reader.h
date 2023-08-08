@@ -19,7 +19,7 @@ public:
 
 
 private:
-    CSV_Reader reader;
+    io::CSV_Reader reader;
 
     int get_position(std::string value);
     std::vector<Parameters> parameters_list;

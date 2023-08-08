@@ -7,7 +7,7 @@
 #include <memory>
 
 
-CSV_Reader::CSV_Reader(string filename, bool has_header, char delimiter) {
+io::CSV_Reader::CSV_Reader(string filename, bool has_header, char delimiter) {
 
     this->delimiter = delimiter;
     vector<vector<string> > data;
@@ -40,7 +40,7 @@ CSV_Reader::CSV_Reader(string filename, bool has_header, char delimiter) {
 
 }
 
-CSV_Reader::~CSV_Reader() {
+io::CSV_Reader::~CSV_Reader() {
 
     if(file->is_open()){
         file->close();

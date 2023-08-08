@@ -33,8 +33,8 @@ public:
     vector<vector<float> > theta_per_layer;
 
 private:
-    CSV_Reader theta_per_layer_reader;
-    CSV_Reader forcing_reader;
+    io::CSV_Reader theta_per_layer_reader;
+    io::CSV_Reader forcing_reader;
 
     vector<float> rad;
 
