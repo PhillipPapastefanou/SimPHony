@@ -3,7 +3,7 @@
 //
 #pragma once
 #include "output.h"
-
+#include <memory>
 
 class Leaf_Stem_Implicit_Model;
 class TimeSlice;

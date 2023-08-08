@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.4)
 
 set(USE_PYBIND11 ON)
 
-set(PYTHON_EXECUTABLE /Users/pp/opt/anaconda3/bin/python3.9)
+#set(PYTHON_EXECUTABLE /Users/pp/opt/anaconda3/bin/python3.9)
 
 find_package(pybind11 CONFIG REQUIRED)
 message(STATUS "Found pybind11 v${pybind11_VERSION}: ${pybind11_INCLUDE_DIRS}")
