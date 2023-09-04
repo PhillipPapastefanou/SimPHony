@@ -15,7 +15,7 @@ class Simulation_Multi {
 
 public:
     Simulation_Multi();
-    void Init_input(std::string theta_file, std::string forcing_file, std::string swiss_trees_folder);
+    void Init_input(std::string theta_file, std::string forcing_file, std::string swiss_trees_folder, int rank);
     void Init_parameters_filename_and_ids(string filename, std::vector<int> ids);
     void Set_water_pot_initials(double psi_leaf, double psi_stem);
 
@@ -23,6 +23,9 @@ public:
 
     std::vector<Analysis> Get_analysis_list();
 private:
+
+    int rank;
+
     std::unique_ptr<Input> input;
     std::unique_ptr<Swiss_Drought_Trees> swiss_trees;
 

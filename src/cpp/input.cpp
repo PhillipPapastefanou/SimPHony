@@ -27,9 +27,6 @@ void Input::Read_N_Parse() {
     vector<vector<float> > forcing_input = forcing_reader.Get<float>(forcing_indexes);
 
 
-
-
-
     //Slice forcing input according to indexes as we might have differnt data for swc and other
     int begin = 7248;
     int end  = 17473;
@@ -46,7 +43,7 @@ void Input::Read_N_Parse() {
 
 
     if(rad.size() != theta_per_layer.size()){
-        std::cout << "Theats and forcing size does not match";
+        std::cout << "Thetas and forcing size does not match";
         throw;
     }
 
