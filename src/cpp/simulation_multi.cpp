@@ -83,14 +83,9 @@ void Simulation_Multi::Run(double steplen, double timestart, double timeend) {
             std::cout << "performed " << r << " out of " << parameter_list.size() << " simulations. "<< std::endl;
             start_timer = std::chrono::high_resolution_clock::now();
         }
-
-
-
-
     }
 
-
-
+    std::cout << "Simulation finished! "<< std::endl;
 }
 
 std::vector<Analysis> Simulation_Multi::Get_analysis_list() {
