@@ -107,8 +107,8 @@ public:
 
     const double PaToMPa = std::pow(10, -6);
     const double MPaToPa = std::pow(10, +6);
-    const double PI = std::numbers::pi;
-
+    //const double PI = std::numbers::pi;
+    const double PI = 3.14159;
 
     double solver_precision = 1E-10;
 

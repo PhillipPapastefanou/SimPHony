@@ -75,7 +75,7 @@ void Simulation_Multi::Run(double steplen, double timestart, double timeend) {
         auto end_timer = std::chrono::high_resolution_clock::now();
         auto elapsed_timer = std::chrono::duration_cast<std::chrono::milliseconds>( end_timer - start_timer);
 
-        if (elapsed_timer.count() > 2000.0){
+        if (elapsed_timer.count() > 10000.0){
 
             auto elapsed_simulation = std::chrono::duration_cast<std::chrono::milliseconds>( end_timer - start_simulatio);
 
