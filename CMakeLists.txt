@@ -17,6 +17,7 @@ project(hydro_standalone)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 add_subdirectory(src/cpp)
+link_libraries(stdc++fs)
 
 # Specify the executable to build, and which sources to build it from
 
