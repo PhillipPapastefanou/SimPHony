@@ -92,6 +92,10 @@ public:
     // Saturated volumetric water content [m3 m-3]
     double theta_s = 0.8;
 
+    // Empircial water content multplier [-]
+    // Should be 1.0 for runs where the given wcont is known precisely
+    double theta_emp_multiplier = 1.0;
+
     // Van Genuchten parameters
     double theta_r = 0.105;
     double alpha_genucht = 1.0;

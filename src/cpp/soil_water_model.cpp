@@ -30,6 +30,14 @@ void Campbell_Water_Uptake::CalculatePsiAndKs() {
 
         vector<float> theta_list = theta_array[i];
 
+
+        // Resize all theta water contents of each layers
+
+        for (float& wcont : theta_list) {
+            wcont *= parameters.theta_emp_multiplier;
+        }
+
+
         int navail_soil_in_data = theta_list.size();
 
         vector<double> psi_row(nsoil);
@@ -38,10 +46,10 @@ void Campbell_Water_Uptake::CalculatePsiAndKs() {
 
         int s_h = 0;
         // The loop also reverse the layers to make the top layer be layer one.
-        for (int s = navail_soil_in_data-1; s > navail_soil_in_data-1 - nsoil  ; --s) {
+        for (int s = navail_soil_in_data - 1; s > navail_soil_in_data - 1 - nsoil  ; --s) {
 
             psi_row[s_h] = psi_s_ref *  std::pow(theta_list[s]/theta_s, -b);
-            k_row[s_h] = ksat *  std::pow(theta_list[s]/theta_s, 2.0 + 3*b);
+            k_row[s_h] = ksat *  std::pow(theta_list[s]/theta_s, 2.0 + 3.0*b);
 
             s_h++;
         }

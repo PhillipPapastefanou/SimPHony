@@ -115,6 +115,9 @@ void Leaf_Stem_Implicit_Model::Run(double steplength, double time_start, double 
         // Update forcing drivers
         ts_ca = 415.0;
         ts_pressure = 1.013*100000.0;
+
+        
+
         ts_anet = input_anet[time_index(ts)];
         ts_vpd = input_vpd[time_index(ts)];
 

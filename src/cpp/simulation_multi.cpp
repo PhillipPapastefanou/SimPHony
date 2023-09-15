@@ -24,11 +24,11 @@ void Simulation_Multi::Init_input(std::string theta_file, std::string forcing_fi
 
 }
 
-void Simulation_Multi::Init_parameters_filename_and_ids(string filename, std::vector<int> ids) {
+void Simulation_Multi::Init_Full_Parameter_Setups(string filename, std::vector<int> ids) {
 
     Parameter_CSV_Reader param_reader(filename);
 
-    param_reader.Parse();
+    param_reader.Parse_Full_Files();
 
     vector<Parameters> all_parameters_list = param_reader.Get_parameter_list();
 
@@ -40,7 +40,6 @@ void Simulation_Multi::Init_parameters_filename_and_ids(string filename, std::ve
 
         parameter_list.push_back(parameter_setup);
     }
-    
 
 
 }
@@ -91,5 +90,38 @@ void Simulation_Multi::Run(double steplen, double timestart, double timeend) {
 
 std::vector<Analysis> Simulation_Multi::Get_analysis_list() {
     return analysis_list;
+}
+
+void Simulation_Multi::Init_Partial_Parameter_Setups(string root_filename, string partial_parameter_filename,
+                                                     std::vector<int> ids) {
+
+    Parameter_CSV_Reader main_param_file_reader(root_filename);
+    main_param_file_reader.Parse_Full_Files();
+    vector<Parameters> main_parameters_list = main_param_file_reader.Get_parameter_list();
+
+    main_param_file_reader.Parse_Full_Files();
+
+    if (main_parameters_list.empty()) {
+        std::cout<< "No root parameter file in list" << std::endl;
+        exit(-1);
+    }
+
+    //The main parameter list should contain only one file
+    Parameters root_parameters = main_parameters_list.front();
+    Parameter_CSV_Reader partial_parameter_reader(partial_parameter_filename);
+
+    partial_parameter_reader.Parse_Partial_Files(root_parameters);
+
+    vector<Parameters> all_parameters_list  = partial_parameter_reader.Get_parameter_list();
+
+    for (int i = 0; i < ids.size(); ++i) {
+
+        int index_of_interest = ids[i];
+
+        std::tuple<Parameters, int> parameter_setup = std::make_tuple(all_parameters_list[index_of_interest], index_of_interest);
+
+        parameter_list.push_back(parameter_setup);
+    }
+
 }
 

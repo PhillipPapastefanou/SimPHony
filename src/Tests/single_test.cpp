@@ -34,7 +34,7 @@ Single_Test::Single_Test() {
 
     auto start0 = std::chrono::high_resolution_clock::now();
 
-    reader.Parse();
+    reader.Parse_Full_Files();
 
     auto end0 = std::chrono::high_resolution_clock::now();
     auto ms0 = std::chrono::duration_cast<std::chrono::milliseconds>( end0 - start0);

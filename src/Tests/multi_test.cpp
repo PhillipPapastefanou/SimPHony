@@ -35,7 +35,7 @@ Multi_Test::Multi_Test() {
     Simulation_Multi simulationMulti;
 
     simulationMulti.Init_input(theta_file,forcing_file,path_of_the_trees, 0);
-    simulationMulti.Init_parameters_filename_and_ids(paramter_list, indexes);
+    simulationMulti.Init_Full_Parameter_Setups(paramter_list, indexes);
     simulationMulti.Set_water_pot_initials(-1.0, -0.3);
 
     double steplen = 30;

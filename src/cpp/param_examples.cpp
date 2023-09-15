@@ -29,6 +29,7 @@ void Parameter_Examples::Define() {
     Baseline_one.alpha_genucht = 1.0;
     Baseline_one.n_genucht = 5.0;
     Baseline_one.neta_genucht = 0.5;
+    Baseline_one.theta_emp_multiplier = 1.0;
 
 
     Baseline_one.theta_s = 0.426;

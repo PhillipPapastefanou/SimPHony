@@ -53,7 +53,7 @@ void Simulation_Single::Init_parameters_filename(std::string filename) {
 
     Parameter_CSV_Reader param_reader(filename);
 
-    param_reader.Parse();
+    param_reader.Parse_Full_Files();
 
     vector<Parameters> list = param_reader.Get_parameter_list();
 

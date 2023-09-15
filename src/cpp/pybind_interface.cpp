@@ -27,7 +27,8 @@ PYBIND11_MODULE(hydro_standalone, handle){
             def(py::init<>());
 
     py::class_<Simulation_Multi>(handle, "Simulation_Multi").
-            def("Init_parameters_filename_and_ids", &Simulation_Multi::Init_parameters_filename_and_ids).
+            def("Init_Full_Parameter_Setups", &Simulation_Multi::Init_Full_Parameter_Setups).
+            def("Init_Partial_Parameter_Setups", &Simulation_Multi::Init_Partial_Parameter_Setups).
             def("Init_input", &Simulation_Multi::Init_input).
             def("Set_water_pot_initials", &Simulation_Multi::Set_water_pot_initials).
             def("Run", &Simulation_Multi::Run).

@@ -16,7 +16,11 @@ class Simulation_Multi {
 public:
     Simulation_Multi();
     void Init_input(std::string theta_file, std::string forcing_file, std::string swiss_trees_folder, int rank);
-    void Init_parameters_filename_and_ids(string filename, std::vector<int> ids);
+    void Init_Full_Parameter_Setups(string filename, std::vector<int> ids);
+    void Init_Partial_Parameter_Setups(string root_filename, string partial_parameter_filename, std::vector<int> ids);
+
+
+
     void Set_water_pot_initials(double psi_leaf, double psi_stem);
 
     void Run(double steplen, double timestart, double timeend);
