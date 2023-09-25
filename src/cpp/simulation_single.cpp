@@ -32,8 +32,6 @@ void Simulation_Single::Set_water_pot_initials(double psi_leaf, double psi_stem)
 
     model->Set_initial_conditions(psi_leaf, psi_stem);
 
-
-
 }
 
 void Simulation_Single::Run(double steplen, double timestart, double timeend) {
@@ -49,7 +47,7 @@ Output Simulation_Single::Get_output() {
     return model->Get_output();
 }
 
-void Simulation_Single::Init_parameters_filename(std::string filename) {
+void Simulation_Single::Init_parameters_filename(std::string filename, int index) {
 
     Parameter_CSV_Reader param_reader(filename);
 
@@ -57,7 +55,7 @@ void Simulation_Single::Init_parameters_filename(std::string filename) {
 
     vector<Parameters> list = param_reader.Get_parameter_list();
 
-    parameters = std::make_unique<Parameters>(list[0]);
+    parameters = std::make_unique<Parameters>(list[index]);
 
 }
 

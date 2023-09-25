@@ -94,7 +94,7 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
         val = "stem_hydraulic_capacitance";
         pos = get_position(val);
         if(pos <  row.size())
-            params.stem_hydraulic_capacitance = std::stod(row[pos]);
+            params.stem_hydraulic_capacitance_max = std::stod(row[pos]);
 
         val = "k_xylem_sat";
         pos = get_position(val);

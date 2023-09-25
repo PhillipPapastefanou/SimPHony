@@ -53,7 +53,7 @@ Single_Test::Single_Test() {
     params.d_50_close = 10.0;
     params.leaf_area_index = 4.8;
     params.leaf_hydraulic_capacitance = 1.0;
-    params.stem_hydraulic_capacitance = 20.0*1000/18.0;
+    params.stem_hydraulic_capacitance_max = 20.0 * 1000 / 18.0;
     params.k_xylem_sat = 300;
 
     params.root_area_index = 24;

@@ -17,7 +17,7 @@ public:
 
     void Init_input(std::string theta_file, std::string forcing_file, std::string swiss_trees_folder);
     void Init_parameters_default();
-    void Init_parameters_filename(string filename);
+    void Init_parameters_filename(string filename, int index);
 
     void Set_water_pot_initials(double psi_leaf, double psi_stem);
     void Run(double stepleng, double timestart, double timeend);
