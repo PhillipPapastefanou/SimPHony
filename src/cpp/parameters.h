@@ -33,7 +33,7 @@ public:
     // From Meinzer et al. 2011 Figure 13.2
     // Range: 10 - 500 kg m-3 MPa-1
     double _c_kg = 300;
-    double stem_hydraulic_capacitance = 20.0*1000/18.0;
+    double stem_hydraulic_capacitance_max = 20.0 * 1000 / 18.0;
 
     // Xylem saturated Hydraulic conductivity [mol m-2 s-1 MPa]
     // from xu et al 2016: 1.7 - 7.5 kg H2O m-2 s-1
@@ -47,7 +47,7 @@ public:
     // Xylem water potential at loss of 50% conductivity [MPa]
     double psi50_xylem = -3.5;
     // Slope parameter of xylem water potential curve (has to be postive)[-]
-    double d_50_s = 10.0;
+    double d_50_s = 5.0;
 
 
 

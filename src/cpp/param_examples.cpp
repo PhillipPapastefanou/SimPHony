@@ -14,7 +14,7 @@ void Parameter_Examples::Define() {
     Baseline_one.d_50_close = 10.0;
     Baseline_one.leaf_area_index = 4.8;
     Baseline_one.leaf_hydraulic_capacitance = 1.0;
-    Baseline_one.stem_hydraulic_capacitance = 30*1000/18.0;
+    Baseline_one.stem_hydraulic_capacitance_max = 30 * 1000 / 18.0;
     Baseline_one.k_xylem_sat = 300;
 
     Baseline_one.root_area_index = 24;

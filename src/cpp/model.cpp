@@ -19,13 +19,15 @@ double Leaf_Stem_Implicit_Model::update_stem_water_flow_J(double psi_leaf, doubl
     // The factor of two reflects the water uptake from the middle of the Stem to the canopy only
     DeltaP_LS = psi_stem - psi_leaf - (params.rho_water * params.grav * params.canopy_height / 2.0) * params.PaToMPa;
 
-    // Prevent negative pressure differences to avoid letting the water flow up the tree
+    // Prevent negative pressure differences to avoid letting the water flow down the tree
     if(DeltaP_LS < 0.0)
         DeltaP_LS = 0.0;
 
+    double k_xylem = params.k_xylem_sat / (1.0 + std::exp(-params.d_50_s * (psi_stem - params.psi50_xylem)));
+
     // Calculate the stem water flow J [mol m-2 s-1]
     // This is essentially Darcy's law
-    return DeltaP_LS * params.k_xylem_sat * params.huber_value / (params.eta_LS * params.canopy_height / 2.0);
+    return DeltaP_LS * k_xylem * params.huber_value / (params.eta_LS * params.canopy_height / 2.0);
 
 }
 
@@ -64,7 +66,7 @@ double Leaf_Stem_Implicit_Model::d_psi_stem(double psi_leaf, double psi_stem) {
         G += Gi[s];
     }
 
-    return ((G - J) / (params.stem_hydraulic_capacitance * params.canopy_height * params.huber_value));
+    return ((G - J) / (params.stem_hydraulic_capacitance_max * params.canopy_height * params.huber_value));
 }
 
 Leaf_Stem_Implicit_Model::Leaf_Stem_Implicit_Model
