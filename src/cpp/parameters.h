@@ -32,14 +32,11 @@ public:
     // Stem hydraulic capacity [mol m-3 MPa-1]
     // From Meinzer et al. 2011 Figure 13.2
     // Range: 10 - 500 kg m-3 MPa-1
-    double _c_kg = 300;
     double stem_hydraulic_capacitance_max = 20.0 * 1000 / 18.0;
 
-    // Xylem saturated Hydraulic conductivity [mol m-2 s-1 MPa]
-    // from xu et al 2016: 1.7 - 7.5 kg H2O m-2 s-1
-    // 1 mole of water equals 18g
-    // equals to 93 - 450
-    double k_xylem_sat = 300;
+    // Xylem saturated Hydraulic conductivity [mol m-1 30min-1 MPa]
+    // Values measured around 10 ~ 250, but could be up 3000
+    double k_xylem_sat = 150;
     // Huber value [m2 m-2] equals 1/klatosa
     // From sperry et al
     double huber_value = 1.0/3600.0;
@@ -84,10 +81,10 @@ public:
     // Jackson rooting parameter [-]
     double jackson_root_beta  = 0.96;
 
-    // Saturated soil hydraulic conductance [m s-1]
+    // Saturated soil hydraulic conductance [m 30min-1]
     // Van Looy et al 4.8 - 62 [cm/d]
     double _k_soil_sat_cm_d = 15.0;
-    double k_soil_sat = _k_soil_sat_cm_d * 100.0 / 86400.0;
+    double k_soil_sat = _k_soil_sat_cm_d / 100.0 / 86400.0 * 1800;
 
     // Saturated volumetric water content [m3 m-3]
     double theta_s = 0.8;

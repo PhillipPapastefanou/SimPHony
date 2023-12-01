@@ -93,7 +93,7 @@ private:
     /// Driving force for the water to be taken up the plant
     double DeltaP_LS;
 
-    /// Stomatal conductance [xxx]
+    /// Stomatal conductance [mol m-2 s-1]
     double gs;
 
     /// Downregulation factor of the g1 parameter of the Medyln2011 photosynthesis
