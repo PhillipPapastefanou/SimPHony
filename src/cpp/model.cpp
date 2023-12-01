@@ -23,6 +23,7 @@ double Leaf_Stem_Implicit_Model::update_stem_water_flow_J(double psi_leaf, doubl
     if(DeltaP_LS < 0.0)
         DeltaP_LS = 0.0;
 
+    // Estimate the xylem conductance based on the satured xylem and the PLC of the xylem
     double k_xylem = params.k_xylem_sat / (1.0 + std::exp(-params.d_50_s * (psi_stem - params.psi50_xylem)));
 
     // Calculate the stem water flow J [mol m-2 s-1]
@@ -53,7 +54,6 @@ double Leaf_Stem_Implicit_Model::d_psi_stem(double psi_leaf, double psi_stem) {
     // J = update_stem_water_flow_J(psi_leaf, psi_stem)
 
     G = 0.0;
-
     for (int s = 0; s < params.nsoil; ++s) {
         Gi[s] = root_fractions[s] * ts_k_soil[s] * std::sqrt(params.root_area_index) /
                 params.PI / params.root_zone_depth * (ts_psi_soil[s] - psi_stem -
