@@ -15,6 +15,7 @@ class Analysis {
 public:
     Analysis(Leaf_Stem_Implicit_Model* model, const Swiss_Drought_Trees& swiss_drought_trees);
 
+
     void Run();
 
     std::vector<TimeSlice> Get_time_slices();
@@ -22,6 +23,9 @@ public:
 
 
 private:
+
+    double dts;
+
     const Output& output;
 
 
@@ -48,7 +52,7 @@ class TimeSlice{
 public:
 
     TimeSlice();
-    void Init(std::string name, const std::vector<float>& values, double ts_min, double ts_max);
+    void Init(std::string name, const std::vector<float>& values, double ts_min, double ts_max, double dts);
 
     void CalculatePeaks();
 
@@ -82,7 +86,7 @@ class Tree_Psi_Leaf_State{
 public:
     Tree_Psi_Leaf_State(const Swiss_Drought_Trees& swiss_drought_trees);
 
-    void Calculate_rmse(const std::vector<float>& values);
+    void Calculate_rmse(const std::vector<float>& values, const double dts);
 
     std::vector<double> Get_rmse_data();
 

@@ -10,13 +10,14 @@ void Leaf_Stem_Implicit_Model::Set_initial_conditions(double psi_leaf_zero, doub
     psi_stem = psi_stem_zero;
 }
 
-int Leaf_Stem_Implicit_Model::time_index(double elapsed_mins) {
-    return static_cast<int>(elapsed_mins / 30.0);
+int Leaf_Stem_Implicit_Model::time_index(double elapsed_seconds) {
+    return static_cast<int>(elapsed_seconds / 1800.0);
 }
 
 double Leaf_Stem_Implicit_Model::update_stem_water_flow_J(double psi_leaf, double psi_stem) {
 
     // The factor of two reflects the water uptake from the middle of the Stem to the canopy only
+    // All units in MPa
     DeltaP_LS = psi_stem - psi_leaf - (params.rho_water * params.grav * params.canopy_height / 2.0) * params.PaToMPa;
 
     // Prevent negative pressure differences to avoid letting the water flow down the tree
@@ -25,6 +26,8 @@ double Leaf_Stem_Implicit_Model::update_stem_water_flow_J(double psi_leaf, doubl
 
     // Estimate the xylem conductance based on the satured xylem and the PLC of the xylem
     double k_xylem = params.k_xylem_sat / (1.0 + std::exp(-params.d_50_s * (psi_stem - params.psi50_xylem)));
+    // Convert from s-1 to ts-1
+    k_xylem *= dts;
 
     // Calculate the stem water flow J [mol m-2 s-1]
     // This is essentially Darcy's law
@@ -38,12 +41,19 @@ double Leaf_Stem_Implicit_Model::d_psi_leaf(double psi_leaf, double psi_stem) {
     beta_stom_cond = 1.0 / (1.0 + std::exp(-params.d_50_close * (psi_leaf - params.psi_leaf_50_close)));
 
     // Medlyn phoytosynthesis model
+    // mol CO2 s-1 m-2
     gs = params.g0  + beta_stom_cond * (1.0 + params.g1 / std::sqrt(ts_vpd / ts_pressure)) * ts_anet / ts_ca;
 
+    // Convert from s-1 to ts-1
+    gs *= dts;
+
+    // Convert from Mol CO2 to Mol H2O
+    gs *= 1.6;
+
+    // Update stem water flow
     J = update_stem_water_flow_J(psi_leaf, psi_stem);
 
     T = gs * params.leaf_area_index * ts_vpd / ts_pressure;
-
     return ((J - T)/ params.leaf_hydraulic_capacitance);
 }
 
@@ -55,7 +65,12 @@ double Leaf_Stem_Implicit_Model::d_psi_stem(double psi_leaf, double psi_stem) {
 
     G = 0.0;
     for (int s = 0; s < params.nsoil; ++s) {
-        Gi[s] = root_fractions[s] * ts_k_soil[s] * std::sqrt(params.root_area_index) /
+
+
+        // Convert from s-1 to ts-1
+        double ts_k_soil_dt = ts_k_soil[s] * dts;
+
+        Gi[s] = root_fractions[s] * ts_k_soil_dt * std::sqrt(params.root_area_index) /
                 params.PI / params.root_zone_depth * (ts_psi_soil[s] - psi_stem -
                 (params.rho_water * params.grav * params.canopy_height / 2.0) * params.PaToMPa) / params.grav * params.MPaToPa;
 
@@ -102,12 +117,12 @@ void Leaf_Stem_Implicit_Model::Set_derived_parameters() {
 
 void Leaf_Stem_Implicit_Model::Run(double steplength, double time_start, double time_end) {
 
-    this->steplength = steplength;
+    this->dts = steplength;
     this->time_start = time_start;
     this->time_end = time_end;
 
     delta_T = time_end - time_start;
-    nsteps = delta_T / steplength;
+    nsteps = delta_T / dts;
 
 
     ts = time_start;
@@ -118,7 +133,6 @@ void Leaf_Stem_Implicit_Model::Run(double steplength, double time_start, double 
         ts_ca = 415.0;
         ts_pressure = 1.013*100000.0;
 
-        
 
         ts_anet = input_anet[time_index(ts)];
         ts_vpd = input_vpd[time_index(ts)];
@@ -147,7 +161,7 @@ void Leaf_Stem_Implicit_Model::Run(double steplength, double time_start, double 
         add_output();
 
         // Update time step
-        ts += this->steplength;
+        ts += dts;
     }
 
 }
@@ -157,11 +171,14 @@ void Leaf_Stem_Implicit_Model::add_output() {
 
     output.Add_Timestep(ts);
 
-    output.Add_T(T);
-    output.Add_J(J);
+    output.Add_T(T / dts);
+    output.Add_J(J /dts);
     output.Add_G(G);
     vector<float> Gi_f(Gi.begin(), Gi.end());
+    for (auto& e: Gi_f)
+        e *= 1.0/dts;
     output.Add_G_indiv(Gi_f);
+
 
 
     output.Add_psi_leaf(psi_leaf);
@@ -170,10 +187,12 @@ void Leaf_Stem_Implicit_Model::add_output() {
     vector<float> psi_soil_f(ts_psi_soil.begin(), ts_psi_soil.end());
     output.Add_psi_soil_indiv(psi_soil_f);
 
-    output.Add_gs(gs);
+    output.Add_gs(gs / dts);
     output.Add_beta(beta_stom_cond);
 
     vector<float> ks_soil_f(ts_k_soil.begin(), ts_k_soil.end());
+    for (auto& e: ks_soil_f)
+        e *= 1.0/dts;
     output.Add_ks_indiv(ks_soil_f);
 
 
@@ -189,12 +208,12 @@ void Leaf_Stem_Implicit_Model::add_output() {
 
 double Leaf_Stem_Implicit_Model::psi_stem_root(double psi_stem_target) {
     double d_psi_stem_rec = d_psi_stem(psi_leaf, psi_stem_target);
-    return psi_stem + d_psi_stem_rec * steplength - psi_stem_target;
+    return psi_stem + d_psi_stem_rec * dts - psi_stem_target;
 }
 
 double Leaf_Stem_Implicit_Model::psi_leaf_root(double psi_leaf_target) {
     double d_psi_leaf_rec = d_psi_leaf(psi_leaf_target, psi_stem);
-    return psi_leaf + d_psi_leaf_rec * steplength - psi_leaf_target;
+    return psi_leaf + d_psi_leaf_rec * dts - psi_leaf_target;
 }
 
 const Output& Leaf_Stem_Implicit_Model::Get_output() {

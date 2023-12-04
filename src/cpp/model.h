@@ -24,8 +24,10 @@ public:
 
     const Output& Get_output();
 
-private:
+    /// Length of one timestep [s]
+    double dts;
 
+private:
     // Input
     const Parameters& params;
     const Input& input_module;
@@ -41,7 +43,7 @@ private:
 
     // Vapour pressure deficit [Pa]
     double ts_vpd;
-    // Net photosythesis rate [xxx]
+    // Net photosythesis rate [mol CO2 m-2 s-1]
     double ts_anet;
     // Atmopheric pressure [Pa]
     double ts_pressure;
@@ -67,8 +69,6 @@ private:
     // Derivative of the stem water potential. Internal function.
     double d_psi_stem(double psi_leaf, double psi_stem);
 
-    /// Length of timestep [in mins xxx?]
-    double steplength;
 
 
 
@@ -93,41 +93,40 @@ private:
     /// Driving force for the water to be taken up the plant
     double DeltaP_LS;
 
-    /// Stomatal conductance [mol m-2 s-1]
+    /// Stomatal conductance [mol H2O m-2 s-1]
     double gs;
 
     /// Downregulation factor of the g1 parameter of the Medyln2011 photosynthesis
     /// 0 --> No stomatal conductance; 1 --> Full stomatal conductance
     double beta_stom_cond;
 
-    /// Transpirational water flow [mol m-2 s-1]
+    /// Transpirational water flow [mol m-2 dts-1]
     double T;
-    /// Stem water flow [mol m-2 s-1]
+    /// Stem water flow [mol m-2 dts-1]
     double J;
-    /// Total Soil water uptake flow [mol m-2 s-1]
+    /// Total Soil water uptake flow [mol m-2 dts-1]
     double G;
-    /// Individial soil water uptake flow [mol m-2 s-1]
+    /// Individial soil water uptake flow [mol m-2 dts-1]
     vector<double> Gi;
 
 
     // Technical parameters
-    /// Start time point of the simulations [in xxx]
+    /// Start time point of the simulations [s]
     double time_start;
-
+    /// End time point of the simulations [s]
     double time_end;
 
+    // Elapsed time [s]
     double ts;
 
     int nsteps;
 
+    //whole simulation timelength [s]
     double delta_T;
 
-
-
-
     // Functions
-    // Get the correct time index from the input forcing as this is in 30 min step resolution
-    int time_index(double elapsed_mins);
+    // Get the correct time index from the input forcing
+    int time_index(double elapsed_seconds);
 
     // Helper function for the stem water flow. Should only be called only once per either stem water pot estimation
     // or leaf water pot estimation

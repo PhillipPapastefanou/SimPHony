@@ -8,7 +8,7 @@
 #include "swiss_drought_trees.h"
 
 Analysis::Analysis(Leaf_Stem_Implicit_Model* model, const Swiss_Drought_Trees& swiss_drought_trees):
-output(model->Get_output()), swiss_drought_trees(swiss_drought_trees) {
+output(model->Get_output()), swiss_drought_trees(swiss_drought_trees), dts(model->dts) {
 
     this->swiss_psi_leaf_states = std::make_shared<Tree_Psi_Leaf_State>(swiss_drought_trees);
 }
@@ -26,36 +26,36 @@ void Analysis::run_peak_analysis() {
     // Day 213 is the last
     // Days 200 to 210 is not inclusive
 
-    timestart = 30 * 2 * 24 * 1;
-    timeend = 30 * 2 * 24 * 10;
+    timestart = 86400* 1;
+    timeend = 86400 * 10;
     ts_of_interest.push_back({timestart, timeend});
     slices_names.push_back("beginning");
 
-    timestart = 30 * 2 * 24 * 13;
-    timeend = 30 * 2 * 24 * 33;
+    timestart = 86400 * 13;
+    timeend = 86400 * 33;
     ts_of_interest.push_back({timestart, timeend});
     slices_names.push_back("first_drop");
 
 
-    timestart = 30 * 2 * 24 * 36;
-    timeend = 30 * 2 * 24 * 83;
+    timestart = 86400 * 36;
+    timeend = 86400* 83;
     ts_of_interest.push_back({timestart, timeend});
     slices_names.push_back("second_drop");
 
 
-    timestart = 30 * 2 * 24 * 84;
-    timeend = 30 * 2 * 24 * 146;
+    timestart = 86400* 84;
+    timeend = 86400 * 146;
     ts_of_interest.push_back({timestart, timeend});
     slices_names.push_back("third_drop");
 
-    timestart = 30 * 2 * 24 * 36;
-    timeend = 30 * 2 * 24 * 146;
+    timestart = 86400 * 36;
+    timeend = 86400 * 146;
     ts_of_interest.push_back({timestart, timeend});
     slices_names.push_back("complete_drop");
 
 
-    timestart = 30 * 2 * 24 * 200;
-    timeend = 30 * 2 * 24 * 210;
+    timestart = 86400 * 200;
+    timeend = 86400* 210;
     ts_of_interest.push_back({timestart, timeend});
     slices_names.push_back("recovered");
 
@@ -68,15 +68,15 @@ void Analysis::run_peak_analysis() {
         int timeend_local = ts_of_interest[running_index].second;
 
         TimeSlice slice;
-        slice.Init("psi_leaf_" + s, output.Get_psi_leaf(), timestart_local,  timeend_local);
+        slice.Init("psi_leaf_" + s, output.Get_psi_leaf(), timestart_local,  timeend_local, dts);
         slices.push_back(slice);
 
         slice = TimeSlice();
-        slice.Init("psi_stem_" + s, output.Get_psi_stem(), timestart_local,  timeend_local);
+        slice.Init("psi_stem_" + s, output.Get_psi_stem(), timestart_local,  timeend_local, dts);
         slices.push_back(slice);
 
         slice = TimeSlice();
-        slice.Init("beta_" + s, output.Get_beta(), timestart_local,  timeend_local);
+        slice.Init("beta_" + s, output.Get_beta(), timestart_local,  timeend_local, dts);
         slices.push_back(slice);
 
         running_index += 1;
@@ -103,7 +103,7 @@ void Analysis::Run() {
 
 void Analysis::compare_psi_model_obs() {
 
-    this->swiss_psi_leaf_states->Calculate_rmse(output.Get_psi_stem());
+    this->swiss_psi_leaf_states->Calculate_rmse(output.Get_psi_stem(), dts);
 
 }
 
@@ -139,8 +139,8 @@ TimeSlice::TimeSlice() {
 
 }
 
-void TimeSlice::Init(std::string name, const vector<float> &values, double ts_min, double ts_max) {
-    const double steplen = 30.0;
+void TimeSlice::Init(std::string name, const vector<float> &values, double ts_min, double ts_max, double dts) {
+    const double steplen = dts;
 
     this->name = name;
 
@@ -161,7 +161,7 @@ swiss_drought_trees(swiss_drought_trees){
 
 }
 
-void Tree_Psi_Leaf_State::Calculate_rmse(const vector<float> &values) {
+void Tree_Psi_Leaf_State::Calculate_rmse(const vector<float> &values, const double dts) {
 
 
     for (int t = 0; t < swiss_drought_trees.trees.size(); ++t) {
@@ -175,10 +175,10 @@ void Tree_Psi_Leaf_State::Calculate_rmse(const vector<float> &values) {
             int offset = tree.offsets[s];
 
             // look for the most negative water potential per day
-            int timestart =  2 * 24 * offset;
-            int timeend = 2 * 24 * (offset + 1);
+            int timestart =  86400.0 / dts * offset;
+            int timeend = 86400.0/ dts * (offset + 1);
 
-            // Allow for some temporal variation
+                        // Allow for some temporal variation
             // the maximum of the model can also be some days earlier or later
             const int number_of_days_off_from_obs = 1;
 
