@@ -18,6 +18,11 @@ public:
     //const double PI = std::numbers::pi;
     //Todo Use C constants again. Does not work on the MPI cluster atm
     const double PI = 3.14159265359;
+    // Density of water [kg m-3]
+    double rho_water = 998.0;
+    // Gravitational constant [kg m-1 m-2]
+    double grav = 9.81;
+
 
     // Root zone depth [m]
     double root_zone_depth = 0.3;
@@ -29,10 +34,6 @@ public:
     // Plant height [m]
     // From Arend et al 2021 SI
     double canopy_height = 20.0;
-    // Density of water [kg m-3]
-    double rho_water = 998.0;
-    // Gravitational constant [kg m-1 m-2]
-    double grav = 9.81;
 
 
     // Viscosity of the leaf to sap flow [1] ??? To be double checked
@@ -56,7 +57,6 @@ public:
     double psi50_xylem = -3.5;
     // Slope parameter of xylem water potential curve (has to be postive)[-]
     double d_50_s = 5.0;
-
 
     // Leaf hydraulic conductance [mol m-2 MPa -1]
     // range 0.2 - 1.2 from Blackmann and Brodribb 2011
@@ -103,7 +103,7 @@ public:
     // Should be 1.0 for runs where the given wcont is known precisely
     double theta_emp_multiplier = 1.0;
 
-    // Van Genuchten parameters
+    // Van Genuchten parametersmm
     double theta_r = 0.105;
     double alpha_genucht = 1.0;
     double n_genucht = 6.0;
@@ -115,12 +115,7 @@ public:
     // from Clapp 1978: -15.3 cm
     double camp_psi_soil_ref = -1.50042 * std::pow(10, -6);
 
-
-
-
     double solver_precision = 1E-10;
-
-
 
 private:
 };
