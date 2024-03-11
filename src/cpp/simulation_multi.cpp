@@ -17,7 +17,7 @@ Simulation_Multi::Simulation_Multi() : rank(0) {
 void Simulation_Multi::Init_input(std::string theta_file, std::string forcing_file, std::string swiss_trees_folder, int rank) {
 
     this->rank = rank;
-    input = std::make_unique<Input>(theta_file, forcing_file);
+    input = std::make_unique<Input>(theta_file, forcing_file, std::get<0>(parameter_list.front()));
     input->Read_N_Parse();
 
     swiss_trees = std::make_unique<Swiss_Drought_Trees>(swiss_trees_folder);
@@ -49,7 +49,7 @@ void Simulation_Multi::Set_water_pot_initials(double psi_leaf, double psi_stem) 
     init_psi_stem = psi_stem;
 }
 
-void Simulation_Multi::Run(double steplen, double timestart, double timeend) {
+void Simulation_Multi::Run(double steplen, DateTime timestart, DateTime timeend) {
 
     std::cout << "Rank " << rank << ": Performing " << parameter_list.size() << " simulations." << std:: endl;
 
@@ -123,5 +123,13 @@ void Simulation_Multi::Init_Partial_Parameter_Setups(string root_filename, strin
         parameter_list.push_back(parameter_setup);
     }
 
+}
+
+DateTime Simulation_Multi::Get_first_year() {
+    return input->dates.front();
+}
+
+DateTime Simulation_Multi::Get_last_year() {
+    return input->dates.back();
 }
 

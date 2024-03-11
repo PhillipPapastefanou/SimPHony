@@ -36,6 +36,12 @@ namespace io {
             vector<T> row;
             vector<string> row_vec;
 
+            if (file->is_open() == false){
+                file = std::make_unique<std::fstream>(filename,  std::ios::in);
+                if (has_header){
+                    getline(*file, line);
+                }
+            }
 
             // Read rows
             while (getline(*file, line)) {
@@ -74,6 +80,13 @@ namespace io {
             vector<T> row;
             vector<string> row_vec;
 
+            if (file->is_open() == false){
+                file = std::make_unique<std::fstream>(filename,  std::ios::in);
+                if (has_header){
+                    getline(*file, line);
+                }
+            }
+
 
             // Read rows
             while (getline(*file, line)) {
@@ -107,6 +120,8 @@ namespace io {
     private:
         std::unique_ptr<std::fstream> file;
         char delimiter;
+        string filename;
+        bool has_header;
 
 
     };
@@ -119,6 +134,11 @@ namespace io {
     template<>
     inline double CSV_Reader::Convert(std::string s) {
         return std::stod(s);
+    };
+
+    template<>
+    inline std::string CSV_Reader::Convert(std::string s) {
+        return s;
     };
 
 

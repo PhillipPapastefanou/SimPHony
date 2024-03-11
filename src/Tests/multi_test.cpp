@@ -39,9 +39,12 @@ Multi_Test::Multi_Test() {
     simulationMulti.Init_Full_Parameter_Setups(paramter_list, indexes);
     simulationMulti.Set_water_pot_initials(-1.0, -0.3);
 
-    double steplen = 30;
-    double timestart = 30 * 2 * 24 * 0.0;
-    double timeend = 30 * 2 * 24 * 213;
+    double steplen   = 1800;
+//    double timestart = 30 * 2 * 24 * 0.0;
+//    double timeend   = 30 * 2 * 24 * 213;
+
+    DateTime timestart = simulationMulti.Get_first_year();
+    DateTime timeend = simulationMulti.Get_last_year();
 
     simulationMulti.Run(steplen,timestart, timeend);
 

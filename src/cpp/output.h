@@ -5,6 +5,7 @@
 #pragma once
 #include <vector>
 #include <string>
+#include "date_time.h"
 
 using std::vector;
 class Output {
@@ -14,6 +15,8 @@ public:
     ~Output();
 
     void Add_Timestep(double t);
+    void Add_DateTime(DateTime t);
+
     void Add_T(double t);
     void Add_J(double J);
     void Add_G(double G);
@@ -32,7 +35,7 @@ public:
     void Add_steps_psi_leaf(int steps_psi_leaf);
     void Add_steps_psi_stem(int steps_psi_stem);
 
-    const vector<float> &Get_times() const;
+    const vector<long> &Get_times() const;
 
     const vector<float> &Get_T() const;
 
@@ -64,7 +67,8 @@ public:
 
 
 private:
-    std::vector<float> times;
+    std::vector<long> times;
+    std::vector<DateTime> dates;
 
     vector<float> Ta;
     vector<float> Ja;

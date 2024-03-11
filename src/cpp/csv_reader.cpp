@@ -9,15 +9,15 @@
 
 io::CSV_Reader::CSV_Reader(string filename, bool has_header, char delimiter) {
 
+    this->filename = filename;
     this->delimiter = delimiter;
+    this->has_header = has_header;
     vector<vector<string> > data;
     vector<string> row;
     string line, word;
 
     file = std::make_unique<std::fstream>(filename,  std::ios::in);
     //std::fstream file(filename,  std::ios::in);
-
-
 
 
     if(file->is_open()){

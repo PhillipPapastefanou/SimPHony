@@ -10,6 +10,7 @@
 #include "swiss_drought_trees.h"
 #include <tuple>
 #include <chrono>
+#include "date_time.h"
 
 class Simulation_Multi {
 
@@ -23,9 +24,12 @@ public:
 
     void Set_water_pot_initials(double psi_leaf, double psi_stem);
 
-    void Run(double steplen, double timestart, double timeend);
+    void Run(double steplen, DateTime timestart, DateTime timeend);
 
     std::vector<Analysis> Get_analysis_list();
+
+    DateTime Get_first_year();
+    DateTime Get_last_year();
 private:
 
     int rank;

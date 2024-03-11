@@ -11,7 +11,8 @@ Simulation_Single::Simulation_Single(){
 
 void Simulation_Single::Init_input(std::string theta_file, std::string forcing_file, std::string swiss_trees_folder) {
 
-    input = std::make_unique<Input>(theta_file, forcing_file);
+    input = std::make_unique<Input>(theta_file, forcing_file,
+                                    *parameters.get());
     input->Read_N_Parse();
 
     swiss_trees = std::make_unique<Swiss_Drought_Trees>(swiss_trees_folder);
@@ -34,7 +35,7 @@ void Simulation_Single::Set_water_pot_initials(double psi_leaf, double psi_stem)
 
 }
 
-void Simulation_Single::Run(double steplen, double timestart, double timeend) {
+void Simulation_Single::Run(double steplen, DateTime timestart, DateTime timeend) {
 
     model->Run(steplen,timestart,timeend);
 

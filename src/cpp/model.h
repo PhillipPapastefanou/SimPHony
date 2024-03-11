@@ -4,6 +4,7 @@
 #include "soil_water_model.h"
 #include "solvers.h"
 #include "output.h"
+#include "date_time.h"
 
 class Bisection_psi_leaf;
 class Bisection_psi_stem;
@@ -17,7 +18,7 @@ public:
 
     void Set_initial_conditions(double psi_leaf_zero, double psi_soil_zero);
 
-    void Run(double steplength, double time_start, double time_end);
+    void Run(double steplength, DateTime begin, DateTime end);
 
     double psi_stem_root(double psi_stem_target);
     double psi_leaf_root(double psi_leaf_target);
@@ -70,8 +71,6 @@ private:
     double d_psi_stem(double psi_leaf, double psi_stem);
 
 
-
-
     // List of soil water potentials per soil layer [MPa]
     vector<double> ts_psi_soil;
     // List of conductivities per soil layer [m s-1]
@@ -111,18 +110,18 @@ private:
 
 
     // Technical parameters
-    /// Start time point of the simulations [s]
-    double time_start;
-    /// End time point of the simulations [s]
-    double time_end;
+    /// Start time point of the simulations [DateTime]
+    DateTime time_start;
+    /// End time point of the simulations [DateTime]
+    DateTime time_end;
 
-    // Elapsed time [s]
-    double ts;
+    // Elapsed time in seconds since t0 [s]
+    long ts;
 
     int nsteps;
 
-    //whole simulation timelength [s]
-    double delta_T;
+    // Simulation timelength [s]
+    double delta_Ts;
 
     // Functions
     // Get the correct time index from the input forcing
