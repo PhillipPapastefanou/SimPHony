@@ -23,7 +23,6 @@ public:
     // Gravitational constant [kg m-1 m-2]
     double grav = 9.81;
 
-
     // Root zone depth [m]
     double root_zone_depth = 0.3;
     // Root area index [1]
@@ -116,6 +115,11 @@ public:
     double camp_psi_soil_ref = -1.50042 * std::pow(10, -6);
 
     double solver_precision = 1E-10;
+
+
+    /// Input parameters
+    /// Length of one timestep in [s]
+    double input_steplen = 1800.0;
 
 private:
 };

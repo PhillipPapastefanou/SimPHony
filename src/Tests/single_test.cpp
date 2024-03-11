@@ -25,7 +25,6 @@ Single_Test::Single_Test() {
     string theta_file = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Water_Input_type2.csv";
     string forcing_file = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Forcing_Inter.csv";
 
-
     Parameter_CSV_Reader reader("/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/Model/Model_setups.csv");
 
     std::string path_of_the_trees = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Trees";
@@ -80,13 +79,11 @@ Single_Test::Single_Test() {
     double psi_stem_init = -0.3;
 
 
-    Input input(theta_file,forcing_file);
-
+    Input input(theta_file,forcing_file, params);
 
     input.Read_N_Parse();
 
-
-    auto start = std::chrono::high_resolution_clock::now();
+    auto start_clock = std::chrono::high_resolution_clock::now();
 
     Leaf_Stem_Implicit_Model model(params, input);
 
@@ -94,23 +91,23 @@ Single_Test::Single_Test() {
 
     model.Set_initial_conditions(psi_leaf_init, psi_stem_init);
 
+    // Length model in seconds
+    long steplen      = 1800;
 
-    double steplen      = 30;
-    double timestart    = 30*2*24 * 0.0;
-    double timeend      = 30*2*24 * 213;
+//    double timestart    = 30*2*24 * 0.0;
+//    double timeend      = 30*2*24 * 213;
 
-    model.Run(steplen,timestart,timeend);
+    DateTime begin = input.dates.front();
+    DateTime end = input.dates[10000];
 
-
+    model.Run(steplen, begin, end);
 
     Analysis analysis(&model, swiss_drought_tress);
-
-
     analysis.Run();
 
 
-    auto end = std::chrono::high_resolution_clock::now();
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>( end - start);
+    auto end_clock = std::chrono::high_resolution_clock::now();
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_clock - start_clock);
     std::cout << "Elapsed time: " << ms.count() << " ms\n";
 
 }

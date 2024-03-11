@@ -11,7 +11,7 @@ void Leaf_Stem_Implicit_Model::Set_initial_conditions(double psi_leaf_zero, doub
 }
 
 int Leaf_Stem_Implicit_Model::time_index(double elapsed_seconds) {
-    return static_cast<int>(elapsed_seconds / 1800.0);
+    return static_cast<int>(elapsed_seconds / params.input_steplen);
 }
 
 double Leaf_Stem_Implicit_Model::update_stem_water_flow_J(double psi_leaf, double psi_stem) {
@@ -65,8 +65,6 @@ double Leaf_Stem_Implicit_Model::d_psi_stem(double psi_leaf, double psi_stem) {
 
     G = 0.0;
     for (int s = 0; s < params.nsoil; ++s) {
-
-
         // Convert from s-1 to ts-1
         double ts_k_soil_dt = ts_k_soil[s] * dts;
 
@@ -115,24 +113,40 @@ void Leaf_Stem_Implicit_Model::Set_derived_parameters() {
 
 }
 
-void Leaf_Stem_Implicit_Model::Run(double steplength, double time_start, double time_end) {
+void Leaf_Stem_Implicit_Model::Run(double steplength, DateTime begin, DateTime end) {
 
     this->dts = steplength;
-    this->time_start = time_start;
-    this->time_end = time_end;
+    time_start = begin;
+    time_end = end;
 
-    delta_T = time_end - time_start;
-    nsteps = delta_T / dts;
+    DateTime begin_available =  input_module.dates.front();
+    DateTime end_available =  input_module.dates.back();
 
 
-    ts = time_start;
+    if (begin < begin_available){
+        std::cout << "Invalid begin date specified";
+        exit(99);
+    }
+
+    if (end_available < end){
+        std::cout << "Invalid end date specified";
+        exit(99);
+    }
+
+    // Calculate total simulation lenght in seconds
+    delta_Ts = time_end - time_start;
+
+    // Calculate acutal number of steps
+    nsteps = delta_Ts / dts;
+
+    // Time difference in seconds to t0
+    ts = begin - begin_available ;
 
     for (int i = 0; i < nsteps; ++i) {
 
         // Update forcing drivers
         ts_ca = 415.0;
         ts_pressure = 1.013*100000.0;
-
 
         ts_anet = input_anet[time_index(ts)];
         ts_vpd = input_vpd[time_index(ts)];
@@ -156,7 +170,6 @@ void Leaf_Stem_Implicit_Model::Run(double steplength, double time_start, double 
             //break;
         }
 
-
         // Addind up output files
         add_output();
 
@@ -170,6 +183,8 @@ void Leaf_Stem_Implicit_Model::Run(double steplength, double time_start, double 
 void Leaf_Stem_Implicit_Model::add_output() {
 
     output.Add_Timestep(ts);
+
+    output.Add_DateTime(time_start.AddSeconds(ts));
 
     output.Add_T(T / dts);
     output.Add_J(J /dts);

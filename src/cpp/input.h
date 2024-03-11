@@ -3,9 +3,12 @@
 //
 
 #pragma once
-#include "csv_reader.h"
+#include "forcing_input_collection.h"
+#include "parameters.h"
+#include "date_time.h"
 #include <string>
 #include <vector>
+
 
 using std::string;
 using std::vector;
@@ -14,7 +17,7 @@ class Input {
 
 
 public:
-    Input(string theta_file, string forcing_reader);
+    Input(string theta_file, string forcing_reader, Parameters parameters);
 
     void Read_N_Parse();
 
@@ -25,18 +28,21 @@ public:
     // According to the excel sheet of Arend 2021 appendix
     const double ANET_MAX = 5.7;
 
-    ///
     vector<float> anet;
     /// Vapour pressure deficit [Pa]
     vector<float> vpd;
     /// Volumetric water content [m3 m-3]
     vector<vector<float> > theta_per_layer;
 
+    vector<DateTime> dates;
+
+
+
 private:
-    io::CSV_Reader theta_per_layer_reader;
-    io::CSV_Reader forcing_reader;
+    ForcingInputCollection theta_parser;
+    ForcingInputCollection forcing_parser;
 
     vector<float> rad;
-
+    Parameters parameters;
 
 };

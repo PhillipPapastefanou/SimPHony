@@ -13,6 +13,8 @@ set(headers
         parameter_csv_reader.h
         analysis.h
         swiss_drought_trees.h
+        date_time.h
+        forcing_input_collection.h
         )
 
 set(source
@@ -31,6 +33,8 @@ set(source
         parameter_csv_reader.cpp
         analysis.cpp
         swiss_drought_trees.cpp
+        date_time.cpp
+        forcing_input_collection.cpp
         )
 
 include(add_model_sources)

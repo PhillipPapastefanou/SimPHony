@@ -18,7 +18,6 @@ void Analysis::run_peak_analysis() {
     //overall_peak_psi_leaf = find_overall_peak(output.Get_psi_leaf());
     //overall_peak_psi_stem = find_overall_peak(output.Get_psi_stem());
 
-
     vector<std::pair<int,int> > ts_of_interest;
     vector<string> slices_names;
     int timestart, timeend;

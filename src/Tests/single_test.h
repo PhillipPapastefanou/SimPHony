@@ -11,8 +11,6 @@ class Single_Test {
 
 public:
     Single_Test();
-
-
 };
 
 

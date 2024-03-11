@@ -69,7 +69,7 @@ void Output::Add_steps_psi_leaf(int steps_psi_leaf) {
     steps_psi_leaf_a.push_back(steps_psi_leaf);
 }
 
-const vector<float> &Output::Get_times() const {
+const vector<long> &Output::Get_times() const {
     return times;
 }
 
@@ -130,5 +130,9 @@ void Output::Export_CSV(std::string filename) {
 
     std::cout << "CSV export is not yet available!";
     throw;
+}
+
+void Output::Add_DateTime(DateTime t) {
+    dates.push_back(t);
 }
 
