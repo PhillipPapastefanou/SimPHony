@@ -20,10 +20,8 @@ void Parameter_Examples::Define() {
     Baseline_one.root_area_index = 24;
     Baseline_one.root_zone_depth = 0.3;
 
-    Baseline_one.nsoil = 11;
-    Baseline_one.layer_depth = 0.1;
-    Baseline_one.min_soil_layer_depth = 0.0;
-    Baseline_one.max_soil_layer_depth = 1.0;
+    Baseline_one.soil_depths.assign(11, 0.1);
+
     Baseline_one.jackson_root_beta = 0.96;
     Baseline_one.theta_r = 0.0972;
     Baseline_one.alpha_genucht = 1.0;

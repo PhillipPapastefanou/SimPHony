@@ -19,7 +19,7 @@ void Campbell_Water_Uptake::CalculatePsiAndKs() {
     double ksat = parameters.k_soil_sat;
     double theta_s = parameters.theta_s;
     double psi_s_ref = parameters.camp_psi_soil_ref;
-    int nsoil = parameters.nsoil;
+    int nsoil = parameters.soil_depths.size();
 
     vector<vector<float> > theta_array = input_module.theta_per_layer;
     this->psi_s_array.resize(theta_array.size());

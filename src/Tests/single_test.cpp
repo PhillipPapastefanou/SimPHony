@@ -58,10 +58,8 @@ Single_Test::Single_Test() {
     params.root_area_index = 24;
     params.root_zone_depth = 0.3;
 
-    params.nsoil = 11;
-    params.layer_depth = 0.1;
-    params.min_soil_layer_depth = 0.0;
-    params.max_soil_layer_depth = 1.0;
+    params.soil_depths.assign(11, 0.1);
+
     params.jackson_root_beta = 0.96;
     params.theta_r = 0.0972;
     params.alpha_genucht = 1.0;

@@ -8,23 +8,27 @@
 
 Root_distribution_model::Root_distribution_model(const Parameters &parameters) {
 
-    root_fractions.resize(parameters.nsoil);
+    int nlayers = parameters.soil_depths.size();
+    root_fractions.resize(nlayers);
+
+    std::vector<double> soil_depths_acc(nlayers);
+    soil_depths_acc[0] = parameters.soil_depths[0];
+
+    for (int i = 1; i < nlayers; ++i) {
+        soil_depths_acc[i] = soil_depths_acc[i - 1] + parameters.soil_depths[i - 1];
+    }
 
     double rf_sum = 0.0;
-
-
-    for (int i = 0; i < parameters.nsoil; ++i) {
-
-        double x = parameters.min_soil_layer_depth + i * parameters.layer_depth;
-        double rf  = std::pow(parameters.jackson_root_beta, 100.0 * x) -
-                     std::pow(parameters.jackson_root_beta, 100.0 * (x + parameters.layer_depth));
-
+    for (int i = 0; i < nlayers; ++i) {
+        double rf  = std::pow(parameters.jackson_root_beta, 100.0 * soil_depths_acc[i]) -
+                     std::pow(parameters.jackson_root_beta, 100.0 * (soil_depths_acc[i] + parameters.soil_depths[i]));
         rf_sum += rf;
         root_fractions[i] = rf;
     }
 
-
-    for (int j = 0; j < parameters.nsoil; ++j) {
+    // Ensure that all roots are distributed in the soil depth
+    // Normalisation of root fractions
+    for (int j = 0; j < nlayers; ++j) {
         root_fractions[j] *= 1.0/rf_sum;
     }
 

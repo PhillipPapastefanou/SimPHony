@@ -194,9 +194,7 @@ void Tree_Psi_Leaf_State::Calculate_rmse(const vector<float> &values, const doub
         }
 
 
-
         double rmse = 0.0;
-
         for (double d : diffs){
             rmse += (d * d);
         }

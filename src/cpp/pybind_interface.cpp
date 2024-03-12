@@ -72,5 +72,8 @@ PYBIND11_MODULE(hydro_standalone, handle){
             def_readwrite("Day_min", &TimeSlice::day_min).
             def(py::init<>());
 
+    py::class_<DateTime>(handle, "DateTime").
+            def(py::init<string, string>());
+
     handle.doc() = "PHS setup and running via python";
 }

@@ -78,15 +78,8 @@ public:
     // Medlyn 2011 model g1 parameter [1]
     // From Medlynn 1.6 - 12
     double g1 = 1.5;
-
-    // Number of soil layers
-    int nsoil = 11;
-    // Depth of each soil layer [m]
-    double layer_depth  = 0.1;
-    // Min depth of soil layers (should be zero) [m]
-    double min_soil_layer_depth = 0.0;
-    // Max depth of soil layers [m]
-    double max_soil_layer_depth = 1.0;
+    // Soil depths
+    std::vector<double> soil_depths;
     // Jackson rooting parameter [-]
     double jackson_root_beta  = 0.96;
 

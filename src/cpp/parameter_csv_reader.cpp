@@ -5,6 +5,9 @@
 #include "parameter_csv_reader.h"
 #include <iostream>
 #include <algorithm>
+#include <sstream>
+#include <iostream>
+#include <memory>
 using std::string;
 
 Parameter_CSV_Reader::Parameter_CSV_Reader(std::string filename): reader(filename, true, ','), check_if_found(false) {
@@ -16,7 +19,7 @@ void Parameter_CSV_Reader::Parse_Full_Files() {
     // Default parameters;
     Parameters params;
 
-    parse_parameters(params, true);
+    parse_parameters(params, false);
 }
 
 
@@ -24,7 +27,7 @@ void Parameter_CSV_Reader::Parse_Partial_Files(const Parameters& parameters) {
 
     Parameters params = parameters;
 
-    parse_parameters(params, true);
+    parse_parameters(params, false);
 
 }
 
@@ -146,25 +149,18 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
         if(pos <  row.size())
             params.g1 = std::stod(row[pos]);
 
-        val = "nsoil";
+        val = "soil_depths";
         pos = get_position(val);
-        if(pos <  row.size())
-            params.nsoil = std::stoi(row[pos]);
+        if(pos <  row.size()){
+            params.soil_depths.resize(0);
+            std::string input = row[pos];
+            std::string word;
+            std::stringstream row_str(input);
 
-        val = "layer_depth";
-        pos = get_position(val);
-        if(pos <  row.size())
-            params.layer_depth = std::stod(row[pos]);
-
-        val = "min_soil_layer_depth";
-        pos = get_position(val);
-        if(pos <  row.size())
-            params.min_soil_layer_depth = std::stod(row[pos]);
-
-        val = "max_soil_layer_depth";
-        pos = get_position(val);
-        if(pos <  row.size())
-            params.max_soil_layer_depth = std::stod(row[pos]);
+            while (getline(row_str, word, ';')) {
+                params.soil_depths.push_back(std::stod(word));
+            }
+        }
 
         val = "jackson_root_beta";
         pos = get_position(val);
