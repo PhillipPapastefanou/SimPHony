@@ -22,7 +22,6 @@ void ForcingInputCollection::init(std::string dt_header, std::string format) {
      }
 
     int index = std::distance( reader.header.begin(), index_it );
-
     vector<vector<string>> dates_str = reader.Get<std::string>({index});
 
     for (int i = 0; i < dates_str.size(); ++i) {
@@ -32,14 +31,16 @@ void ForcingInputCollection::init(std::string dt_header, std::string format) {
     }
 
 
+    long diff0 = dates[1] - dates[0];
     // Checking for nonregular data
     for (int i = 0; i < dates.size() - 1; ++i) {
         long diff = dates[i+1] - dates[i];
-        if (diff != 1800){
+        if (diff != diff0){
             std:: cout << "Nonregular input found at " << i << std:: endl;
             exit(99);
         }
     }
+    time_res_sec = diff0;
 
 }
 

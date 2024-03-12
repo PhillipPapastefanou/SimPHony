@@ -22,8 +22,8 @@ int main(int argc, char* argv[]) {
 //    int x = 3 ;
 
 
-    Single_Test single_test;
-//Multi_Test single_test;
+    //Single_Test single_test;
+    Multi_Test single_test;
 
 
 

@@ -64,7 +64,7 @@ double Leaf_Stem_Implicit_Model::d_psi_stem(double psi_leaf, double psi_stem) {
     // J = update_stem_water_flow_J(psi_leaf, psi_stem)
 
     G = 0.0;
-    for (int s = 0; s < params.nsoil; ++s) {
+    for (int s = 0; s < params.soil_depths.size(); ++s) {
         // Convert from s-1 to ts-1
         double ts_k_soil_dt = ts_k_soil[s] * dts;
 
@@ -109,7 +109,7 @@ void Leaf_Stem_Implicit_Model::Set_derived_parameters() {
     solver_psi_leaf = std::make_unique<Bisection_psi_leaf>(*this, 1E-10, 100);
     solver_psi_stem = std::make_unique<Bisection_psi_stem>(*this, 1E-10,100);
 
-    Gi.resize(params.nsoil);
+    Gi.resize(params.soil_depths.size());
 
 }
 

@@ -16,6 +16,8 @@ public:
 
     vector<vector<float> > get_data(vector<int> indexes);
 
+    // Time resolution in seconds of input data
+    long time_res_sec;
     std::vector<DateTime> dates;
 
 private:
