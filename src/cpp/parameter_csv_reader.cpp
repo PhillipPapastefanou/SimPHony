@@ -64,11 +64,6 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
 
         vector<string> row = values[i];
 
-        val = "root_zone_depth";
-        pos = get_position(val);
-        if(pos <  row.size())
-            params.root_zone_depth = std::stod(row[pos]);
-
         val = "root_area_index";
         pos = get_position(val);
         if(pos <  row.size())

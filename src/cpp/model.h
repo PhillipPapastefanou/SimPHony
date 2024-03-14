@@ -77,13 +77,13 @@ private:
     vector<double> ts_k_soil;
 
     // Derived Parameters
-    vector<double> root_fractions;
+    vector<double> root_fraction_player;
+    vector<double> soil_layer_depth_acc;
 
 
     /// Solvers
     std::unique_ptr<Bisection_psi_leaf> solver_psi_leaf;
     std::unique_ptr<Bisection_psi_stem> solver_psi_stem;
-    //Bisection_solver_interface solver_psi_leaf;
 
 
 

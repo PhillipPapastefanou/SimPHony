@@ -5,4 +5,5 @@ cmake-build-debug
 *.sh
 !scripts/*.sh
 build/*
-build2/*
+.DS_Store
+*/*/__pycache__

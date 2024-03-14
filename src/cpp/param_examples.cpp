@@ -18,7 +18,6 @@ void Parameter_Examples::Define() {
     Baseline_one.k_xylem_sat = 300;
 
     Baseline_one.root_area_index = 24;
-    Baseline_one.root_zone_depth = 0.3;
 
     Baseline_one.soil_depths.assign(11, 0.1);
 
