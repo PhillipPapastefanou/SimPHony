@@ -23,8 +23,6 @@ public:
     // Gravitational constant [kg m-1 m-2]
     double grav = 9.81;
 
-    // Root zone depth [m]
-    double root_zone_depth = 0.3;
     // Root area index [1]
     // Xu et al: 24
     // Katul et al: 5.5 - 14.2
@@ -78,7 +76,7 @@ public:
     // Medlyn 2011 model g1 parameter [1]
     // From Medlynn 1.6 - 12
     double g1 = 1.5;
-    // Soil depths
+    // Soil depths in m
     std::vector<double> soil_depths;
     // Jackson rooting parameter [-]
     double jackson_root_beta  = 0.96;

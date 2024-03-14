@@ -25,7 +25,7 @@ Single_Test::Single_Test() {
     string theta_file = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Water_Input_type2.csv";
     string forcing_file = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Forcing_Inter.csv";
 
-    Parameter_CSV_Reader reader("/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/Model/Model_setups.csv");
+    Parameter_CSV_Reader reader("/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/Model/Full_Parameter_setup_12.csv");
 
     std::string path_of_the_trees = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Trees";
 
@@ -52,11 +52,10 @@ Single_Test::Single_Test() {
     params.d_50_close = 10.0;
     params.leaf_area_index = 4.8;
     params.leaf_hydraulic_capacitance = 1.0;
-    params.stem_hydraulic_capacitance_max = 20.0 * 1000 / 18.0;
+    params.stem_hydraulic_capacitance_max = 200 * 1000 / 18.0;
     params.k_xylem_sat = 300;
 
     params.root_area_index = 24;
-    params.root_zone_depth = 0.3;
 
     params.soil_depths.assign(11, 0.1);
 
@@ -67,11 +66,12 @@ Single_Test::Single_Test() {
     params.neta_genucht = 0.5;
 
 
-    params.theta_s = 0.8;
-    params.camp_b = 8.4;
-    params.camp_psi_soil_ref = -1.5E-6;
-    params.k_soil_sat = 100.0 * 15.0/86400.0;
+    params.theta_s = 0.43;
+    params.camp_b = 4.5;
+    params.camp_psi_soil_ref = -4.5E-3;
+    params.k_soil_sat = 20.0/100.0/3600 * 0;
 
+    params.psi50_xylem = -10000.0;
 
     double psi_leaf_init = -1.0;
     double psi_stem_init = -0.3;
@@ -96,12 +96,16 @@ Single_Test::Single_Test() {
 //    double timeend      = 30*2*24 * 213;
 
     DateTime begin = input.dates.front();
-    DateTime end = input.dates[10000];
+    DateTime end = begin.AddSeconds(86400 * 20);
 
     model.Run(steplen, begin, end);
 
     Analysis analysis(&model, swiss_drought_tress);
     analysis.Run();
+
+
+    std::cout << "Psi leaf  " << model.Get_output().Get_psi_leaf()[959] << "\n";
+    std::cout << "Psi stem  " << model.Get_output().Get_psi_stem()[959] << "\n";
 
 
     auto end_clock = std::chrono::high_resolution_clock::now();
