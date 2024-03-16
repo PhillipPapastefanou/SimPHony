@@ -26,7 +26,12 @@ void ForcingInputCollection::init(std::string dt_header, std::string format) {
 
     for (int i = 0; i < dates_str.size(); ++i) {
 
-        DateTime dt(dates_str[i][0], format);
+        std::string dstr = dates_str[i][0];
+        std::replace( dstr.begin(),
+                      dstr.end(),'T', ' ');
+        std::replace( dstr.begin(),
+                      dstr.end(),'Z', '\0');
+        DateTime dt(dstr, format);
         dates.push_back(dt);
     }
 
@@ -36,7 +41,7 @@ void ForcingInputCollection::init(std::string dt_header, std::string format) {
     for (int i = 0; i < dates.size() - 1; ++i) {
         long diff = dates[i+1] - dates[i];
         if (diff != diff0){
-            std:: cout << "Nonregular input found at " << i << std:: endl;
+            std:: cout << "Nonregular time input found at " << i << std:: endl;
             exit(99);
         }
     }

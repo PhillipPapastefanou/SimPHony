@@ -1,5 +1,5 @@
 #include "parameters.h"
-#include "input.h"
+#include "input_swiss.h"
 #include <vector>
 #include "soil_water_model.h"
 #include "solvers.h"
@@ -52,10 +52,12 @@ private:
     double ts_ca;
 
 
-    // Output
+    // Derived parameters
+    double psi_gomp_50;
+
+
+    // Output dataset
     Output output;
-
-
 
     /// Main states
     /// Leaf water potential at average canopy height [MPa]
@@ -86,7 +88,6 @@ private:
     std::unique_ptr<Bisection_psi_stem> solver_psi_stem;
 
 
-
     /// Derived or helper states
     /// Forcing pressure between leaf and soil water potential [MPA]
     /// Driving force for the water to be taken up the plant
@@ -115,7 +116,7 @@ private:
     /// End time point of the simulations [DateTime]
     DateTime time_end;
 
-    // Elapsed time in seconds since t0 [s]
+    // Elapsed time in seconds since time_start [s]
     long ts;
 
     int nsteps;

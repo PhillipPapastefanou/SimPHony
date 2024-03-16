@@ -34,8 +34,12 @@ double Leaf_Stem_Implicit_Model::update_stem_water_flow_J(double psi_leaf, doubl
 
 double Leaf_Stem_Implicit_Model::d_psi_leaf(double psi_leaf, double psi_stem) {
 
-    // Update beta stomatal conductional parameter
-    beta_stom_cond = 1.0 / (1.0 + std::exp(-params.d_50_close * (psi_leaf - params.psi_leaf_50_close)));
+    // Update beta parameter that rescales stomatal conductance
+    // beta = 0 -> stomata closed; beta = 1 -> stomata fully open
+    // The intial function was a simple logic model
+    //beta_stom_cond = 1.0 / (1.0 + std::exp(-params.d_50_close * (psi_leaf - params.psi_leaf_50_close)));
+    // Gompertz function
+    beta_stom_cond = std::exp(-1.0 * std::exp(-1.0 *params.d_50_close*(psi_leaf - psi_gomp_50)));
 
     // Medlyn phoytosynthesis model
     // mol CO2 s-1 m-2
@@ -79,6 +83,9 @@ params(parameters),
 input_module(input),
 output()
 {
+    // Gompertz function parameter estimates
+    psi_gomp_50 = parameters.psi_leaf_50_close;
+    psi_gomp_50 += std::log(std::log(2.0)) / parameters.d_50_close;
 
 }
 
@@ -89,7 +96,6 @@ void Leaf_Stem_Implicit_Model::Set_derived_parameters() {
     soil_layer_depth_acc = root_model.Get_soil_layer_depth_acc();
 
     soil_water_module = std::make_unique<Campbell_Water_Uptake>(params, input_module);
-
     soil_water_module->CalculatePsiAndKs();
 
     input_k_soil = soil_water_module->Get_ks();
@@ -161,6 +167,9 @@ void Leaf_Stem_Implicit_Model::Run(double steplength, DateTime begin, DateTime e
         if(psi_stem < - 15.0){
             //break;
         }
+
+//        std::cout << "Psi leaf  " << psi_leaf << std::endl;
+//        std::cout << "Psi stem  " << psi_stem << std::endl;
 
         // Addind up output files
         add_output();

@@ -1,14 +1,14 @@
 //
-// Created by Phillip on 27.07.23.
+// Created by Phillip on 15.03.24.
 //
 
-#include "single_test.h"
+#include "hainich_single_test.h"
 #include <iostream>
 #include <string>
 
 
 #include "../cpp/parameters.h"
-#include "../cpp/input.h"
+#include "../cpp/input_hainich.h"
 #include "../cpp/model.h"
 #include <chrono>
 #include "../cpp/parameter_csv_reader.h"
@@ -17,19 +17,17 @@
 
 using std::cout;
 using std::endl;
-
 using std::string;
 
-Single_Test::Single_Test() {
+Hainich_Single_Test::Hainich_Single_Test() {
 
-    string theta_file = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Water_Input_type2.csv";
-    string forcing_file = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Forcing_Inter.csv";
+    string forcing_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/appl/hainich/Meteo_Hainich_dT30min_forcing_PHS.csv";
 
     Parameter_CSV_Reader reader("/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/Model/Full_Parameter_setup_12.csv");
 
     std::string path_of_the_trees = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Trees";
 
-    Swiss_Drought_Trees swiss_drought_tress(path_of_the_trees);
+    //Swiss_Drought_Trees swiss_drought_tress(path_of_the_trees);
 
     auto start0 = std::chrono::high_resolution_clock::now();
 
@@ -43,21 +41,19 @@ Single_Test::Single_Test() {
     // Default parameters
     Parameters params;
 
-
-    params.huber_value  = 1.0/3600.0;
-    params.canopy_height  = 20.0;
+    params.huber_value  = 1.0/5000.0;
+    params.canopy_height  = 40.0;
     params.g0 = 0.005;
     params.g1 = 1.5;
     params.psi_leaf_50_close = -2.1;
     params.d_50_close = 10.0;
     params.leaf_area_index = 4.8;
     params.leaf_hydraulic_capacitance = 1.0;
-    params.stem_hydraulic_capacitance_max = 200 * 1000 / 18.0;
+    params.stem_hydraulic_capacitance_max = 20 * 1000 / 18.0;
     params.k_xylem_sat = 300;
 
     params.root_area_index = 24;
-
-    params.soil_depths.assign(11, 0.1);
+    params.soil_depths= {0.08, 0.16, 0.32};
 
     params.jackson_root_beta = 0.96;
     params.theta_r = 0.0972;
@@ -65,11 +61,10 @@ Single_Test::Single_Test() {
     params.n_genucht = 5.0;
     params.neta_genucht = 0.5;
 
-
-    params.theta_s = 0.43;
-    params.camp_b = 4.5;
+    params.theta_s = 0.52;
+    params.camp_b = 10.5;
     params.camp_psi_soil_ref = -4.5E-3;
-    params.k_soil_sat = 20.0/100.0/3600 * 0;
+    params.k_soil_sat = 0.02/100.0/3600 ;
 
     params.psi50_xylem = -10000.0;
 
@@ -77,8 +72,8 @@ Single_Test::Single_Test() {
     double psi_stem_init = -0.3;
 
 
-    Input input(theta_file,forcing_file, params);
-
+    Input_Hainich input(params);
+    input.Add_Forcing_File(forcing_file);
     input.Read_N_Parse();
 
     auto start_clock = std::chrono::high_resolution_clock::now();
@@ -100,8 +95,8 @@ Single_Test::Single_Test() {
 
     model.Run(steplen, begin, end);
 
-    Analysis analysis(&model, swiss_drought_tress);
-    analysis.Run();
+    //Analysis analysis(&model, swiss_drought_tress);
+   // analysis.Run();
 
 
     std::cout << "Psi leaf  " << model.Get_output().Get_psi_leaf()[959] << "\n";

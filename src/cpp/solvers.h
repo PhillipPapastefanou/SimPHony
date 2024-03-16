@@ -24,5 +24,8 @@ private:
     double prec;
     int max_steps;
     int steps_converged;
+
+    const int nmax_errors = 10;
+    int n_errors;
 };
 

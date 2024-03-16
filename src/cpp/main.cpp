@@ -1,4 +1,5 @@
-#include "../Tests/single_test.h"
+#include "../Tests/swiss_single_test.h"
+#include "../Tests/hainich_single_test.h"
 #include "../Tests/multi_test.h"
 #include "date_time.h"
 #include <ctime>
@@ -22,8 +23,9 @@ int main(int argc, char* argv[]) {
 //    int x = 3 ;
 
 
-    Single_Test single_test;
+    //Swiss_Single_Test single_test;
     //Multi_Test single_test;
+    Hainich_Single_Test test;
 
 
 

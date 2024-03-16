@@ -17,7 +17,7 @@ Simulation_Multi::Simulation_Multi() : rank(0) {
 void Simulation_Multi::Init_input(std::string theta_file, std::string forcing_file, std::string swiss_trees_folder, int rank) {
 
     this->rank = rank;
-    input = std::make_unique<Input>(theta_file, forcing_file, std::get<0>(parameter_list.front()));
+    input = std::make_unique<Input_Swiss>(std::get<0>(parameter_list.front()));
     input->Read_N_Parse();
 
     swiss_trees = std::make_unique<Swiss_Drought_Trees>(swiss_trees_folder);

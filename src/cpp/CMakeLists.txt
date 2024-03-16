@@ -5,6 +5,8 @@ set(headers
         solvers.h
         soil_water_model.h
         root_distribution_model.h
+        input_swiss.h
+        input_hainich.h
         input.h
         parameters.h
         csv_reader.h
@@ -26,6 +28,8 @@ set(source
         root_distribution_model.cpp
         csv_reader.cpp
         parameters.cpp
+        input_swiss.cpp
+        input_hainich.cpp
         input.cpp
         output.cpp
         main.cpp

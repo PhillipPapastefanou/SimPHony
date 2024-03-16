@@ -3,7 +3,7 @@
 //
 #pragma once
 #include "output.h"
-#include "input.h"
+#include "input_swiss.h"
 #include "parameters.h"
 #include <memory>
 #include "analysis.h"
@@ -34,7 +34,7 @@ private:
 
     int rank;
 
-    std::unique_ptr<Input> input;
+    std::unique_ptr<Input_Swiss> input;
     std::unique_ptr<Swiss_Drought_Trees> swiss_trees;
 
     std::vector<std::tuple<Parameters, int> > parameter_list;
