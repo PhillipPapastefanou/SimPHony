@@ -1,48 +1,32 @@
 //
-// Created by Phillip on 11.07.23.
+// Created by Phillip on 14.03.24.
 //
-
 #pragma once
-#include "forcing_input_collection.h"
 #include "parameters.h"
 #include "date_time.h"
 #include <string>
 #include <vector>
 
-
-using std::string;
-using std::vector;
-
 class Input {
 
-
 public:
-    Input(string theta_file, string forcing_reader, Parameters parameters);
+    Input(Parameters parameters);
 
-    void Read_N_Parse();
+    virtual void Add_Forcing_File(std::string file) = 0;
+    virtual void Add_Soilwater_File(std::string file) = 0;
+    virtual void Read_N_Parse() = 0;
 
-    // According to the forcing input [W m-2]
-    const double SWDOWN_MAX = 1040;
-
-    // Maximum net photosythesis rate [xxx]
-    // According to the excel sheet of Arend 2021 appendix
-    const double ANET_MAX = 5.7;
-
-    vector<float> anet;
     /// Vapour pressure deficit [Pa]
-    vector<float> vpd;
+    std::vector<float> anet;
+    /// Vapour pressure deficit [Pa]
+    std::vector<float> vpd;
     /// Volumetric water content [m3 m-3]
-    vector<vector<float> > theta_per_layer;
+    std::vector<std::vector<float>> theta_per_layer;
+    // Date that are going to be simulated
+    std::vector<DateTime> dates;
 
-    vector<DateTime> dates;
-
-
-
-private:
-    ForcingInputCollection theta_parser;
-    ForcingInputCollection forcing_parser;
-
-    vector<float> rad;
+protected:
     Parameters parameters;
-
 };
+
+

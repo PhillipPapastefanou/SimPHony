@@ -15,12 +15,10 @@ class Analysis {
 public:
     Analysis(Leaf_Stem_Implicit_Model* model, const Swiss_Drought_Trees& swiss_drought_trees);
 
-
     void Run();
 
     std::vector<TimeSlice> Get_time_slices();
     std::vector<double> Get_rmse();
-
 
 private:
 
@@ -34,20 +32,13 @@ private:
     void run_peak_analysis();
     void compare_psi_model_obs();
 
-    float overall_peak_psi_stem;
-    float overall_peak_psi_leaf;
-
-
     std::vector<TimeSlice> slices;
     const Swiss_Drought_Trees& swiss_drought_trees;
     std::shared_ptr<Tree_Psi_Leaf_State> swiss_psi_leaf_states;
 
-
-
 };
 
 class TimeSlice{
-
 
 public:
 

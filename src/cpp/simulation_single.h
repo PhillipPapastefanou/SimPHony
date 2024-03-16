@@ -3,6 +3,7 @@
 //
 #pragma once
 #include "output.h"
+#include "input_swiss.h"
 #include "input.h"
 #include "model.h"
 #include "parameters.h"

@@ -105,12 +105,22 @@ public:
     // from Clapp 1978: -15.3 cm
     double camp_psi_soil_ref = -1.50042 * std::pow(10, -6);
 
-    double solver_precision = 1E-10;
-
-
     /// Input parameters
     /// Length of one timestep in [s]
     double input_steplen = 1800.0;
+
+    // According to the forcing input [W m-2]
+    double swdown_max = 1040;
+
+    // Todo fix unit
+    // Maximum net photosythesis rate [xxx]
+    // According to the excel sheet of Arend 2021 appendix
+    double anet_max = 5.7;
+
+    // Auxiliary parameters
+    // Todo connect to solvers
+    double solver_precision = 1E-10;
+
 
 private:
 };

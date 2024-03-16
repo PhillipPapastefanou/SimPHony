@@ -3,6 +3,7 @@
 //
 
 #include "soil_water_model.h"
+#include <iostream>
 
 Soil_water_module::Soil_water_module(const Parameters& parameters, const Input& input):
 parameters(parameters), input_module(input){
@@ -48,6 +49,15 @@ void Campbell_Water_Uptake::CalculatePsiAndKs() {
         // The loop also reverse the layers to make the top layer be layer one.
         for (int s = navail_soil_in_data - 1; s > navail_soil_in_data - 1 - nsoil  ; --s) {
 
+            double base = theta_list[s]/theta_s;
+            if((base < 0.0) || (base > 1.0)){
+                std::cout << "Invalid water content or theta_s paramter: ";
+                std::cout << "Theta(t) is " << theta_list[s];
+                std::cout << " and Theta_s is " << theta_s;
+                std::cout << ". Exiting simulation..." << std::endl;
+                exit(99);
+            }
+
             psi_row[s_h] = psi_s_ref *  std::pow(theta_list[s]/theta_s, -b);
             k_row[s_h] = ksat *  std::pow(theta_list[s]/theta_s, 2.0 + 3.0*b);
 
@@ -68,7 +78,7 @@ vector<vector<double> > Campbell_Water_Uptake::Get_ks() {
     return ks_array;
 }
 
-Campbell_Water_Uptake::Campbell_Water_Uptake(const Parameters& parameters, const Input& input): Soil_water_module(parameters,input)
+Campbell_Water_Uptake::Campbell_Water_Uptake(const Parameters& parameters, const Input& input): Soil_water_module(parameters, input)
 {
 
 }

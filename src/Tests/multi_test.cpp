@@ -8,7 +8,7 @@
 #include <chrono>
 
 #include "../cpp/parameters.h"
-#include "../cpp/input.h"
+#include "../cpp/input_swiss.h"
 #include "../cpp/simulation_multi.h"
 
 #include "../cpp/parameter_csv_reader.h"

@@ -3,7 +3,7 @@
 //
 
 #include "parameters.h"
-#include "input.h"
+#include "input_swiss.h"
 #include <vector>
 
 #pragma once

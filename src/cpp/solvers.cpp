@@ -6,7 +6,8 @@
 #include <iostream>
 
 
-Bisection_solver_interface::Bisection_solver_interface(Leaf_Stem_Implicit_Model& model, double prec, int max_steps) : model(model), prec(prec), max_steps(max_steps) {}
+Bisection_solver_interface::Bisection_solver_interface(Leaf_Stem_Implicit_Model& model, double prec, int max_steps) :
+model(model), prec(prec), max_steps(max_steps),n_errors(0) {}
 
 double Bisection_solver_interface::Solve(double lower_bound, double upper_bound) {
 
@@ -38,8 +39,10 @@ double Bisection_solver_interface::Solve(double lower_bound, double upper_bound)
         not_converged = std::abs(y2) > prec;
 
         if(step > max_steps){
-            //Todo tell that something went wrong here
-            std::cout << "Warning: Solver did not converge. " << std::endl;
+            if(n_errors < nmax_errors)
+            std::cout << "Warning: Solver did not converge between " << std::to_string(lower_bound) ;
+            std::cout << " and " << std::to_string(upper_bound) << std::endl;
+            n_errors++;
             break;
         }
 

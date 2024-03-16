@@ -17,12 +17,8 @@ io::CSV_Reader::CSV_Reader(string filename, bool has_header, char delimiter) {
     string line, word;
 
     file = std::make_unique<std::fstream>(filename,  std::ios::in);
-    //std::fstream file(filename,  std::ios::in);
-
 
     if(file->is_open()){
-
-        // Read header
         if(has_header){
             getline(*file, line);
             std::stringstream str(line);
@@ -30,10 +26,11 @@ io::CSV_Reader::CSV_Reader(string filename, bool has_header, char delimiter) {
                 header.push_back(word);
         }
 
-
     }
     else{
-        std::cout<<"Could not open the file\n";
+        std::cout<<"Could not open the file ";
+        std::cout<<filename << std::endl;
+        exit(99);
     }
 
 
