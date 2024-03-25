@@ -74,15 +74,15 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
         if(pos <  row.size())
             params.canopy_height = std::stod(row[pos]);
 
-        val = "rho_water";
-        pos = get_position(val);
-        if(pos <  row.size())
-            params.rho_water = std::stod(row[pos]);
-
-        val = "grav";
-        pos = get_position(val);
-        if(pos <  row.size())
-            params.grav = std::stod(row[pos]);
+//        val = "rho_water";
+//        pos = get_position(val);
+//        if(pos <  row.size())
+//            params.rho_water = std::stod(row[pos]);
+//
+//        val = "grav";
+//        pos = get_position(val);
+//        if(pos <  row.size())
+//            params.grav = std::stod(row[pos]);
 
         val = "eta_LS";
         pos = get_position(val);
@@ -212,6 +212,42 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
         if(pos <  row.size())
             params.theta_emp_multiplier = std::stod(row[pos]);
 
+        val = "tree_density";
+        pos = get_position(val);
+        if(pos <  row.size())
+            params.tree_density = std::stod(row[pos]);
+
+        val = "sand_frac";
+        pos = get_position(val);
+        if(pos <  row.size())
+            params.sand_frac = std::stod(row[pos]);
+
+        val = "clay_frac";
+        pos = get_position(val);
+        if(pos <  row.size())
+            params.clay_frac = std::stod(row[pos]);
+
+        val = "organic_matter_frac";
+        pos = get_position(val);
+        if(pos <  row.size())
+            params.organic_matter_frac = std::stod(row[pos]);
+
+        val = "soil_water_model_type";
+        pos = get_position(val);
+        if(pos <  row.size()){
+            std::string type_str = row[pos];
+            if(type_str == "Saxton06")
+                params.soil_water_type = Soil_water_module_type::Saxton06;
+            else if(type_str == "Campbell")
+                params.soil_water_type = Soil_water_module_type::Campbell;
+            else if(type_str == "VanGenuchten")
+                params.soil_water_type = Soil_water_module_type::VanGenuchten;
+            else{
+                std::cout<< "Invalid soil water type: .";
+                std::cout << type_str;
+                exit(99);
+            }
+        }
 
         if (check_all){
             if(this->n_conversion != row.size() - 1){

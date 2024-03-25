@@ -1,9 +1,11 @@
+#pragma once
 #include "parameters.h"
 #include "input_swiss.h"
 #include <vector>
 #include "soil_water_model.h"
 #include "solvers.h"
 #include "output.h"
+#include "model.h"
 #include "date_time.h"
 
 class Bisection_psi_leaf;
@@ -29,7 +31,7 @@ public:
     double dts;
 
 private:
-    // Input
+    // Input references
     const Parameters& params;
     const Input& input_module;
 
@@ -43,21 +45,32 @@ private:
     // Driver values for this timestep
 
     // Vapour pressure deficit [Pa]
-    double ts_vpd;
+    double ivpd;
     // Net photosythesis rate [mol CO2 m-2 s-1]
-    double ts_anet;
+    double ianet;
     // Atmopheric pressure [Pa]
-    double ts_pressure;
+    double ipressure;
     // Ambient CO2 concentration [ppm]
-    double ts_ca;
+    double ica;
+    // List of soil water potentials per soil layer [MPa]
+    vector<double> ipsi_soil;
+    // List of conductivities per soil layer [mol H2O m-1 MPA-1 s-1]
+    vector<double> ik_soil;
 
 
-    // Derived parameters
+    // Derived parameters [MPa]
     double psi_gomp_50;
+    // Rooting fraction per laye [-]
+    vector<double> root_fraction_player;
+    // Soil layer depths
+    vector<double> soil_layer_depth_acc;
 
 
-    // Output dataset
-    Output output;
+
+    /// Main model solvers
+    std::unique_ptr<Bisection_psi_leaf> solver_psi_leaf;
+    std::unique_ptr<Bisection_psi_stem> solver_psi_stem;
+
 
     /// Main states
     /// Leaf water potential at average canopy height [MPa]
@@ -66,26 +79,15 @@ private:
     /// Stem water potential at the mean height of the stem [MPa]
     double psi_stem;
 
+
+    // Main functions
+
     // Derivative of the leaf water potential. Internal function.
+    // [MPa s-1]
     double d_psi_leaf(double psi_leaf, double psi_stem);
 
     // Derivative of the stem water potential. Internal function.
     double d_psi_stem(double psi_leaf, double psi_stem);
-
-
-    // List of soil water potentials per soil layer [MPa]
-    vector<double> ts_psi_soil;
-    // List of conductivities per soil layer [m s-1]
-    vector<double> ts_k_soil;
-
-    // Derived Parameters
-    vector<double> root_fraction_player;
-    vector<double> soil_layer_depth_acc;
-
-
-    /// Solvers
-    std::unique_ptr<Bisection_psi_leaf> solver_psi_leaf;
-    std::unique_ptr<Bisection_psi_stem> solver_psi_stem;
 
 
     /// Derived or helper states
@@ -100,15 +102,14 @@ private:
     /// 0 --> No stomatal conductance; 1 --> Full stomatal conductance
     double beta_stom_cond;
 
-    /// Transpirational water flow [mol m-2 dts-1]
+    /// Transpirational water flow [mol H2O m-2 s-1]
     double T;
-    /// Stem water flow [mol m-2 dts-1]
+    /// Stem water flow [mol H2O m-2 dts-1]
     double J;
-    /// Total Soil water uptake flow [mol m-2 dts-1]
+    /// Total Soil water uptake flow [mol H2O m-2 s-1]
     double G;
-    /// Individial soil water uptake flow [mol m-2 dts-1]
+    /// Individial soil water uptake flow [mol H2O m-2 s-1]
     vector<double> Gi;
-
 
     // Technical parameters
     /// Start time point of the simulations [DateTime]
@@ -118,9 +119,7 @@ private:
 
     // Elapsed time in seconds since time_start [s]
     long ts;
-
     int nsteps;
-
     // Simulation timelength [s]
     double delta_Ts;
 
@@ -132,6 +131,8 @@ private:
     // or leaf water pot estimation
     double update_stem_water_flow_J(double psi_leaf, double psi_stem);
 
+    // Output dataset
+    Output output;
 
     void add_output();
 };

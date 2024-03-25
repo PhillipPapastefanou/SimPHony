@@ -7,12 +7,14 @@
 #include <vector>
 #include "date_time.h"
 
-class ForcingInputCollection {
+class InputCollection {
 
 public:
-    ForcingInputCollection(std::string filename, bool has_header, char delimiter);
+    InputCollection(std::string filename, bool has_header, char delimiter);
 
-    void init(std::string dt_header, std::string format);
+    void init_regular(std::string dt_header, std::string format);
+
+    void init_irregular(std::string dt_header, std::string format);
 
     vector<vector<float> > get_data(vector<int> indexes);
 

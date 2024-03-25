@@ -25,7 +25,7 @@ private:
     int max_steps;
     int steps_converged;
 
-    const int nmax_errors = 10;
+    const int nmax_errors = 2;
     int n_errors;
 };
 

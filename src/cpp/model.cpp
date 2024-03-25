@@ -25,6 +25,7 @@ double Leaf_Stem_Implicit_Model::update_stem_water_flow_J(double psi_leaf, doubl
         DeltaP_LS = 0.0;
 
     // Estimate the xylem conductance based on the satured xylem and the PLC of the xylem
+    // [mol m-1 s-1 MPa-1]
     double k_xylem = params.k_xylem_sat / (1.0 + std::exp(-params.d_50_s * (psi_stem - params.psi50_xylem)));
 
     // Calculate the stem water flow J [mol m-2 s-1]
@@ -43,7 +44,7 @@ double Leaf_Stem_Implicit_Model::d_psi_leaf(double psi_leaf, double psi_stem) {
 
     // Medlyn phoytosynthesis model
     // mol CO2 s-1 m-2
-    gs = params.g0  + beta_stom_cond * (1.0 + params.g1 / std::sqrt(ts_vpd / ts_pressure)) * ts_anet / ts_ca;
+    gs = params.g0  + beta_stom_cond * (1.0 + params.g1 / std::sqrt(ivpd / ipressure)) * ianet / ica;
 
     // Convert from Mol CO2 to Mol H2O
     gs *= 1.6;
@@ -51,7 +52,8 @@ double Leaf_Stem_Implicit_Model::d_psi_leaf(double psi_leaf, double psi_stem) {
     // Update stem water flow
     J = update_stem_water_flow_J(psi_leaf, psi_stem);
 
-    T = gs * params.leaf_area_index * ts_vpd / ts_pressure;
+    // Calculate transpiration
+    T = gs * params.leaf_area_index * ivpd / ipressure;
     return ((J - T)/ params.leaf_hydraulic_capacitance);
 }
 
@@ -60,11 +62,10 @@ double Leaf_Stem_Implicit_Model::d_psi_stem(double psi_leaf, double psi_stem) {
     // The water stem flow could be also updated right here, but this might lead to inconsistent water uptakes/
     // in case it is updated two times.
     // J = update_stem_water_flow_J(psi_leaf, psi_stem)
-
     G = 0.0;
     for (int s = 0; s < params.soil_depths.size(); ++s) {
-        Gi[s] = root_fraction_player[s] * ts_k_soil[s] * std::sqrt(params.root_area_index) /
-                params.PI / params.soil_depths[s] * (ts_psi_soil[s] - psi_stem -
+        Gi[s] = root_fraction_player[s] * ik_soil[s] * std::sqrt(params.root_area_index) /
+                params.PI / params.soil_depths[s] * (ipsi_soil[s] - psi_stem -
                 (params.rho_water * params.grav * params.canopy_height / 2.0) * params.PaToMPa) / params.grav * params.MPaToPa;
 
         // Avoid water from flowing down from the stem to the soil
@@ -81,7 +82,7 @@ Leaf_Stem_Implicit_Model::Leaf_Stem_Implicit_Model
 (const Parameters &parameters, const Input &input):
 params(parameters),
 input_module(input),
-output()
+output(parameters)
 {
     // Gompertz function parameter estimates
     psi_gomp_50 = parameters.psi_leaf_50_close;
@@ -95,7 +96,33 @@ void Leaf_Stem_Implicit_Model::Set_derived_parameters() {
     root_fraction_player = root_model.Get_root_fractions();
     soil_layer_depth_acc = root_model.Get_soil_layer_depth_acc();
 
-    soil_water_module = std::make_unique<Campbell_Water_Uptake>(params, input_module);
+    std::string water_model_str;
+    switch (params.soil_water_type) {
+
+        case Soil_water_module_type::Saxton06:{
+            soil_water_module = std::make_unique<Saxton06_Soil_Water>(params, input_module);
+            water_model_str = "Saxton06";
+            break;
+        }
+        case Soil_water_module_type::Campbell:{
+            soil_water_module = std::make_unique<Campbell_Soil_Water>(params, input_module);
+            water_model_str = "Campbell";
+            break;
+        }
+        case Soil_water_module_type::VanGenuchten:{
+            soil_water_module = std::make_unique<Van_Gnuchten_Soil_Water>(params, input_module);
+            water_model_str = "VanGnuchten";
+            break;
+        }
+        default:{
+            std::cout << "Invalid soil water uptake" << std::endl;
+            exit(99);
+            break;
+        }
+    }
+    // Todo Reenable with logging
+    // std::cout << "Using " << water_model_str << " soil water model." << std::endl;
+
     soil_water_module->CalculatePsiAndKs();
 
     input_k_soil = soil_water_module->Get_ks();
@@ -143,18 +170,18 @@ void Leaf_Stem_Implicit_Model::Run(double steplength, DateTime begin, DateTime e
     for (int i = 0; i < nsteps; ++i) {
 
         // Update forcing drivers
-        ts_ca = 415.0;
-        ts_pressure = 1.013*100000.0;
+        ica = 415.0;
+        ipressure = 1.013 * 100000.0;
 
-        ts_anet = input_anet[time_index(ts)];
-        ts_vpd = input_vpd[time_index(ts)];
+        ianet = input_anet[time_index(ts)];
+        ivpd = input_vpd[time_index(ts)];
 
-        ts_psi_soil = input_psi_soil[time_index(ts)];
-        ts_k_soil = input_k_soil[time_index(ts)];
+        ipsi_soil = input_psi_soil[time_index(ts)];
+        ik_soil = input_k_soil[time_index(ts)];
 
         const double minimum_psi_leaf = -15.0;
         double l0 = minimum_psi_leaf;
-        //double s1  = *std::max_element(ts_psi_soil.begin(),ts_psi_soil.end());
+        //double s1  = *std::max_element(ipsi_soil.begin(),ipsi_soil.end());
         double l1 = 0.0;
         this->psi_leaf = solver_psi_leaf->Solve(l0, l1);
 
@@ -168,7 +195,7 @@ void Leaf_Stem_Implicit_Model::Run(double steplength, DateTime begin, DateTime e
             //break;
         }
 
-//        std::cout << "Psi leaf  " << psi_leaf << std::endl;
+        //std::cout << "Psi leaf  " << psi_leaf << std::endl;
 //        std::cout << "Psi stem  " << psi_stem << std::endl;
 
         // Addind up output files
@@ -184,8 +211,8 @@ void Leaf_Stem_Implicit_Model::Run(double steplength, DateTime begin, DateTime e
 void Leaf_Stem_Implicit_Model::add_output() {
 
     output.Add_Timestep(ts);
-
     output.Add_DateTime(time_start.AddSeconds(ts));
+
 
     output.Add_T(T);
     output.Add_J(J);
@@ -200,19 +227,19 @@ void Leaf_Stem_Implicit_Model::add_output() {
     output.Add_psi_leaf(psi_leaf);
     output.Add_psi_stem(psi_stem);
 
-    vector<float> psi_soil_f(ts_psi_soil.begin(), ts_psi_soil.end());
+    vector<float> psi_soil_f(ipsi_soil.begin(), ipsi_soil.end());
     output.Add_psi_soil_indiv(psi_soil_f);
 
     output.Add_gs(gs);
     output.Add_beta(beta_stom_cond);
 
-    vector<float> ks_soil_f(ts_k_soil.begin(), ts_k_soil.end());
+    vector<float> ks_soil_f(ik_soil.begin(), ik_soil.end());
     for (auto& e: ks_soil_f)
         e *= 1.0;
     output.Add_ks_indiv(ks_soil_f);
 
-
-    output.Add_vpd(ts_vpd);
+    output.Add_anet(ianet);
+    output.Add_vpd(ivpd);
 
     output.Add_steps_psi_leaf(solver_psi_leaf->Get_nsteps_converged());
     output.Add_steps_psi_stem(solver_psi_stem->Get_nsteps_converged());

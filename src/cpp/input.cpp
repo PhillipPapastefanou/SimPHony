@@ -4,6 +4,6 @@
 
 #include "input.h"
 
-Input::Input(Parameters parameters):parameters(parameters) {
+Input::Input(const Parameters& parameters):parameters(parameters) {
 
 }

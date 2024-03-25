@@ -34,3 +34,5 @@ private:
 long operator -(DateTime t1, DateTime t2);
 
 bool operator < (DateTime t1, DateTime t2);
+
+bool operator > (DateTime t1, DateTime t2);

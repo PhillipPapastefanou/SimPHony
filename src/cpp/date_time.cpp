@@ -66,3 +66,9 @@ bool operator < (DateTime t1, DateTime t2){
         return true;
     return false;
 }
+
+bool operator > (DateTime t1, DateTime t2){
+    if(t1.t > t2.t)
+        return true;
+    return false;
+}

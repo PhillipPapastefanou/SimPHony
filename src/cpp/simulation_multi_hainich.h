@@ -1,22 +1,22 @@
 //
-// Created by Phillip on 27.07.23.
+// Created by Phillip on 16.03.24.
 //
+
 #pragma once
 #include "output.h"
-#include "input_swiss.h"
+#include "input_hainich.h"
 #include "parameters.h"
 #include <memory>
-#include "analysis.h"
-#include "swiss_drought_trees.h"
+#include "analysis_hainich.h"
 #include <tuple>
 #include <chrono>
 #include "date_time.h"
 
-class Simulation_Multi {
+class Simulation_Multi_Hainich {
 
 public:
-    Simulation_Multi();
-    void Init_input(std::string theta_file, std::string forcing_file, std::string swiss_trees_folder, int rank);
+    Simulation_Multi_Hainich();
+    void Init_input(std::string forcing_file, std::string sap_flow_file, int rank);
     void Init_Full_Parameter_Setups(string filename, std::vector<int> ids);
     void Init_Partial_Parameter_Setups(string root_filename, string partial_parameter_filename, std::vector<int> ids);
 
@@ -24,7 +24,7 @@ public:
 
     void Run(double steplen, DateTime timestart, DateTime timeend);
 
-    std::vector<Analysis> Get_analysis_list();
+    std::vector<AnalysisHainich> Get_analysis_list();
 
     DateTime Get_first_year();
     DateTime Get_last_year();
@@ -32,11 +32,10 @@ private:
 
     int rank;
 
-    std::unique_ptr<Input_Swiss> input;
-    std::unique_ptr<Swiss_Drought_Trees> swiss_trees;
-
+    std::unique_ptr<Input_Hainich> input;
     std::vector<std::tuple<Parameters, int> > parameter_list;
-    std::vector<Analysis> analysis_list;
+    std::vector<AnalysisHainich> analysis_list;
+    std::unique_ptr<TimeSeries> sap_series;
 
     double init_psi_stem;
     double init_psi_leaf;
@@ -69,7 +68,6 @@ private:
         ss << hour_str << ":" << min_str << ":" << sec_str;
         return ss.str();
     }
+
 };
-
-
 

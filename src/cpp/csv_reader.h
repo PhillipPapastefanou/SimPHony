@@ -58,7 +58,6 @@ namespace io {
                     row.push_back(Convert<T>(row_vec[itr]));
                 }
 
-
                 //vector<T> slice = vector<T>(row.begin() + col_min, row.begin() + col_max);
 
                 data.push_back(row);
