@@ -8,10 +8,11 @@ config.build_path = '/Users/pp/Documents/Repos/plant_hydro_standalone/cmake-buil
 config.lib_path = '/Users/pp/Documents/Repos/plant_hydro_standalone/'
 config.forcing_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/appl/hainich/Meteo_Hainich_dT30min_forcing_PHS.csv"
 config.sap_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/appl/hainich/SAP_Hainich_Fagus-mean_dT30min_prog.csv"
-config.parameter_input_file_list = f"ParameterList{1200}.csv"
+config.parameter_input_file_list = f"ParameterList{50000}.csv"
 
 sys.path.append(config.build_path)
-from contrib.ParallelRun import Binder
+from contrib.ParallelRunFull import ParallelSetupFull
+from contrib.ParallelSetupIndividual import ParallelSetupIndividual
 
 from mpi4py import MPI
 
@@ -22,7 +23,7 @@ rank = comm.Get_rank()
 size = comm.Get_size()
 
 
-binder = Binder(comm, rank, size)
+binder = ParallelSetupIndividual(comm, rank, size)
 binder.init(config=config)
 binder.send_parameter_indexes()
 binder.start_simulations()
