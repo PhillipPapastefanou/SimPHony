@@ -39,17 +39,21 @@ double Bisection_solver_interface::Solve(double lower_bound, double upper_bound)
         not_converged = std::abs(y2) > prec;
 
         if(step > max_steps){
-            if(n_errors < nmax_errors)
-            std::cout << "Warning: Solver did not converge between " << std::to_string(lower_bound) ;
-            std::cout << " and " << std::to_string(upper_bound) << std::endl;
-            n_errors++;
+            if(n_errors < nmax_errors){
+//                    std::cout << "Warning: Solver did not converge between " << std::to_string(lower_bound) ;
+//                    std::cout << " and " << std::to_string(upper_bound) << std::endl;
+                    n_errors++;
+            }
             break;
         }
-
 
     }
 
     steps_converged = step;
+
+    if (step > max_steps){
+        return lower_bound;
+    }
     return s2;
 
 

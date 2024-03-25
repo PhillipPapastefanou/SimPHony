@@ -1,4 +1,11 @@
 import numpy as np
+from enum import Enum
+
+class Soil_Water_Model_Type(Enum):
+    VanGenuchten    = 0
+    Saxton06        = 1
+    Campbell        = 2
+
 
 class Parameters:
 
@@ -62,10 +69,15 @@ class Parameters:
         # From Medlynn 1.6 - 12
         self.g1 = 1.5
 
+        self.soil_water_model_type_enum = Soil_Water_Model_Type.VanGenuchten
+        self.soil_water_model_type =  self.soil_water_model_type_enum.name
+
         # Soil depths
-        self.soil_depths = np.repeat(0.1, 11);
+        self.soil_depths = np.repeat(0.1, 1);
         self.soil_depths_arr = np.array2string(self.soil_depths, separator=';')
         self.soil_depths_arr = self.soil_depths_arr[1:-1]
+
+
         # Jackson rooting parameter [-]
         self.jackson_root_beta  = 0.96
 
@@ -95,4 +107,4 @@ class Parameters:
         self.input_step_len = 1800
 
         # Number of trees per m-2
-        self.tree_dens = 1/20.0
+        self.tree_density = 1/20.0

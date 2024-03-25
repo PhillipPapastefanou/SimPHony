@@ -11,14 +11,12 @@ Simulation_Single::Simulation_Single(){
 
 void Simulation_Single::Init_input(std::string theta_file, std::string forcing_file, std::string swiss_trees_folder) {
 
-    input = std::make_unique<Input_Swiss>(*parameters.get());
-
+    input = std::make_unique<Input_Swiss>(*parameters);
     input->Add_Soilwater_File(theta_file);
     input->Add_Forcing_File(forcing_file);
     input->Read_N_Parse();
 
     swiss_trees = std::make_unique<Swiss_Drought_Trees>(swiss_trees_folder);
-
 }
 
 void Simulation_Single::Init_parameters_default() {

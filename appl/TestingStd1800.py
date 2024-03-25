@@ -49,7 +49,7 @@ in_anpp = sw_arr / max_swdown * anet_max
 
 params = Parameters()
 params.huber_value  = 1.0/3600.0
-params.huber_value  = 1.0/1000.0
+params.huber_value  = 1.0/2400.0
 params.canopy_height  = 20.0
 params.g0 = 0.005
 params.g1 = 1.5

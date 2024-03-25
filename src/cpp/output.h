@@ -6,12 +6,13 @@
 #include <vector>
 #include <string>
 #include "date_time.h"
+#include "parameters.h"
 
 using std::vector;
 class Output {
 
 public:
-    Output();
+    Output(const Parameters& parameters);
     ~Output();
 
     void Add_Timestep(double t);
@@ -31,17 +32,18 @@ public:
     void Add_beta(double beta);
     void Add_ks_indiv(vector<float> ks_indiv);
     void Add_vpd(double vpd);
+    void Add_anet(double anet);
 
     void Add_steps_psi_leaf(int steps_psi_leaf);
     void Add_steps_psi_stem(int steps_psi_stem);
 
     const vector<long> &Get_times() const;
-
     const vector<float> &Get_T() const;
-
     const vector<float> &Get_J() const;
-
     const vector<float> &Get_G() const;
+
+    vector<float> Get_J_per_sap() const;
+    vector<float> Get_G_per_sap() const;
 
     const vector<vector<float> > &Get_G_indiv() const;
 
@@ -57,6 +59,9 @@ public:
 
     const vector<float> &Get_vpd() const;
 
+    const vector<float> &Get_anet() const;
+
+
     const vector<vector<float> > &Get_ks_soil() const;
 
     const vector<int> &Get_steps_psi_leaf() const;
@@ -67,6 +72,8 @@ public:
 
 
 private:
+    const Parameters& parameters;
+
     std::vector<long> times;
     std::vector<DateTime> dates;
 
@@ -85,6 +92,7 @@ private:
     vector<float> beta_a;
 
     vector<float> vpd_a;
+    vector<float> anet_a;
 
     vector<vector<float> > k_soil_aa;
 

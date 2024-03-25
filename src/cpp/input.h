@@ -10,7 +10,7 @@
 class Input {
 
 public:
-    Input(Parameters parameters);
+    Input(const Parameters& parameters);
 
     virtual void Add_Forcing_File(std::string file) = 0;
     virtual void Add_Soilwater_File(std::string file) = 0;
@@ -26,7 +26,7 @@ public:
     std::vector<DateTime> dates;
 
 protected:
-    Parameters parameters;
+    const Parameters& parameters;
 };
 
 

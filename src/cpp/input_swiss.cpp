@@ -6,26 +6,26 @@
 #include <numeric>
 #include <iostream>
 
-Input_Swiss::Input_Swiss(Parameters parameters): Input(parameters){
+Input_Swiss::Input_Swiss(const Parameters& parameters): Input(parameters){
 
 }
 
 void Input_Swiss::Read_N_Parse() {
 
-    theta_parser = std::make_unique<ForcingInputCollection>(theta_file, true, ',');
-    forcing_parser = std::make_unique<ForcingInputCollection>(forcing_file, true, ',');
+    theta_parser = std::make_unique<InputCollection>(theta_file, true, ',');
+    forcing_parser = std::make_unique<InputCollection>(forcing_file, true, ',');
 
     vector<int> theta_indexes(11);
     std::iota(theta_indexes.begin(), theta_indexes.end(), 1);
 
     std::string format = "%Y-%m-%d %H:%M:%S";
-    theta_parser->init("dt", format);
+    theta_parser->init_regular("dt", format);
     // Directly write theta to memory
     theta_per_layer = theta_parser->get_data(theta_indexes);
 
     vector<int> forcing_indexes= {2,8};
     format = "%Y-%m-%d %H:%M:%S";
-    forcing_parser->init("dt", format);
+    forcing_parser->init_regular("dt", format);
     vector<vector<float> > forcing_input = forcing_parser->get_data(forcing_indexes);
 
 

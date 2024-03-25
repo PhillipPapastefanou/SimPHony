@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include "forcing_input_collection.h"
+#include "input_collection.h"
 #include "parameters.h"
 #include "date_time.h"
 #include <string>
@@ -19,7 +19,7 @@ class Input_Swiss: public Input{
 
 
 public:
-    Input_Swiss(Parameters parameters);
+    Input_Swiss(const Parameters& parameters);
 
     void Read_N_Parse() override;
 
@@ -28,8 +28,8 @@ public:
     void Add_Soilwater_File(std::string file) override;
 
 private:
-    std::unique_ptr<ForcingInputCollection> theta_parser;
-    std::unique_ptr<ForcingInputCollection> forcing_parser;
+    std::unique_ptr<InputCollection> theta_parser;
+    std::unique_ptr<InputCollection> forcing_parser;
 
     vector<float> rad;
 

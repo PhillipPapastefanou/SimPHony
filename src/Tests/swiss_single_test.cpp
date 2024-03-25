@@ -50,7 +50,7 @@ Swiss_Single_Test::Swiss_Single_Test() {
     params.d_50_close = 10.0;
     params.leaf_area_index = 4.8;
     params.leaf_hydraulic_capacitance = 1.0;
-    params.stem_hydraulic_capacitance_max = 200 * 1000 / 18.0;
+    params.stem_hydraulic_capacitance_max = 2 * 1000 / 18.0;
     params.k_xylem_sat = 300;
 
     params.root_area_index = 24;
@@ -100,10 +100,6 @@ Swiss_Single_Test::Swiss_Single_Test() {
 
     Analysis analysis(&model, swiss_drought_tress);
     analysis.Run();
-
-
-    std::cout << "Psi leaf  " << model.Get_output().Get_psi_leaf()[959] << "\n";
-    std::cout << "Psi stem  " << model.Get_output().Get_psi_stem()[959] << "\n";
 
 
     auto end_clock = std::chrono::high_resolution_clock::now();

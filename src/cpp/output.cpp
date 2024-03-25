@@ -5,7 +5,7 @@
 #include "output.h"
 #include <iostream>
 
-Output::Output() {
+Output::Output(const Parameters& parameters):parameters(parameters) {
 
 }
 
@@ -55,6 +55,10 @@ void Output::Add_ks_indiv(vector<float> ks_indiv) {
 
 void Output::Add_vpd(double vpd) {
     vpd_a.push_back(vpd);
+}
+
+void Output::Add_anet(double anet) {
+    anet_a.push_back(anet);
 }
 
 void Output::Add_Timestep(double t) {
@@ -125,6 +129,11 @@ const vector<float> &Output::Get_T() const {
     return Ta;
 }
 
+const vector<float> &Output::Get_anet() const {
+    return anet_a;
+}
+
+
 
 void Output::Export_CSV(std::string filename) {
 
@@ -135,4 +144,23 @@ void Output::Export_CSV(std::string filename) {
 void Output::Add_DateTime(DateTime t) {
     dates.push_back(t);
 }
+
+vector<float> Output::Get_J_per_sap() const {
+
+    std::vector<float> Ja_td(Ja.begin(), Ja.end());
+    for(auto& J : Ja_td){
+        J /= parameters.tree_density;
+    }
+    return Ja_td;
+}
+
+vector<float> Output::Get_G_per_sap() const {
+    std::vector<float> Ga_td(Ga.begin(), Ga.end());
+    for(auto& G : Ga_td){
+        G /= parameters.tree_density;
+    }
+    return Ga_td;
+}
+
+
 

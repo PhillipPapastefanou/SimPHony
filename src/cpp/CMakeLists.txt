@@ -1,7 +1,10 @@
 set(headers
         model.h
+        analysis_hainich.h
         simulation_single.h
+        simulation_single_hainich.h
         simulation_multi.h
+        simulation_multi_hainich.h
         solvers.h
         soil_water_model.h
         root_distribution_model.h
@@ -16,13 +19,16 @@ set(headers
         analysis.h
         swiss_drought_trees.h
         date_time.h
-        forcing_input_collection.h
+        input_collection.h
+        time_series.h
         )
 
 set(source
         model.cpp
         simulation_single.cpp
         simulation_multi.cpp
+        simulation_multi_hainich.cpp
+        simulation_single_hainich.cpp
         solvers.cpp
         soil_water_model.cpp
         root_distribution_model.cpp
@@ -38,7 +44,9 @@ set(source
         analysis.cpp
         swiss_drought_trees.cpp
         date_time.cpp
-        forcing_input_collection.cpp
+        input_collection.cpp
+        analysis_hainich.cpp
+        time_series.cpp
         )
 
 include(add_model_sources)

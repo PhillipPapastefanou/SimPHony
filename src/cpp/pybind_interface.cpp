@@ -1,13 +1,18 @@
 //
 // Created by Phillip on 14.07.23.
 //
+#pragma  once
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <vector>
 
 #include "simulation_single.h"
+#include "simulation_single_hainich.h"
 #include "simulation_multi.h"
+#include "simulation_multi_hainich.h"
 #include "analysis.h"
+#include "analysis_hainich.h"
+#include "parameters.h"
 #include "swiss_drought_trees.h"
 
 
@@ -16,6 +21,16 @@ namespace py = pybind11;
 using std::vector;
 
 PYBIND11_MODULE(hydro_standalone, handle){
+    py::class_<Simulation_Single_Hainich>(handle, "Simulation_Single_Hainich").
+            def("Init_parameters_def", &Simulation_Single_Hainich::Init_parameters_default).
+            def("Init_parameters_fn_single", &Simulation_Single_Hainich::Init_parameters_filename).
+            def("Init_input", &Simulation_Single_Hainich::Init_input).
+            def("Set_water_pot_initials", &Simulation_Single_Hainich::Set_water_pot_initials).
+            def("Run", &Simulation_Single_Hainich::Run).
+            def("Get_output", &Simulation_Single_Hainich::Get_output).
+            def("Get_analysis", &Simulation_Single_Hainich::Get_analysis).
+            def(py::init<>());
+
     py::class_<Simulation_Single>(handle, "Simulation_Single").
             def("Init_parameters_def", &Simulation_Single::Init_parameters_default).
             def("Init_parameters_fn_single", &Simulation_Single::Init_parameters_filename).
@@ -35,28 +50,40 @@ PYBIND11_MODULE(hydro_standalone, handle){
             def("Get_analysis_list", &Simulation_Multi::Get_analysis_list).
             def(py::init<>());
 
+    py::class_<Simulation_Multi_Hainich>(handle, "Simulation_Multi_Hainich").
+            def("Init_Full_Parameter_Setups", &Simulation_Multi_Hainich::Init_Full_Parameter_Setups).
+            def("Init_Partial_Parameter_Setups", &Simulation_Multi_Hainich::Init_Partial_Parameter_Setups).
+            def("Init_input", &Simulation_Multi_Hainich::Init_input).
+            def("Set_water_pot_initials", &Simulation_Multi_Hainich::Set_water_pot_initials).
+            def("Run", &Simulation_Multi_Hainich::Run).
+            def("Get_analysis_list", &Simulation_Multi_Hainich::Get_analysis_list).
+            def(py::init<>());
+
     py::class_<Output>(handle, "Output").
             def("Get_T", &Output::Get_T).
             def("Get_J", &Output::Get_J).
             def("Get_G", &Output::Get_G).
             def("Get_G_indiv", &Output::Get_G_indiv).
 
+            def("Get_G_per_sap", &Output::Get_G_per_sap).
+            def("Get_J_per_sap", &Output::Get_J_per_sap).
+
             def("Get_psi_leaf", &Output::Get_psi_leaf).
             def("Get_psi_stem", &Output::Get_psi_stem).
             def("Get_psi_soil_indiv", &Output::Get_psi_soil_indiv).
 
-            def("Get_psi_soil_indiv", &Output::Get_psi_soil_indiv).
             def("Get_gs", &Output::Get_gs).
             def("Get_beta", &Output::Get_beta).
 
             def("Get_vpd", &Output::Get_vpd).
+            def("Get_anet", &Output::Get_anet).
             def("Get_ks_soil", &Output::Get_ks_soil).
 
             def("Get_steps_psi_leaf", &Output::Get_steps_psi_leaf).
             def("Get_steps_psi_stem", &Output::Get_steps_psi_stem).
 
             def("Get_times", &Output::Get_times).
-            def(py::init<>());
+            def(py::init<const Parameters&>());
 
 
     py::class_<Analysis>(handle, "Analysis").
@@ -64,6 +91,11 @@ PYBIND11_MODULE(hydro_standalone, handle){
             def("Get_rmse", &Analysis::Get_rmse).
             def("Get_time_slices", &Analysis::Get_time_slices).
             def(py::init<Leaf_Stem_Implicit_Model*, Swiss_Drought_Trees >());
+
+    py::class_<AnalysisHainich>(handle, "AnalysisHainich").
+            def("Get_Rmse_G", &AnalysisHainich::Get_Rmse_G).
+            def("Get_Rmse_J", &AnalysisHainich::Get_Rmse_J).
+            def(py::init<Leaf_Stem_Implicit_Model*, Parameters>());
 
     py::class_<TimeSlice>(handle, "TimeSlice").
             def_readwrite("Min", &TimeSlice::minimum).
