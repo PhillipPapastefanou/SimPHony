@@ -8,7 +8,7 @@ from hydro_standalone import Simulation_Multi_Hainich
 from hydro_standalone import DateTime
 from contrib.config import Config
 
-class Binder:
+class ParallelSetupFull:
     def __init__(self, comm, rank, size):
 
         self.comm = comm
@@ -174,7 +174,8 @@ class Binder:
         else:
             displ =  self.displ
 
-        #print(f"Rank {self.rank} send {sendbuf}")
+        print(f"Rank {self.rank} count {self.count}")
+        print(f"Rank {self.rank} disp {self.displ}")
 
         self.comm.Gatherv(sendbuf, [recvbuf, count_transfer,  displ, MPI.DOUBLE], root=0)
         # if self.is_root == 0:

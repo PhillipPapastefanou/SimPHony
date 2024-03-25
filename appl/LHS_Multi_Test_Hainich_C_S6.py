@@ -24,7 +24,7 @@ def rescale_mean(x, mean, percent):
     max = mean * (100.0 + percent)/100.0
     return rescale(x, min, max)
 
-ncombs = 1200
+ncombs = 50000
 seed   = 123456789
 sampler = qmc.LatinHypercube(d = 14, seed= seed)
 sample = sampler.random(n = ncombs)
