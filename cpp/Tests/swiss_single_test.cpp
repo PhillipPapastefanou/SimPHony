@@ -7,13 +7,13 @@
 #include <string>
 
 
-#include "../cpp/parameters.h"
-#include "../cpp/input_swiss.h"
-#include "../cpp/model.h"
+#include "../src/parameters.h"
+#include "../src/input_swiss.h"
+#include "../src/model.h"
 #include <chrono>
-#include "../cpp/parameter_csv_reader.h"
-#include "../cpp/analysis.h"
-#include "../cpp/swiss_drought_trees.h"
+#include "../src/parameter_csv_reader.h"
+#include "../src/analysis.h"
+#include "../src/swiss_drought_trees.h"
 
 using std::cout;
 using std::endl;

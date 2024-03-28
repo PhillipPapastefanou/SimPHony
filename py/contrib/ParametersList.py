@@ -1,4 +1,4 @@
-from src.py.Parameters import Parameters
+from src.Parameters import Parameters
 import pandas as pd
 
 class ParametersList():

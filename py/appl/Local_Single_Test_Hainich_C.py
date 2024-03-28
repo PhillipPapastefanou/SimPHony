@@ -5,12 +5,12 @@ import datetime
 import matplotlib.dates as mdates
 
 import sys
-sys.path.append('/Users/pp/Documents/Repos/plant_hydro_standalone/cmake-build-release')
+sys.path.append('/Users/pp/Documents/Repos/plant_hydro_standalone/cpp/cmake-build-release')
 from hydro_standalone import Simulation_Single_Hainich
 from hydro_standalone import DateTime
 
-from src.py.Parameters import Parameters
-from src.py.Parameters import Soil_Water_Model_Type
+from src.Parameters import Parameters
+from src.Parameters import Soil_Water_Model_Type
 from contrib.ParametersList import ParametersList
 
 params = Parameters()
@@ -67,8 +67,8 @@ plist.Add(params)
 plist.Write_Full_Parameter_File("ParameterList1.csv")
 
 
-forcing_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/appl/hainich/Meteo_Hainich_dT30min_forcing_PHS.csv"
-sap_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/appl/hainich/SAP_Hainich_Fagus-mean_dT30min_prog.csv"
+forcing_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/hainich/Meteo_Hainich_dT30min_forcing_PHS.csv"
+sap_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/hainich/SAP_Hainich_Fagus-mean_dT30min_prog.csv"
 
 
 df_sap = pd.read_csv(sap_file)

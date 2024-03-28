@@ -6,13 +6,13 @@
 #include <iostream>
 #include <string>
 
-#include "../cpp/parameters.h"
-#include "../cpp/input_hainich.h"
-#include "../cpp/model.h"
+#include "../src/parameters.h"
+#include "../src/input_hainich.h"
+#include "../src/model.h"
 #include <chrono>
-#include "../cpp/parameter_csv_reader.h"
-#include "../cpp/analysis_hainich.h"
-#include "../cpp/time_series.h"
+#include "../src/parameter_csv_reader.h"
+#include "../src/analysis_hainich.h"
+#include "../src/time_series.h"
 
 using std::cout;
 using std::endl;
@@ -20,8 +20,8 @@ using std::string;
 
 Hainich_Single_Test::Hainich_Single_Test() {
 
-    string forcing_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/appl/hainich/Meteo_Hainich_dT30min_forcing_PHS.csv";
-    string sap_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/appl/hainich/SAP_Hainich_Fagus-mean_dT30min_prog.csv";
+    string forcing_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/hainich/Meteo_Hainich_dT30min_forcing_PHS.csv";
+    string sap_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/hainich/SAP_Hainich_Fagus-mean_dT30min_prog.csv";
 
 
     Parameter_CSV_Reader reader("/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/Model/Full_Parameter_setup_12.csv");
