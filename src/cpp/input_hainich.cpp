@@ -4,6 +4,8 @@
 
 #include "input_hainich.h"
 #include <iostream>
+#include <algorithm>
+
 
 Input_Hainich::Input_Hainich(const Parameters& parameters) : Input(parameters) {
 

@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 3.4)
 
 set(USE_PYBIND11 ON)
 
+set(CMAKE_PREFIX_PATH "/Net/Groups/BSI/work_scratch/ppapastefanou/envs/forcing_gen/lib/python3.9/site-packages/mpi4py")
+
 #set(PYTHON_EXECUTABLE /Users/pp/opt/anaconda3/bin/python3.9)
 
 find_package(pybind11 CONFIG REQUIRED)
@@ -13,6 +15,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(hydro_standalone)
+
+link_libraries(stdc++fs)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 

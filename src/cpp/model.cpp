@@ -1,6 +1,5 @@
 #include "model.h"
 #include <cmath>
-#include <numbers>
 #include <iostream>
 #include "root_distribution_model.h"
 #include "soil_water_model.h"

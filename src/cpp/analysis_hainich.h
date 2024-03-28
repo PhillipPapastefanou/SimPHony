@@ -21,6 +21,8 @@ public:
     double Get_Rmse_J();
     double Get_Rmse_G();
 
+    double Get_Log_Likelyhood();
+
 private:
     const Output& output;
     const Parameters& parameters;

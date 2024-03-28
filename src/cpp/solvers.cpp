@@ -14,7 +14,6 @@ double Bisection_solver_interface::Solve(double lower_bound, double upper_bound)
     double s0 = lower_bound;
     double s1 = upper_bound;
 
-
     // Actucally not neccessary to initialise
     double s2 = (s0 + s1) / 2.0;
 
