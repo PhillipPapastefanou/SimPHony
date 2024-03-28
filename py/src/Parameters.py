@@ -108,3 +108,6 @@ class Parameters:
 
         # Number of trees per m-2
         self.tree_density = 1/20.0
+
+
+        self.sigma_log_likelyhood = 1.0
