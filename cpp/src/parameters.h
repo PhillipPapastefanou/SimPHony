@@ -141,5 +141,9 @@ public:
     double solver_precision = 1E-10;
 
 
+    // Analysis paramters
+    double sigma_log_likelyhood = 1.0;
+
+
 private:
 };

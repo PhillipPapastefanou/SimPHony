@@ -71,6 +71,7 @@ Hainich_Single_Test::Hainich_Single_Test() {
     params.tree_density = 79.0 / 10000.0;
 
     params.clay_frac = 0.6;
+    params.sigma_log_likelyhood = 0.01;
 
     double psi_leaf_init = -1.0;
     double psi_stem_init = -0.3;
@@ -116,6 +117,9 @@ Hainich_Single_Test::Hainich_Single_Test() {
 
     std::cout << "RMSE G " << analysis.Get_Rmse_G() << "\n";
     std::cout << "RMSE J " << analysis.Get_Rmse_J() << "\n";
+
+    std::cout << "LL G " << analysis.Get_Log_Likelyhood_G() << "\n";
+    std::cout << "LL J " << analysis.Get_Log_Likelyhood_J() << "\n";
 
 
     auto end_clock = std::chrono::high_resolution_clock::now();

@@ -74,16 +74,6 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
         if(pos <  row.size())
             params.canopy_height = std::stod(row[pos]);
 
-//        val = "rho_water";
-//        pos = get_position(val);
-//        if(pos <  row.size())
-//            params.rho_water = std::stod(row[pos]);
-//
-//        val = "grav";
-//        pos = get_position(val);
-//        if(pos <  row.size())
-//            params.grav = std::stod(row[pos]);
-
         val = "eta_LS";
         pos = get_position(val);
         if(pos <  row.size())
@@ -231,6 +221,11 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
         pos = get_position(val);
         if(pos <  row.size())
             params.organic_matter_frac = std::stod(row[pos]);
+
+        val = "sigma_log_likelyhood";
+        pos = get_position(val);
+        if(pos <  row.size())
+            params.sigma_log_likelyhood = std::stod(row[pos]);
 
         val = "soil_water_model_type";
         pos = get_position(val);
