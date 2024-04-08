@@ -1,4 +1,5 @@
 set(headers
+        amath.h
         model.h
         analysis_hainich.h
         simulation_single.h
@@ -21,6 +22,7 @@ set(headers
         date_time.h
         input_collection.h
         time_series.h
+        stem_flow_model.h
         )
 
 set(source
@@ -47,6 +49,7 @@ set(source
         input_collection.cpp
         analysis_hainich.cpp
         time_series.cpp
+        stem_flow_model.cpp
         )
 
 include(add_model_sources)

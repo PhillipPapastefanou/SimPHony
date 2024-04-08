@@ -7,6 +7,7 @@
 #include "output.h"
 #include "model.h"
 #include "date_time.h"
+#include "stem_flow_model.h"
 
 class Bisection_psi_leaf;
 class Bisection_psi_stem;
@@ -43,7 +44,6 @@ private:
     vector<vector<double> > input_psi_soil;
 
     // Driver values for this timestep
-
     // Vapour pressure deficit [Pa]
     double ivpd;
     // Net photosythesis rate [mol CO2 m-2 s-1]
@@ -65,6 +65,8 @@ private:
     // Soil layer depths
     vector<double> soil_layer_depth_acc;
 
+    /// Stem water flow models
+    std::unique_ptr<Stem_flow_module> stem_flow_module;
 
 
     /// Main model solvers
@@ -126,10 +128,6 @@ private:
     // Functions
     // Get the correct time index from the input forcing
     int time_index(double elapsed_seconds);
-
-    // Helper function for the stem water flow. Should only be called only once per either stem water pot estimation
-    // or leaf water pot estimation
-    double update_stem_water_flow_J(double psi_leaf, double psi_stem);
 
     // Output dataset
     Output output;

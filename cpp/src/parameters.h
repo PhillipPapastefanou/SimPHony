@@ -4,6 +4,12 @@
 #include <cmath>
 //#include <numbers>
 
+enum class Stem_flow_module_type{
+    Linear,
+    KirchhoffWeibull,
+    KirchhoffPiecewiseErf
+};
+
 enum class Soil_water_module_type{
     Campbell,
     Saxton06,
@@ -39,6 +45,8 @@ public:
     // From Arend et al 2021 SI
     double canopy_height = 20.0;
 
+    Stem_flow_module_type stem_flow_type = Stem_flow_module_type::Linear;
+
     // Viscosity of the leaf to sap flow [1] ??? To be double checked
     // Todo: Check if kinematic or dynamic viscosity
      double eta_LS = 1.0; // 1.0 = Water
@@ -58,8 +66,8 @@ public:
 
     // Xylem water potential at loss of 50% conductivity [MPa]
     double psi50_xylem = -3.5;
-    // Slope parameter of xylem water potential curve (has to be postive)[-]
-    double d_50_s = 5.0;
+    // Xylem water potential at loss of 88% conductivity [MPa]
+    double psi88_xylem = -6.0;
 
     // Leaf hydraulic conductance [mol H2O m-2 MPa-1]
     // range 0.2 - 1.2 from Blackmann and Brodribb 2011

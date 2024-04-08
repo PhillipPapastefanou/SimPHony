@@ -1,7 +1,9 @@
 import numpy as np
 from src.py.JacksonRootModule import Jackson_Root_Distribution
 from src.py.SoilModel import VanGenuchten_Water_Uptake
-from src.py.SoilModel import Campbell_Water_Uptake
+from src.py.Stem_Flow_Model_Type import Campbell_Water_Uptake
+from src.py.Parameters import Stem_Flow_Model_Type
+
 
 class ML_Leaf_Stem_SemiCoupled_Module:
     def __init__(self, params):
@@ -59,7 +61,6 @@ class ML_Leaf_Stem_SemiCoupled_Module:
 
         #self.soil_water_uptake = VanGenuchten_Water_Uptake(params)
         self.soil_water_uptake = Campbell_Water_Uptake(params)
-
 
 
         self.PaToMPa = 10 ** (-6)

@@ -4,7 +4,8 @@ cmake_minimum_required(VERSION 3.4)
 
 set(USE_PYBIND11 ON)
 
-set(CMAKE_PREFIX_PATH "/Net/Groups/BSI/work_scratch/ppapastefanou/envs/forcing_gen/lib/python3.9/site-packages/mpi4py")
+#set(CMAKE_PREFIX_PATH "/Net/Groups/BSI/work_scratch/ppapastefanou/envs/forcing_gen/lib/python3.9/site-packages/pybind11")
+#set(CMAKE_PREFIX_PATH "/Net/Groups/BSI/work_scratch/ppapastefanou/envs/forcing_gen/lib/python3.9/site-packages/mpi4py")
 
 #set(PYTHON_EXECUTABLE /Users/pp/opt/anaconda3/bin/python3.9)
 

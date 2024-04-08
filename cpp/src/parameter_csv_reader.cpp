@@ -99,10 +99,10 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
         if(pos <  row.size())
             params.psi50_xylem = std::stod(row[pos]);
 
-        val = "d_50_s";
+        val = "psi88_xylem";
         pos = get_position(val);
         if(pos <  row.size())
-            params.d_50_s = std::stod(row[pos]);
+            params.psi88_xylem = std::stod(row[pos]);
 
         val = "leaf_hydraulic_capacitance";
         pos = get_position(val);
@@ -238,11 +238,29 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
             else if(type_str == "VanGenuchten")
                 params.soil_water_type = Soil_water_module_type::VanGenuchten;
             else{
-                std::cout<< "Invalid soil water type: .";
+                std::cout<< "Invalid soil water type:";
                 std::cout << type_str;
                 exit(99);
             }
         }
+
+        val = "stem_flow_type";
+        pos = get_position(val);
+        if(pos <  row.size()){
+            std::string type_str = row[pos];
+            if(type_str == "Linear")
+                params.stem_flow_type = Stem_flow_module_type::Linear;
+            else if(type_str == "KirchhoffWeibull")
+                params.stem_flow_type = Stem_flow_module_type::KirchhoffWeibull;
+            else if(type_str == "KirchhoffPiecewiseErf")
+                params.stem_flow_type = Stem_flow_module_type::KirchhoffPiecewiseErf;
+            else{
+                std::cout<< "Invalid stem flow type:";
+                std::cout << type_str;
+                exit(99);
+            }
+        }
+
 
         if (check_all){
             if(this->n_conversion != row.size() - 1){

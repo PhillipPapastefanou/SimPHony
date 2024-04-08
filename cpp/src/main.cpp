@@ -7,6 +7,8 @@
 #include <iomanip>
 #include <string>
 #include <sstream>
+#include "stem_flow_model.h"
+#include <vector>
 
 int main(int argc, char* argv[]) {
 
@@ -22,6 +24,27 @@ int main(int argc, char* argv[]) {
 //
 //    int x = 3 ;
 
+    Parameters parameters;
+
+    std::vector<std::unique_ptr<Stem_flow_module> > modules;
+
+
+    modules.push_back(std::make_unique<Linear_stem_flow>(parameters));
+    modules.push_back(std::make_unique<Kirchhoff_Weibull_stem_flow>(parameters));
+    modules.push_back(std::make_unique<Kirchhoff_Piecewise_Erf>(parameters));
+
+
+    for (auto& module: modules) {
+        module->Init();
+    }
+
+    double psi_leaf = -2;
+    double psi_stem = -1;
+
+
+    for (auto& module: modules) {
+        std::cout << module->Get_Stem_flow(psi_stem, psi_leaf) << std::endl;
+    }
 
     //Swiss_Single_Test single_test;
     //Multi_Test single_test;

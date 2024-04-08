@@ -13,25 +13,6 @@ int Leaf_Stem_Implicit_Model::time_index(double elapsed_seconds) {
     return static_cast<int>(elapsed_seconds / params.input_steplen);
 }
 
-double Leaf_Stem_Implicit_Model::update_stem_water_flow_J(double psi_leaf, double psi_stem) {
-
-    // The factor of two reflects the water uptake from the middle of the Stem to the canopy only
-    // All units in MPa
-    DeltaP_LS = psi_stem - psi_leaf - (params.rho_water * params.grav * params.canopy_height / 2.0) * params.PaToMPa;
-
-    // Prevent negative pressure differences to avoid letting the water flow down the tree
-    if(DeltaP_LS < 0.0)
-        DeltaP_LS = 0.0;
-
-    // Estimate the xylem conductance based on the satured xylem and the PLC of the xylem
-    // [mol m-1 s-1 MPa-1]
-    double k_xylem = params.k_xylem_sat / (1.0 + std::exp(-params.d_50_s * (psi_stem - params.psi50_xylem)));
-
-    // Calculate the stem water flow J [mol m-2 s-1]
-    // This is essentially Darcy's law
-    return DeltaP_LS * k_xylem * params.huber_value / (params.eta_LS * params.canopy_height / 2.0);
-}
-
 double Leaf_Stem_Implicit_Model::d_psi_leaf(double psi_leaf, double psi_stem) {
 
     // Update beta parameter that rescales stomatal conductance
@@ -49,7 +30,7 @@ double Leaf_Stem_Implicit_Model::d_psi_leaf(double psi_leaf, double psi_stem) {
     gs *= 1.6;
 
     // Update stem water flow
-    J = update_stem_water_flow_J(psi_leaf, psi_stem);
+    J = stem_flow_module->Get_Stem_flow(psi_stem, psi_leaf);
 
     // Calculate transpiration
     T = gs * params.leaf_area_index * ivpd / ipressure;
@@ -116,7 +97,6 @@ void Leaf_Stem_Implicit_Model::Set_derived_parameters() {
         default:{
             std::cout << "Invalid soil water uptake" << std::endl;
             exit(99);
-            break;
         }
     }
     // Todo Reenable with logging
@@ -130,10 +110,32 @@ void Leaf_Stem_Implicit_Model::Set_derived_parameters() {
     input_anet = input_module.anet;
     input_vpd = input_module.vpd;
 
+    Gi.resize(params.soil_depths.size());
+
+
+    switch (params.stem_flow_type) {
+
+        case Stem_flow_module_type::Linear:{
+            stem_flow_module = std::make_unique<Linear_stem_flow>(params);
+            break;
+        }
+        case Stem_flow_module_type::KirchhoffWeibull:{
+            stem_flow_module = std::make_unique<Kirchhoff_Weibull_stem_flow>(params);
+            break;
+        }
+        case Stem_flow_module_type::KirchhoffPiecewiseErf:{
+            stem_flow_module = std::make_unique<Kirchhoff_Piecewise_Erf>(params);
+            break;
+        }
+        default:{
+            std::cout << "Invalid soil water uptake" << std::endl;
+            exit(99);
+        }
+    }
+    stem_flow_module->Init();
+
     solver_psi_leaf = std::make_unique<Bisection_psi_leaf>(*this, 1E-10, 100);
     solver_psi_stem = std::make_unique<Bisection_psi_stem>(*this, 1E-10,100);
-
-    Gi.resize(params.soil_depths.size());
 
 }
 

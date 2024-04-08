@@ -129,6 +129,10 @@ void Saxton06_Soil_Water::CalculatePsiAndKs() {
     // Convert from pressure head m to MPa
     Ks *= 1000.0/parameters.grav;
 
+    //Account for the density of water
+    // 1 m = 1000 kg m-2
+    Ks *= 1000.0;
+
     // Convert from kg to mol H2O
     Ks *= 1000.0/18.0;
 

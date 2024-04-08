@@ -5,13 +5,15 @@ import datetime
 import matplotlib.dates as mdates
 
 import sys
-rtpath = '/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone'
-rtpath = '../'
+rtpath = '/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/py'
+output_path = '/Net/Groups/BSI/work_scratch/ppapastefanou/simulations/plant_hydraulics_standalone/2024/Hainich/MCMC/uniform_run/'
+
 
 sys.path.append(rtpath)
 
 from src.Parameters import Parameters
 from src.Parameters import Soil_Water_Model_Type
+from src.Parameters import Stem_Flow_Model_Type
 from contrib.ParametersList import ParametersList
 
 def rescale(x, min, max):
@@ -22,8 +24,8 @@ def rescale_mean(x, mean, percent):
     max = mean * (100.0 + percent)/100.0
     return rescale(x, min, max)
 
-#ncombs = 20000000
-ncombs = 200000
+ncombs = 20000000
+#ncombs = 20000
 seed   = 123456789
 sample = np.random.rand(14, ncombs)
 
@@ -63,7 +65,7 @@ sel_cols.append("g1")
 sel_cols.append("jackson_root_beta")
 # From Saxton et al 2006 in mm h-1
 k_min = 0.1
-k_max = 1000.0
+k_max = 10000.0
 # Convert to m s-1
 k_min /= (1000 * 3600)
 k_max /= (1000 * 3600)
@@ -124,16 +126,18 @@ for i in range(ncombs):
     pressure = 1.013 * 100000.0  # Pa
     c_a = 415
 
-    params.sigma_log_likelyhood = 0.05
+    params.sigma_log_likelyhood = 0.04
 
     params.soil_water_model_type_enum = Soil_Water_Model_Type.Saxton06
     params.soil_water_model_type = params.soil_water_model_type_enum.name
-    params.soil_water_model_type = params.soil_water_model_type_enum.name
+
+    params.stem_flow_type_enum = Stem_Flow_Model_Type.Linear
+    params.stem_flow_type = params.stem_flow_type_enum.name
 
     if i % 50000 == 0:
         print(i/ncombs * 100.0)
     plist.Add(params)
 
-plist.Write_Full_Parameter_File(f"UniformParameterList{ncombs}.csv")
-plist.Write_Partial_Parameter_File(f"UniformPartialParameterList{ncombs}.csv", sel_cols)
+plist.Write_Full_Parameter_File(f"{output_path}UniformParameterList{ncombs}.csv")
+plist.Write_Partial_Parameter_File(f"{output_path}UniformPartialParameterList{ncombs}.csv", sel_cols)
 

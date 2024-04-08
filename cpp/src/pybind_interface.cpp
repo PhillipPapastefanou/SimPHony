@@ -1,7 +1,6 @@
 //
 // Created by Phillip on 14.07.23.
 //
-#pragma once
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <vector>

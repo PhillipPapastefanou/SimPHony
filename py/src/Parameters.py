@@ -6,6 +6,11 @@ class Soil_Water_Model_Type(Enum):
     Saxton06        = 1
     Campbell        = 2
 
+class Stem_Flow_Model_Type(Enum):
+    Linear                  = 0
+    KirchhoffWeibull        = 1
+    KirchhoffPiecewiseErf   = 2
+
 
 class Parameters:
 
@@ -26,6 +31,10 @@ class Parameters:
         self.grav = 9.81
 
 
+        # Stemflow type module
+        self.stem_flow_type = Stem_Flow_Model_Type.Linear
+
+
         # Viscosity of the leaf to sap flow [1] ??? To be double checked
         self.eta_LS = 1.0 # 1.0 = Water
         # Stem hydraulic capacity [mol m-3 MPa-1]
@@ -43,9 +52,8 @@ class Parameters:
         self.huber_value = 1.0/3600.0
         # Xylem water potential at loss of 50% conductivity [MPa]
         self.psi50_xylem = -3.5
-        # Slope parameter of xylem water potential curve (has to be postive)[-]
-        self.d_50_s = 10.0
-
+        # Xylem water potential at loss of 50% conductivity [MPa]
+        self.psi88_xylem = -6.0
 
         # Leaf hydraulic conductance [mol m-2 MPa]
         # range 0.2 - 1.2 from Blackmann and Brodribb 2011

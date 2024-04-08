@@ -28,7 +28,6 @@ void Input_Swiss::Read_N_Parse() {
     forcing_parser->init_regular("dt", format);
     vector<vector<float> > forcing_input = forcing_parser->get_data(forcing_indexes);
 
-
     DateTime t0_f = forcing_parser->dates.front();
     DateTime t0_w = theta_parser->dates.front();
     DateTime t0 = t0_f;

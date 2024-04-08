@@ -17,7 +17,6 @@ class ParallelSetupIndividual:
         self.rank = rank
         self.is_root = rank == 0
 
-
         random.seed(seed=123)
 
     def init(self, config : Config):
@@ -167,7 +166,7 @@ class ParallelSetupIndividual:
 
         ds = di.to_xarray()
 
-        ds.to_netcdf(f"A{self.rank}.nc")
+        ds.to_netcdf(f"{self.config.output_path}ParameterRanks{self.rank}.nc")
 
 
 
