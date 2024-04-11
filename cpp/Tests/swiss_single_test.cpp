@@ -7,13 +7,14 @@
 #include <string>
 
 
-#include "../src/parameters.h"
-#include "../src/input_swiss.h"
-#include "../src/model.h"
+#include "../src/framework/parameters.h"
+#include "../src/io/input_swiss.h"
+#include "../src/io/input_swiss_mult_soils.h"
+#include "../src/modules/model.h"
 #include <chrono>
-#include "../src/parameter_csv_reader.h"
-#include "../src/analysis.h"
-#include "../src/swiss_drought_trees.h"
+#include "../src/framework/parameter_csv_reader.h"
+#include "../src/io/analysis_swiss.h"
+#include "../src/io/swiss_drought_trees.h"
 
 using std::cout;
 using std::endl;
@@ -21,14 +22,16 @@ using std::string;
 
 Swiss_Single_Test::Swiss_Single_Test() {
 
-    string theta_file = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Water_Input_type2.csv";
-    string forcing_file = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Forcing_Inter.csv";
 
-    Parameter_CSV_Reader reader("/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/Model/Full_Parameter_setup_12.csv");
+    string theta_file = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/data/swiss/Water_content_MultiSoils.csv";
+    string forcing_file = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/data/swiss/Forcing_Inter.csv";
+    string parameters_list = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/py/appl/LHS/SwissParameterList100.csv";
+    string tree_folder_path = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/data/swiss/Trees";
 
-    std::string path_of_the_trees = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Trees";
+    //string forcing_file = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Forcing_Inter.csv";
 
-    Swiss_Drought_Trees swiss_drought_tress(path_of_the_trees);
+    Parameter_CSV_Reader reader(parameters_list);
+    Swiss_Drought_Trees swiss_drought_tress(tree_folder_path);
 
     auto start0 = std::chrono::high_resolution_clock::now();
 
@@ -40,41 +43,66 @@ Swiss_Single_Test::Swiss_Single_Test() {
 
 
     // Default parameters
-    Parameters params;
+    Parameters params = reader.Get_parameter_list()[80];
 
-    params.huber_value  = 1.0/3600.0;
-    params.canopy_height  = 20.0;
-    params.g0 = 0.005;
-    params.g1 = 1.5;
-    params.psi_leaf_50_close = -2.1;
-    params.d_50_close = 10.0;
-    params.leaf_area_index = 4.8;
-    params.leaf_hydraulic_capacitance = 1.0;
-    params.stem_hydraulic_capacitance_max = 2 * 1000 / 18.0;
-    params.k_xylem_sat = 300;
+    params.k_xylem_sat = 600;
 
-    params.root_area_index = 24;
+    params.stem_hydraulic_capacitance_max = 200;
 
-    params.soil_depths.assign(11, 0.1);
-
-    params.jackson_root_beta = 0.96;
-    params.theta_r = 0.0972;
-    params.alpha_genucht = 1.0;
-    params.n_genucht = 5.0;
-    params.neta_genucht = 0.5;
-
-    params.theta_s = 0.43;
-    params.camp_b = 4.5;
-    params.camp_psi_soil_ref = -4.5E-3;
-    params.k_soil_sat = 20.0/100.0/3600 * 0;
-
-    params.psi50_xylem = -10000.0;
+//    params.huber_value  = 1.0/3600.0;
+//    params.canopy_height  = 20.0;
+//    params.g0 = 0.005;
+//    params.g1 = 1.5;
+//    params.psi_leaf_50_close = -2.1;
+//    params.d_50_close = 10.0;
+//    params.leaf_area_index = 4.8;
+//    params.leaf_hydraulic_capacitance = 1.0;
+//    params.stem_hydraulic_capacitance_max =1 * 1000 / 18.0;
+//    params.k_xylem_sat = 300;
+//
+//    params.root_area_index = 10;
+//
+//    params.jackson_root_beta = 0.8;
+//    params.theta_r = 0.0972;
+//    params.alpha_genucht = 1.0;
+//    params.n_genucht = 5.0;
+//    params.neta_genucht = 0.5;
+//
+//    params.theta_s = 0.43;
+//    params.camp_b = 4.5;
+//    params.camp_psi_soil_ref = -4.5E-3;
+//
+//    params.psi50_xylem = -3.5;
+//    params.psi88_xylem = -5.0;
+//
+//    params.soil_depths[0] = 0.1;
+//    params.soil_depths[1] = 0.3;
+//    params.soil_depths[2] = 0.4;
+//
+//    params.k_soil_sats[0] = 1.0/100.0/86400.0 * 0.000001;
+//    params.k_soil_sats[1] = 1.0/100.0/86400.0 * 0.00001;
+//    params.k_soil_sats[2] = 1.0/100.0/86400.0 * 0.00001;
+//
+//    params.clay_fracs[0] = 0.619;
+//    params.clay_fracs[1] = 0.329;
+//    params.clay_fracs[2] = 0.286;
+//
+//    params.sand_fracs[0] = 0.12;
+//    params.sand_fracs[1] = 0.254;
+//    params.sand_fracs[2] = 0.251;
+//
+//    params.organic_matter_fracs[0] = 0.06;
+//    params.organic_matter_fracs[1] = 0.06;
+//    params.organic_matter_fracs[2] = 0.06;
+//
+//    params.soil_profile_index = 4;
+//
+//    params.stem_flow_type = Stem_flow_module_type::Linear;
 
     double psi_leaf_init = -1.0;
     double psi_stem_init = -0.3;
 
-
-    Input_Swiss input(params);
+    Input_Swiss_Multi_Soils input(    params);
     input.Add_Forcing_File(forcing_file);
     input.Add_Soilwater_File(theta_file);
     input.Read_N_Parse();
@@ -94,11 +122,11 @@ Swiss_Single_Test::Swiss_Single_Test() {
 //    double timeend      = 30*2*24 * 213;
 
     DateTime begin = input.dates.front();
-    DateTime end = begin.AddSeconds(86400 * 20);
+    DateTime end = input.dates.back();
 
     model.Run(steplen, begin, end);
 
-    Analysis analysis(&model, swiss_drought_tress);
+    Analysis_Swiss analysis(&model, swiss_drought_tress);
     analysis.Run();
 
 

@@ -7,13 +7,13 @@
 #include <string>
 #include <chrono>
 
-#include "../src/parameters.h"
-#include "../src/input_swiss.h"
-#include "../src/simulation_multi.h"
+#include "../src/framework/parameters.h"
+#include "../src/io/input_swiss.h"
+#include "../src/framework/simulation_multi_swiss.h"
 
-#include "../src/parameter_csv_reader.h"
-#include "../src/analysis.h"
-#include "../src/swiss_drought_trees.h"
+#include "../src/framework/parameter_csv_reader.h"
+#include "../src/io/analysis_swiss.h"
+#include "../src/io/swiss_drought_trees.h"
 
 Multi_Test::Multi_Test() {
 
@@ -33,7 +33,7 @@ Multi_Test::Multi_Test() {
         indexes[i] = i/300;
     }
 
-    Simulation_Multi simulationMulti;
+    Simulation_Multi_Swiss simulationMulti;
     simulationMulti.Init_Full_Parameter_Setups(paramter_list, indexes);
     simulationMulti.Init_input(theta_file,forcing_file,path_of_the_trees, 0);
     simulationMulti.Set_water_pot_initials(-1.0, -0.3);

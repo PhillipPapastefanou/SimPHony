@@ -1,13 +1,13 @@
 #include "../Tests/swiss_single_test.h"
 #include "../Tests/hainich_single_test.h"
 #include "../Tests/multi_test.h"
-#include "date_time.h"
+#include "framework/date_time.h"
 #include <ctime>
 #include <iostream>
 #include <iomanip>
 #include <string>
 #include <sstream>
-#include "stem_flow_model.h"
+#include "modules/stem_flow_model.h"
 #include <vector>
 
 int main(int argc, char* argv[]) {
@@ -28,6 +28,8 @@ int main(int argc, char* argv[]) {
 
     std::vector<std::unique_ptr<Stem_flow_module> > modules;
 
+    parameters.psi50_xylem = -2;
+    parameters.psi88_xylem= -4;
 
     modules.push_back(std::make_unique<Linear_stem_flow>(parameters));
     modules.push_back(std::make_unique<Kirchhoff_Weibull_stem_flow>(parameters));
@@ -38,17 +40,16 @@ int main(int argc, char* argv[]) {
         module->Init();
     }
 
-    double psi_leaf = -2;
-    double psi_stem = -1;
-
+    double psi_leaf = -1;
+    double psi_stem = -0.25;
 
     for (auto& module: modules) {
         std::cout << module->Get_Stem_flow(psi_stem, psi_leaf) << std::endl;
     }
 
-    //Swiss_Single_Test single_test;
+    Swiss_Single_Test single_test;
     //Multi_Test single_test;
-    Hainich_Single_Test test;
+    //Hainich_Single_Test test;
 
 
 

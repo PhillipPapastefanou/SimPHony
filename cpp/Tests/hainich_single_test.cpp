@@ -6,13 +6,13 @@
 #include <iostream>
 #include <string>
 
-#include "../src/parameters.h"
-#include "../src/input_hainich.h"
-#include "../src/model.h"
+#include "../src/framework/parameters.h"
+#include "../src/io/input_hainich.h"
+#include "../src/modules/model.h"
 #include <chrono>
-#include "../src/parameter_csv_reader.h"
-#include "../src/analysis_hainich.h"
-#include "../src/time_series.h"
+#include "../src/framework/parameter_csv_reader.h"
+#include "../src/io/analysis_hainich.h"
+#include "../src/io/time_series.h"
 
 using std::cout;
 using std::endl;
@@ -22,7 +22,6 @@ Hainich_Single_Test::Hainich_Single_Test() {
 
     string forcing_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/hainich/Meteo_Hainich_dT30min_forcing_PHS.csv";
     string sap_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/hainich/SAP_Hainich_Fagus-mean_dT30min_prog.csv";
-
 
     Parameter_CSV_Reader reader("/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/Model/Full_Parameter_setup_12.csv");
 
@@ -65,17 +64,32 @@ Hainich_Single_Test::Hainich_Single_Test() {
     params.theta_s = 0.52;
     params.camp_b = 6.2;
     params.camp_psi_soil_ref = -2.5E-3;
-    params.k_soil_sat = 0.02/100.0/3600 ;
+
+    params.k_soil_sats.resize(3);
+    for (int i = 0; i < 3; ++i) {
+        params.k_soil_sats[i] = 0.02/100.0/3600;
+    }
+    params.clay_fracs.resize(3);
+    for (int i = 0; i < 3; ++i) {
+        params.clay_fracs[i] = 0.6;
+    }
+    params.sand_fracs.resize(3);
+    for (int i = 0; i < 3; ++i) {
+        params.sand_fracs[i] = 0.025;
+    }
+    params.organic_matter_fracs.resize(3);
+    for (int i = 0; i < 3; ++i) {
+        params.organic_matter_fracs[i] = 0.05;
+    }
 
     params.psi50_xylem = -3.5;
-    params.tree_density = 79.0 / 10000.0;
+    params.psi88_xylem = -5.5;
+    params.tree_density = 100.0 / 10000.0;
 
-    params.clay_frac = 0.6;
     params.sigma_log_likelyhood = 0.01;
 
     double psi_leaf_init = -1.0;
     double psi_stem_init = -0.3;
-
 
     Input_Hainich input(params);
     input.Add_Forcing_File(forcing_file);
@@ -83,16 +97,13 @@ Hainich_Single_Test::Hainich_Single_Test() {
 
 
     TimeSeries sap_data(sap_file, true, ',');
-
     sap_data.Load("datetime", "%Y-%m-%d %H:%M:%S", {1});
 
 
     auto start_clock = std::chrono::high_resolution_clock::now();
-
     Leaf_Stem_Implicit_Model model(params, input);
 
     model.Set_derived_parameters();
-
     model.Set_initial_conditions(psi_leaf_init, psi_stem_init);
 
     // Length model in seconds
