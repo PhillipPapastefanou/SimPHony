@@ -3,10 +3,11 @@ import pandas as pd
 import mpi4py.MPI as MPI
 import xarray as xr
 from time import perf_counter
+from contrib.config import Config, Location
 
 from hydro_standalone import Simulation_Multi_Hainich
+from hydro_standalone import Simulation_Multi_Swiss
 from hydro_standalone import DateTime
-from contrib.config import Config
 
 class ParallelSetupIndividual:
     def __init__(self, comm, rank, size):
@@ -61,7 +62,6 @@ class ParallelSetupIndividual:
         self.displ = None
 
 
-
     def send_parameter_indexes(self):
 
         if self.is_root:
@@ -83,21 +83,42 @@ class ParallelSetupIndividual:
     def start_simulations(self):
 
         if self.is_root:
-            print("Starting simulations...", end = '')
+            print("Starting simulations...")
+            print(f"Location: {self.config.location.name}...", end = '')
             t1 = perf_counter()
 
-        self.sim = Simulation_Multi_Hainich()
-        self.sim.Init_Full_Parameter_Setups(f"{self.config.parameter_input_file_list}{self.rank}", np.arange(0,self.n_sims_per_process))
-        self.sim.Init_input(self.config.forcing_file, self.config.sap_file, self.rank)
+
+        if self.config.location == Location.Swiss:
+            self.sim = Simulation_Multi_Swiss()
+            self.sim.Init_Full_Parameter_Setups(f"{self.config.parameter_input_file_list}{self.rank}",
+                                                np.arange(0, self.n_sims_per_process))
+            self.sim.Init_input(self.config.theta_file, self.config.forcing_file, self.config.tree_folder_path, self.rank)
+
+        elif self.config.location == Location.Hainich:
+            self.sim = Simulation_Multi_Hainich()
+            self.sim.Init_Full_Parameter_Setups(f"{self.config.parameter_input_file_list}{self.rank}",
+                                                np.arange(0, self.n_sims_per_process))
+            self.sim.Init_input(self.config.forcing_file, self.config.sap_file, self.rank)
+        else:
+            print("Invalid location specified")
+            exit(99)
+
         self.sim.Set_water_pot_initials(-1.0, -0.3)
 
-        # in seconds
+        # in seconds and should be 30 mins
         steplen = 1800
 
-        # Steplenght should be 30 mins
-        format = "%Y-%m-%d %H:%M:%S"
-        timestart = DateTime("2023-6-1 00:00:00", format)
-        timeend = DateTime("2023-10-1 00:00:00", format)
+
+        if self.config.location == Location.Hainich:
+            format = "%Y-%m-%d %H:%M:%S"
+            timestart = DateTime("2023-6-1 00:00:00", format)
+            timeend = DateTime("2023-10-1 00:00:00", format)
+
+        if self.config.location == Location.Swiss:
+            format = "%Y-%m-%d %H:%M:%S"
+            timestart = DateTime("2018-4-1 00:00:00", format)
+            timeend = DateTime("2018-12-1 00:00:00", format)
+
 
         self.sim.Run(steplen, timestart, timeend)
         self.comm.Barrier()
@@ -107,18 +128,16 @@ class ParallelSetupIndividual:
             print(f"Done ({np.round(t2-t1, 1)}) sec.")
 
 
-    def receive_analysis_data(self):
+    def receive_analysis(self):
+        if self.config.location == Location.Swiss:
+            self.receive_analysis_data_swiss()
+        elif self.config.location == Location.Hainich:
+            self.receive_analysis_data_hainich()
+        else:
+            print(f"No analysis performed for {self.config.location.name}.")
+    def receive_analysis_data_hainich(self):
         analysis = self.sim.Get_analysis_list()
-        # Get first time_slice data
-        #time_slices = analysis[0].Get_time_slices()
-        # Get first RMSE datapoint
-        rmse_J = analysis[0].Get_Rmse_J()
-        rmse_G = analysis[0].Get_Rmse_G()
-
-
-
         t1 = perf_counter()
-
         # Send the RMSE datasets
         nx = self.n_sims_per_process
 
@@ -131,17 +150,6 @@ class ParallelSetupIndividual:
         for i in range(0, nx):
             data_to_send[i] = analysis[i].Get_Rmse_G()
         gathered_data_rmse_G = data_to_send
-
-
-        # # Send the minimum values
-        # ny_slices = len(time_slices)
-        # data_to_send = np.zeros((nx, ny_slices), dtype='d')
-        # for i in range(0, nx):
-        #     slices = analysis[i].Get_time_slices()
-        #     for j in range (0, ny_slices):
-        #         data_to_send[i][j] = slices[j].Min
-        # gathered_data_slices = self._receive_2D_data(nx, ny_slices, data_to_send)
-        #self.comm.Barrier()
 
         t2 = perf_counter()
         print(f"Done ({np.round(t2 - t1, 1)}) sec.")
@@ -165,7 +173,38 @@ class ParallelSetupIndividual:
         t2 = perf_counter()
         print(f"Done ({np.round(t2 - t1, 1)}) sec.")
 
+    def receive_analysis_data_swiss(self):
 
+        analysis = self.sim.Get_analysis_list()
+        t1 = perf_counter()
+
+        nx = self.n_sims_per_process
+        ny_rmse = len(analysis[0].Get_rmse())
+        data_to_send = np.zeros((nx, ny_rmse), dtype='d')
+        for i in range(0, nx):
+            data_to_send[i] = analysis[i].Get_rmse()
+        gathered_data_rmse = data_to_send
+
+        t2 = perf_counter()
+        print(f"Done ({np.round(t2 - t1, 1)}) sec.")
+
+        # ds = xr.DataArray(recvbuf2, coords=[('run_id', np.arange(0, sum(count))), ('tree_rmse_id', np.arange(0, ndata_pts_y))])
+        print("Writing netcdf file...", end='')
+        t1 = perf_counter()
+        ds = xr.Dataset(
+            {"RMSE_swiss_trees": (("run_id", "tree_rmse_id"), gathered_data_rmse),
+             # ,"Minimum": (("run_id", "slices_id"), gathered_data_slices)
+             },
+            coords={
+                "run_id": np.arange(0, nx),
+                 "tree_rmse_id": np.arange(0, ny_rmse)
+                # "slices_id": np.arange(0, ny_slices),
+            },
+        )
+        ds.to_netcdf(f'Sens_Output{self.rank}.nc', encoding={"RMSE_swiss_trees": {"dtype": "single"}
+                                                             })
+        t2 = perf_counter()
+        print(f"Done ({np.round(t2 - t1, 1)}) sec.")
 
     def _receive_2D_data(self, nx, ny, data_to_send):
 

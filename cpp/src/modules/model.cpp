@@ -34,6 +34,8 @@ double Leaf_Stem_Implicit_Model::d_psi_leaf(double psi_leaf, double psi_stem) {
 
     // Calculate transpiration
     T = gs * params.leaf_area_index * ivpd / ipressure;
+
+    // Return the derivative of the leaf water potential
     return ((J - T)/ params.leaf_hydraulic_capacitance);
 }
 
@@ -55,6 +57,7 @@ double Leaf_Stem_Implicit_Model::d_psi_stem(double psi_leaf, double psi_stem) {
         G += Gi[s];
     }
 
+    // Return the derivativee of the stem water potential
     return ((G - J) / (params.stem_hydraulic_capacitance_max * params.canopy_height * params.huber_value));
 }
 
@@ -179,25 +182,26 @@ void Leaf_Stem_Implicit_Model::Run(double steplength, DateTime begin, DateTime e
         ipsi_soil = input_psi_soil[time_index(ts)];
         ik_soil = input_k_soil[time_index(ts)];
 
-        const double minimum_psi_leaf = -15.0;
-        double l0 = minimum_psi_leaf;
-        //double s1  = *std::max_element(ipsi_soil.begin(),ipsi_soil.end());
-        double l1 = 0.0;
+
+        double l0 = psi_leaf  - 2.0;
+        double l1 = psi_leaf  + 2.0;
+
+        if(l1 >= 0.0){
+            l1 = 0.0;
+        }
+
+
         this->psi_leaf = solver_psi_leaf->Solve(l0, l1);
 
-        if (psi_leaf < -1.8){
-            int x = 34;
-        }
+//        if (psi_leaf < -1.8){
+//            int x = 34;
+//        }
 
         // Lower bound for stem water potential is just the leaf water potential
         // Set the lower bound to be much smaller than leaf water potential to avoid numerical instabilities
-        double s0 = 10.0 * psi_leaf;
+        double s0 = psi_leaf;
         double s1 = 0.0;
         this->psi_stem = solver_psi_stem->Solve(s0, s1);
-
-        if(psi_stem < - 15.0){
-            //break;
-        }
 
 //        std::cout << "Psi leaf  " << psi_leaf << std::endl;
 //        std::cout << "Psi stem  " << psi_stem << std::endl;

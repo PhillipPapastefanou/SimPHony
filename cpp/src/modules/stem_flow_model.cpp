@@ -26,8 +26,8 @@ void Linear_stem_flow::Init(){
 
     if (params.psi50_xylem < params.psi88_xylem){
         std::cout << "Error: psi50(" << params.psi50_xylem <<") is smaller  than pis88(";
-        std::cout << params.psi88_xylem << ")! This is physically impossible and must be fixed!" std::endl
-        exit(99)
+        std::cout << params.psi88_xylem << ")! This is physically impossible and must be fixed!" << std::endl;
+        exit(99);
     }
 
     c = log(log(1. - x1)/log(1. - x2))/(log(-params.psi50_xylem) - log(-params.psi88_xylem));

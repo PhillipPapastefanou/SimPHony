@@ -2,12 +2,12 @@ import pandas as pd
 import xarray as xr
 import numpy as np
 
-for i in range(0, 256):
-    ds  = xr.open_dataset(f"run/Sens_Output{i}.nc")
+for i in range(0, 10):
+    ds  = xr.open_dataset(f"Sens_Output{i}.nc")
     if i == 0:
-        df_t = ds.to_pandas()
+        df_t = ds.to_dataframe()
     else:
-        df= ds.to_pandas()
+        df= ds.to_dataframe()
         df_t = pd.concat([df_t, df])
     print(i)
 

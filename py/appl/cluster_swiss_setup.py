@@ -16,7 +16,7 @@ config.location = Location.Swiss
 
 #config.parameter_input_file_list = f"ParameterList{20000000}.csv"
 
-config.parameter_input_file_list = f"LHS/SwissParameterList10000.csv"
+config.parameter_input_file_list = f"SwissParameterList10000000.csv"
 
 sys.path.append(config.build_path)
 #from contrib.ParallelRunFull import ParallelSetupFull

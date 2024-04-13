@@ -81,18 +81,20 @@ class Parameters:
         self.soil_water_model_type =  self.soil_water_model_type_enum.name
 
         # Soil depths
-        self.soil_depths = np.repeat(0.1, 1);
-        self.soil_depths_arr = np.array2string(self.soil_depths, separator=';')
-        self.soil_depths_arr = self.soil_depths_arr[1:-1]
+        self.soil_depths = np.repeat(0.1, 3);
+        self.soil_depths = np.array2string(self.soil_depths, separator=';')
+        self.soil_depths = self.soil_depths[1:-1]
 
 
         # Jackson rooting parameter [-]
         self.jackson_root_beta  = 0.96
 
         # Saturated soil hydraulic conductance [m s-1]
-        # Van Looy et al 4.8 - 62 [cm/d]
-        k_soil_sat_cm_d = 15.0
-        self.k_soil_sat = k_soil_sat_cm_d / 100.0 / 86400.0
+        self.k_soil_sats = self.array_to_list_entry(np.array([1.0 / 100.0 / 86400.0, 1.0 / 100.0 / 86400.0, 1.0 / 100.0 / 86400.0]))
+
+        self.sand_fracs =self.array_to_list_entry( np.array([0.03, 0.03, 0.03]))
+        self.clay_fracs = self.array_to_list_entry(np.array([0.5, 0.5, 0.5]))
+        self.organic_matter_fracs = self.array_to_list_entry(np.array([0.05, 0.05, 0.05]))
 
         self.theta_r = 0.105
         self.alpha_genucht = 1.0
@@ -119,3 +121,10 @@ class Parameters:
 
 
         self.sigma_log_likelyhood = 1.0
+
+        #Only relevant for Swiss soils at the moments
+        self.soil_profile_index = 2;
+
+    def array_to_list_entry(self, array):
+        array_s = np.array2string(array, separator=';')
+        return array_s[1:-1]

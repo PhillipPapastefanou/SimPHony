@@ -7,7 +7,7 @@ class ParametersList():
         self.parameters_list = []
 
 
-    def Add(self, parameters: type[Parameters]):
+    def Add(self, parameters:  Parameters):
         self.parameters_list.append(parameters)
 
     def Write_First_File(self, filename):

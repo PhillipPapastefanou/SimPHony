@@ -1,4 +1,5 @@
 import numpy as np
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import datetime
@@ -31,8 +32,11 @@ class Subslicer:
         self.i +=1
         return self.array[self.i]
 
-ncombs = 10000000
-path = '/Net/Groups/BSI/work_scratch/ppapastefanou/simulations/plant_hydraulics_standalone/2024/swiss/extremelow_ks/input/'
+ncombs = 1000000
+path = '/Net/Groups/BSI/work_scratch/ppapastefanou/simulations/plant_hydraulics_standalone/2024/swiss/constraind_more_k/input/'
+
+if not os.path.exists(path):
+    os.makedirs(path)
 seed   = 123456789
 sampler = qmc.LatinHypercube(d = 21, seed= seed)
 sample = sampler.random(n = ncombs)
@@ -62,9 +66,9 @@ sel_cols.append("clay_frac_02")
 sel_cols.append("clay_frac_03")
 
 k_soil_sats_log = np.zeros((3, ncombs))
-k_soil_sats_log[0]        = rescale(slicer.get(), min=-18, max = -10)
-k_soil_sats_log[1]        = k_soil_sats_log[0]
-k_soil_sats_log[2]        = k_soil_sats_log[0]
+k_soil_sats_log[0]        = rescale(slicer.get(), min=-16, max = -5)
+k_soil_sats_log[1]        = k_soil_sats_log[0] - 8
+k_soil_sats_log[2]        = k_soil_sats_log[0] - 9
 
 sel_cols.append("k_soil_sat_01")
 sel_cols.append("k_soil_sat_02")
@@ -74,17 +78,18 @@ g0_s            = rescale(slicer.get(), min=0.03, max = 0.1)
 sel_cols.append("g0")
 g1_s            = rescale(slicer.get(), min = 0.5, max = 4.5)
 sel_cols.append("g1")
-k_xylems_sats_log   = rescale(slicer.get(), min=np.log10(1), max=np.log10(200))
+k_xylems_sats_log   = rescale(slicer.get(), min=np.log10(90), max=np.log10(900))
 sel_cols.append("k_xylem_sat")
 
-huber_values    =  rescale(slicer.get(), min = 1/10000, max= 1/2000)
+huber_values    =  rescale(slicer.get(), min = 1/7000, max= 1/3000)
 sel_cols.append("huber_value")
 
 cstem_s         = rescale(slicer.get(), min=0.5, max=1000)
 sel_cols.append("kappa_stem")
 lai_s           = rescale(slicer.get(), min= 2 , max = 6)
 sel_cols.append("lai")
-cleaf_s         = rescale_mean(slicer.get(), mean=1.0, percent=50)
+cleaf_s         = rescale(slicer.get(), min = 0.004, max = 0.8)
+#cleaf_s         = rescale(slicer.get(), min = 0.04, max = 0.4)
 sel_cols.append("kappa_leaf")
 d_50close_s     = rescale(slicer.get(), min = 1.0, max = 5.0)
 sel_cols.append("d50_close")
@@ -154,8 +159,8 @@ for i in range(ncombs):
 
     plist.Add(params)
 
-plist.Write_Full_Parameter_File(f"{path}SwissParameterListWide12_4{ncombs}.csv")
-plist.Write_Partial_Parameter_File(f"{path}SwissPartialParameterListWide12_4{ncombs}.csv", sel_cols)
+plist.Write_Full_Parameter_File(f"{path}SwissParameterListLowerLow12_4{ncombs}.csv")
+plist.Write_Partial_Parameter_File(f"{path}SwissPartialParameterListLowerLow12_4{ncombs}.csv", sel_cols)
 
 
 # from hydro_standalone import Simulation_Multi

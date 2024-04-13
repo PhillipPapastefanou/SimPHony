@@ -1,15 +1,16 @@
+import sys
+import datetime
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import datetime
-import matplotlib.dates as mdates
 
-import sys
+import matplotlib.dates as mdates
 rtpath = '/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone'
 
 sys.path.append(rtpath)
 
 from src.Parameters import Parameters
+from src.Parameters import Stem_Flow_Model_Type
 from src.Parameters import Soil_Water_Model_Type
 from contrib.ParametersList import ParametersList
 from scipy.stats import qmc
@@ -22,34 +23,34 @@ def rescale_mean(x, mean, percent):
     max = mean * (100.0 + percent)/100.0
     return rescale(x, min, max)
 
-ncombs = 20000000
-#ncombs = 10000
+#ncombs = 20000000
+ncombs = 1000
 seed   = 123456789
-sampler = qmc.LatinHypercube(d = 14, seed= seed)
+sampler = qmc.LatinHypercube(d = 20, seed= seed)
 sample = sampler.random(n = ncombs)
 sample = sample.T
 
 sel_cols = []
 
 sand_fracs          = rescale(sample[0], min=0.025, max = 0.035)
-clay_fracs          = rescale(sample[1],min = 0.49, max = 0.55)
+clay_fracs          = rescale(sample[1], min = 0.49, max = 0.55)
 org_matter_fracs    = rescale(sample[2], min = 0.025, max = 0.065)
 
 sel_cols.append("sand_frac")
 sel_cols.append("clay_frac")
 sel_cols.append("organic_matter_frac")
 
-cstem_s         = rescale(sample[3], min=0.5, max=1000)
+cstem_s         = rescale(sample[3],      min=0.5, max=1000)
 lai_s           = rescale_mean(sample[4], mean=4.8, percent=30)
-g0_s            = rescale(sample[5], min=0, max = 0.1)
+g0_s            = rescale(sample[5],      min=0, max = 0.1)
 
 sel_cols.append("stem_hydraulic_capacitance")
 sel_cols.append("leaf_area_index")
 sel_cols.append("g0")
 
 
-k_xylems_sats   = rescale(sample[6], min=np.log10(1), max=np.log10(1000))
-huber_values    =  rescale(sample[7], min = 1/8000, max= 1/3000)
+k_xylems_sats   = rescale(sample[6], min=np.log10(0.0001), max=np.log10(1000))
+huber_values    =  rescale(sample[7], min = 1/8000, max= 1/2000)
 
 sel_cols.append("huber_value")
 sel_cols.append("k_xylem_sat")
@@ -105,10 +106,10 @@ for i in range(ncombs):
     # params.camp_b = b_s[i]
     # params.camp_psi_soil_ref = psi_ref_s[i]
 
-    params.k_soil_sat = 10**k_soil_s_log[i]
-    params.sand_frac = sand_fracs[i]
-    params.clay_frac = clay_fracs[i]
-    params.organic_matter_frac = org_matter_fracs[i]
+    # params.k_soil_sat = 10**k_soil_s_log[i]
+    # params.sand_frac = sand_fracs[i]
+    # params.clay_frac = clay_fracs[i]
+    # params.organic_matter_frac = org_matter_fracs[i]
 
     params.stem_hydraulic_capacitance = cstem_s[i]
     params.leaf_area_index = lai_s[i]
@@ -128,7 +129,11 @@ for i in range(ncombs):
 
     params.soil_water_model_type_enum = Soil_Water_Model_Type.Saxton06
     params.soil_water_model_type = params.soil_water_model_type_enum.name
-    params.soil_water_model_type = params.soil_water_model_type_enum.name
+
+    params.stem_flow_type_enum = Stem_Flow_Model_Type.Linear
+    params.stem_flow_type = params.stem_flow_type_enum.name
+
+    params.soil_profile_index = 2
 
     if i % 50000 == 0:
         print(i/ncombs * 100.0)

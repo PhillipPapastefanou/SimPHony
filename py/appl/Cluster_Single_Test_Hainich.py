@@ -3,43 +3,44 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import datetime
 import matplotlib.dates as mdates
+import subprocess
+
 
 import sys
-sys.path.append('/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/build')
-sys.path.append('/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/')
+sys.path.append('/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/cpp/build')
+sys.path.append('/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/py')
 
 
-from hydro_standalone import Simulation_Single_Hainich
-from hydro_standalone import DateTime
-
-from src.py.Parameters import Parameters
-from src.py.Parameters import Soil_Water_Model_Type
+from src.Parameters import Parameters
+from src.Parameters import Stem_Flow_Model_Type
+from src.Parameters import Soil_Water_Model_Type
 from contrib.ParametersList import ParametersList
 
 params = Parameters()
-params.huber_value = 1.0 / 1500.0
+params.huber_value = 1.0 / 2000.0
 params.canopy_height = 30.0
 params.g0 = 0.01;
 params.g1 = 4.5
-params.psi_leaf_50_close = -2.1
-params.d_50_close = 2.0
+params.psi_leaf_50_close = -1.5
+params.d_50_close = 6.0
 params.leaf_area_index = 4.8
-params.leaf_hydraulic_capacitance = 2.0
-params.stem_hydraulic_capacitance = 10 * 1000 / 18.0
+params.leaf_hydraulic_capacitance = 1.0
+params.stem_hydraulic_capacitance = 100 * 1000 / 18.0
 params.k_xylem_sat = 100
 
+params.psi50_xylem = -2.5
+params.psi88_xylem = -5.5
+
 params.root_area_index = 10
-
-params.soil_depths = np.array([0.08, 0.08, 0.16])
-params.soil_depths = np.array2string(params.soil_depths, separator=';')
-params.soil_depths = params.soil_depths[1:-1]
-
 params.jackson_root_beta = 0.96
 
 params.soil_water_model_type_enum = Soil_Water_Model_Type.Saxton06
 params.soil_water_model_type = params.soil_water_model_type_enum.name
 
-params.k_soil_sat = 10 / 100.0 / 86400.0
+params.stem_flow_type_enum = Stem_Flow_Model_Type.Linear
+params.stem_flow_type = params.stem_flow_type_enum.name
+
+params.k_soil_sat = 1 / 100.0 / 86400.0
 params.theta_s = 0.6
 
 params.theta_r = 0.0972
@@ -54,10 +55,29 @@ params.neta_genucht = 0.5
 params.camp_psi_soil_ref = -4.5 * 1000 * 1E-6
 params.camp_b = 3.2
 
+params.soil_depths = np.array([0.1, 0.3, 0.4])
+params.soil_depths = np.array2string(params.soil_depths, separator=';')
+params.soil_depths = params.soil_depths[1:-1]
+
+params.clay_fracs = np.array([0.5, 0.5, 0.5])
+params.clay_fracs = np.array2string(params.clay_fracs, separator=';')
+params.clay_fracs = params.clay_fracs[1:-1]
+
+params.sand_fracs = np.array([0.03, 0.03, 0.03])
+params.sand_fracs = np.array2string(params.sand_fracs, separator=';')
+params.sand_fracs = params.sand_fracs[1:-1]
+
+params.sand_fracorganic_matter_fracs = np.array([0.05, 0.05, 0.05])
+params.organic_matter_fracs = np.array2string(params.organic_matter_fracs, separator=';')
+params.organic_matter_fracs = params.organic_matter_fracs[1:-1]
+
+params.k_soil_sats = np.array([1.0 / 100.0 / 86400.0, 1.0 / 100.0 / 86400.0, 1.0 / 100.0 / 86400.0])
+params.k_soil_sats = np.array2string(params.k_soil_sats, separator=';')
+params.k_soil_sats = params.k_soil_sats[1:-1]
+
+params.soil_profile_index = 3;
 
 
-params.clay_frac = 0.45
-params.sand_frac = 0.03
 # params.organic_matter_frac= 0.064
 
 pressure = 1.013 * 100000.0  # Pa
@@ -70,8 +90,8 @@ plist.Add(params)
 plist.Write_Full_Parameter_File("ParameterList1.csv")
 
 
-forcing_file = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/appl/hainich/Meteo_Hainich_dT30min_forcing_PHS.csv"
-sap_file = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/appl/hainich/SAP_Hainich_Fagus-mean_dT30min_prog.csv"
+forcing_file = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/data/hainich/Meteo_Hainich_dT30min_forcing_PHS.csv"
+sap_file = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/data/hainich/SAP_Hainich_Fagus-mean_dT30min_prog.csv"
 
 
 df_sap = pd.read_csv(sap_file)
@@ -80,12 +100,14 @@ df_sap['datetime']  = pd.to_datetime(df_sap['datetime'])
 df_sap['J'] = df_sap['J'] * 1000
 df_sap['J'] = df_sap['J'] * 1.0/18
 
+
+from hydro_standalone import Simulation_Single_Hainich
+from hydro_standalone import DateTime
+
+
 sim = Simulation_Single_Hainich()
-
 sim.Init_parameters_fn_single("ParameterList1.csv", 0)
-
 sim.Init_input(forcing_file, sap_file)
-
 sim.Set_water_pot_initials(-1.0, -0.3)
 
 # in seconds
@@ -211,7 +233,7 @@ ax.xaxis.set_major_formatter(formatter)
 ax.set_xlim((df.index[0]), (df.index[-1]))
 
 
-ax = fig.add_subplot(3,2,6 )
+ax = fig.add_subplot(3,2,6)
 
 #ax.plot(df['Js'], label = 'J',  c= 'tab:orange')
 ax.plot(df['Gs'], label = 'J model', c = 'black', alpha = 0.5)
@@ -226,6 +248,6 @@ ax.set_xlim((df.index[0]), (df.index[-1]))
 plt.subplots_adjust(hspace= 0.5, bottom = 0.2)
 #plt.plot(in_thetas[0:2*24*2])
 plt.tight_layout()
-plt.savefig("Water_flow_obs_model.png", dpi = 300)
+plt.savefig(f"{params.stem_flow_type}_Water_flow_obs_model.png", dpi = 300)
 plt.show()
 
