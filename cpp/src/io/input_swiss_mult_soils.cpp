@@ -39,9 +39,12 @@ void Input_Swiss_Multi_Soils::Read_N_Parse() {
             // Convert from % to relative
             sl[s] /= 100.0;
         }
+
         input_theta_per_layer[i] = sl;
     }
 
+
+    std::cout << input_theta_per_layer[0][0] << std::endl;
 
     vector<int> forcing_indexes= {2,8};
     format = "%Y-%m-%d %H:%M:%S";

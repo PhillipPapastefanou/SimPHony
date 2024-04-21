@@ -23,10 +23,16 @@ using std::string;
 Swiss_Single_Test::Swiss_Single_Test() {
 
 
-    string theta_file = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/data/swiss/Water_content_MultiSoils.csv";
-    string forcing_file = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/data/swiss/Forcing_Inter.csv";
-    string parameters_list = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/py/appl/LHS/SwissParameterList100.csv";
-    string tree_folder_path = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/data/swiss/Trees";
+//    string theta_file = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/data/swiss/Water_content_MultiSoils.csv";
+//    string forcing_file = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/data/swiss/Forcing_Inter.csv";
+//    string parameters_list = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/py/appl/LHS/SwissParameterList100.csv";
+//    string tree_folder_path = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/data/swiss/Trees";
+
+
+    string theta_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/swiss/Water_content_MultiSoils.csv";
+    string forcing_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/swiss/Forcing_Inter.csv";
+    string parameters_list = "/Users/pp/data/Simulations/A08_Hydraulics_standalone/2024/swiss/LHS/less_ks_more_constrained/Best_Alive_avg.csv";
+    string tree_folder_path = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/swiss/Trees";
 
     //string forcing_file = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Forcing_Inter.csv";
 
@@ -43,11 +49,11 @@ Swiss_Single_Test::Swiss_Single_Test() {
 
 
     // Default parameters
-    Parameters params = reader.Get_parameter_list()[80];
+    Parameters params = reader.Get_parameter_list()[460];
 
-    params.k_xylem_sat = 600;
+    //params.k_xylem_sat = 600;
 
-    params.stem_hydraulic_capacitance_max = 200;
+    //params.stem_hydraulic_capacitance_max = 200;
 
 //    params.huber_value  = 1.0/3600.0;
 //    params.canopy_height  = 20.0;

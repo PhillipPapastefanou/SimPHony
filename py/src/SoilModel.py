@@ -12,7 +12,6 @@ class VanGenuchten_Water_Uptake:
         self.m = 1.0 - 1.0 / self.n
         self.neta = params.neta_genucht
 
-
     def Calculate_PsiSoil_KSoil(self, theta):
 
         self.thetas = theta
@@ -36,7 +35,6 @@ class Campbell_Water_Uptake:
         self.ps_soil_ref = params.camp_psi_soil_ref
 
     def Calculate_PsiSoil_KSoil(self, theta):
-
         self.thetas = theta
         self.k_soil_array = self.k_soil_sat * (self.thetas/self.theta_s) ** (2  + 3*self.b)
         self.psi_soil_array = self.ps_soil_ref * (self.thetas/self.theta_s) ** (-self.b)

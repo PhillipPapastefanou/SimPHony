@@ -60,7 +60,6 @@ double Linear_stem_flow::Get_Stem_flow(double psi_stem, double psi_leaf) {
 Kirchhoff_Weibull_stem_flow::Kirchhoff_Weibull_stem_flow(const Parameters &params) : Stem_flow_module(params) {
 
 
-
 }
 
 void Kirchhoff_Weibull_stem_flow::Init() {

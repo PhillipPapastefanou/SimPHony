@@ -183,8 +183,8 @@ void Leaf_Stem_Implicit_Model::Run(double steplength, DateTime begin, DateTime e
         ik_soil = input_k_soil[time_index(ts)];
 
 
-        double l0 = psi_leaf  - 2.0;
-        double l1 = psi_leaf  + 2.0;
+        double l0 = psi_leaf  - 0.5;
+        double l1 = psi_leaf  + 0.5;
 
         if(l1 >= 0.0){
             l1 = 0.0;
