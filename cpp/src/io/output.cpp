@@ -33,9 +33,14 @@ void Output::Add_psi_leaf(float psi_leaf) {
     psi_leaf_a.push_back(psi_leaf);
 }
 
-void Output::Add_psi_stem(float psi_stem) {
-    psi_stem_a.push_back(psi_stem);
+void Output::Add_psi_stem_ground(float psi_root) {
+    psi_root_a.push_back(psi_root);
 }
+
+void Output::Add_psi_stems_seg(vector<float> psi_stem_seg) {
+    psi_stem_a.push_back(psi_stem_seg);
+}
+
 
 void Output::Add_psi_soil_indiv(vector<float> psi_soil_indiv) {
     psi_soil_aa.push_back(psi_soil_indiv);
@@ -65,13 +70,15 @@ void Output::Add_Timestep(double t) {
     times.push_back(t);
 }
 
-void Output::Add_steps_psi_stem(int steps_psi_stem) {
+void Output::Add_steps_psi_stem_ground(int steps_psi_stem) {
     steps_psi_stem_a.push_back(steps_psi_stem);
 }
 
 void Output::Add_steps_psi_leaf(int steps_psi_leaf) {
     steps_psi_leaf_a.push_back(steps_psi_leaf);
 }
+
+
 
 const vector<long> &Output::Get_times() const {
     return times;
@@ -94,7 +101,7 @@ const vector<float> &Output::Get_psi_leaf() const {
 }
 
 const vector<float> &Output::Get_psi_stem() const {
-    return psi_stem_a;
+    return psi_root_a;
 }
 
 const vector<vector<float> > &Output::Get_psi_soil_indiv() const {
@@ -165,6 +172,8 @@ vector<float> Output::Get_G_per_sap() const {
 const vector<DateTime> &Output::Get_dates() const {
     return dates;
 }
+
+
 
 
 

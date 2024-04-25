@@ -22,7 +22,7 @@ void Simulation_Single_Hainich::Init_input(std::string forcing_file, std::string
 
 void Simulation_Single_Hainich::Set_water_pot_initials(double psi_leaf, double psi_stem) {
 
-    model = std::make_unique<Leaf_Stem_Implicit_Model>(*parameters, *input);
+    model = std::make_unique<Leaf_Stem_Ground_Implicit_Model>(*parameters, *input);
     model->Set_derived_parameters();
     model->Set_initial_conditions(psi_leaf, psi_stem);
 

@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <iostream>
 
-AnalysisHainich::AnalysisHainich(Leaf_Stem_Implicit_Model* model, const Parameters& parameters):
+AnalysisHainich::AnalysisHainich(Leaf_Stem_Ground_Implicit_Model* model, const Parameters& parameters):
 output(model->Get_output()), dts(model->dts), parameters(parameters),
 sigma_log_likelyhood(parameters.sigma_log_likelyhood){
 }

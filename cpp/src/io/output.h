@@ -25,7 +25,8 @@ public:
     void Add_G_indiv(vector<float> G_indiv);
 
     void Add_psi_leaf(float psi_leaf);
-    void Add_psi_stem(float psi_stem);
+    void Add_psi_stem_ground(float psi_stem_ground);
+    void Add_psi_stems_seg(vector<float> psi_stem_seg);
     void Add_psi_soil_indiv(vector<float> psi_soil_indiv);
 
     void Add_gs( double gs);
@@ -35,7 +36,7 @@ public:
     void Add_anet(double anet);
 
     void Add_steps_psi_leaf(int steps_psi_leaf);
-    void Add_steps_psi_stem(int steps_psi_stem);
+    void Add_steps_psi_stem_ground(int steps_psi_stem);
 
     const vector<DateTime> &Get_dates() const;
     const vector<long> &Get_times() const;
@@ -85,7 +86,8 @@ private:
     vector<vector<float> > Gaa;
 
     vector<float> psi_leaf_a;
-    vector<float> psi_stem_a;
+    vector<float> psi_root_a;
+    vector<vector<float> > psi_stem_a;
     vector<vector<float> > psi_soil_aa;
 
     vector<float> gs_a;

@@ -89,14 +89,14 @@ PYBIND11_MODULE(hydro_standalone, handle){
             def("Run", &Analysis_Swiss::Run).
             def("Get_rmse", &Analysis_Swiss::Get_rmse).
             def("Get_time_slices", &Analysis_Swiss::Get_time_slices).
-            def(py::init<Leaf_Stem_Implicit_Model*, Swiss_Drought_Trees >());
+            def(py::init<Leaf_Stem_Ground_Implicit_Model*, Swiss_Drought_Trees >());
 
     py::class_<AnalysisHainich>(handle, "AnalysisHainich").
             def("Get_Rmse_G", &AnalysisHainich::Get_Rmse_G).
             def("Get_Rmse_J", &AnalysisHainich::Get_Rmse_J).
             def("Get_LL_G", &AnalysisHainich::Get_Log_Likelyhood_G).
             def("Get_LL_J", &AnalysisHainich::Get_Log_Likelyhood_J).
-            def(py::init<Leaf_Stem_Implicit_Model*, Parameters>());
+            def(py::init<Leaf_Stem_Ground_Implicit_Model*, Parameters>());
 
     py::class_<TimeSlice>(handle, "TimeSlice").
             def_readwrite("Min", &TimeSlice::minimum).

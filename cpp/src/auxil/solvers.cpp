@@ -6,10 +6,12 @@
 #include <iostream>
 
 
-Bisection_solver_interface::Bisection_solver_interface(Leaf_Stem_Implicit_Model& model, double prec, int max_steps) :
-model(model), prec(prec), max_steps(max_steps),n_errors(0) {}
+Bisection_two_layer_solver_interface::Bisection_two_layer_solver_interface(Leaf_Stem_Ground_Implicit_Model& model, double prec, int max_steps,
+                                                                           double global_min,
+                                                                           double global_max) :
+model(model), prec(prec), max_steps(max_steps),n_errors(0), global_min(global_min), global_max(global_max) {}
 
-double Bisection_solver_interface::Solve(double lower_bound, double upper_bound) {
+double Bisection_two_layer_solver_interface::Solve(double lower_bound, double upper_bound, int solver_level) {
 
     double s0 = lower_bound;
     double s1 = upper_bound;
@@ -38,18 +40,26 @@ double Bisection_solver_interface::Solve(double lower_bound, double upper_bound)
         not_converged = std::abs(y2) > prec;
 
         if(step > max_steps){
-            if(n_errors < nmax_errors){
-//                    std::cout << "Warning: Solver did not converge between " << std::to_string(lower_bound) ;
-//                    std::cout << " and " << std::to_string(upper_bound) << std::endl;
-                    n_errors++;
-            }
+            //std::cout << "Error: Solver did not converge between " << std::to_string(lower_bound) ;
+            //std::cout << " and " << std::to_string(upper_bound) ;
             return lower_bound;
         }
 
-        // We are converging against a value outside of the boundaries. In this case
-        // omit the lowest value
-        if ((std::abs(s0) < 1E-14) &&(std::abs(s1) < 1E-14)){
+        // We are converging against a value on the edge of the boundaries.
+        if ((std::abs(s0 - upper_bound) < 1E-8) && (std::abs(s1 - upper_bound) < 1E-8)){
+            if (solver_level == 1){
+                std::cout << "Warning : Solver did not converge on first search space. Extending search space:" << std::endl;
+                return Solve(global_min, global_max, 2);
+            }
+            else {
+                std::cout << "Warning : Solver did not converge on second search space. Setting fixed water potential" << std::endl;
+                return global_min;
+            }
+        }
+
+        if ((std::abs(s0 - lower_bound) < 1E-10) && (std::abs(s1 - lower_bound) < 1E-10)){
             return lower_bound;
+            //std::cout << "Warning : Solver did not converge on second search space. Setting fixed water potential" << std::endl;
         }
 
         // We do not have enough precision to calculate the correct water potential
@@ -64,6 +74,6 @@ double Bisection_solver_interface::Solve(double lower_bound, double upper_bound)
 
 }
 
-int Bisection_solver_interface::Get_nsteps_converged() {
+int Bisection_two_layer_solver_interface::Get_nsteps_converged() {
     return steps_converged;
 }

@@ -5,13 +5,12 @@
 #include "swiss_single_test.h"
 #include <iostream>
 #include <string>
-
+#include <chrono>
 
 #include "../src/framework/parameters.h"
 #include "../src/io/input_swiss.h"
 #include "../src/io/input_swiss_mult_soils.h"
 #include "../src/modules/model.h"
-#include <chrono>
 #include "../src/framework/parameter_csv_reader.h"
 #include "../src/io/analysis_swiss.h"
 #include "../src/io/swiss_drought_trees.h"
@@ -103,7 +102,18 @@ Swiss_Single_Test::Swiss_Single_Test() {
 //
 //    params.soil_profile_index = 4;
 //
-//    params.stem_flow_type = Stem_flow_module_type::Linear;
+    params.stem_flow_type = Stem_flow_module_type::Linear;
+    params.sustain_xylem_damage = true;
+    params.stem_hydraulic_capacitance_max = 500.0;
+    params.verbose= true;
+
+    for (int i = 0; i < params.k_soil_sats.size(); ++i) {
+        params.k_soil_sats[i] *= 2.0;
+    }
+
+    params.k_xylem_sat = 10000.0;
+    params.leaf_hydraulic_capacitance = 10.0;
+
 
     double psi_leaf_init = -1.0;
     double psi_stem_init = -0.3;
@@ -115,10 +125,8 @@ Swiss_Single_Test::Swiss_Single_Test() {
 
     auto start_clock = std::chrono::high_resolution_clock::now();
 
-    Leaf_Stem_Implicit_Model model(params, input);
-
+    Leaf_Stem_Ground_Implicit_Model model(params, input);
     model.Set_derived_parameters();
-
     model.Set_initial_conditions(psi_leaf_init, psi_stem_init);
 
     // Length model in seconds
@@ -131,10 +139,8 @@ Swiss_Single_Test::Swiss_Single_Test() {
     DateTime end = input.dates.back();
 
     model.Run(steplen, begin, end);
-
     Analysis_Swiss analysis(&model, swiss_drought_tress);
     analysis.Run();
-
 
     auto end_clock = std::chrono::high_resolution_clock::now();
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_clock - start_clock);

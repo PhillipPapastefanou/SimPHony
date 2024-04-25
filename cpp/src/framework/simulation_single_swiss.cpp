@@ -27,7 +27,7 @@ void Simulation_Single_Swiss::Init_parameters_default() {
 
 void Simulation_Single_Swiss::Set_water_pot_initials(double psi_leaf, double psi_stem) {
 
-    model = std::make_unique<Leaf_Stem_Implicit_Model>(*parameters, *input);
+    model = std::make_unique<Leaf_Stem_Ground_Implicit_Model>(*parameters, *input);
 
     model->Set_derived_parameters();
 

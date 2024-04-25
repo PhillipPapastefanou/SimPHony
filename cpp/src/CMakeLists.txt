@@ -24,6 +24,8 @@ set(headers
         io/input_collection.h
         io/time_series.h
         modules/stem_flow_model.h
+        auxil/lookup_table.h
+        ../Tests/water_flow_segments_approx_test.h
         )
 
 set(source
@@ -52,6 +54,8 @@ set(source
         io/analysis_hainich.cpp
         io/time_series.cpp
         modules/stem_flow_model.cpp
+        auxil/lookup_table.cpp
+        ../Tests/water_flow_segments_approx_test.cpp
         )
 
 include(add_model_sources)

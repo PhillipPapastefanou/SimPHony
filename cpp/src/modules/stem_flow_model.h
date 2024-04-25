@@ -4,17 +4,23 @@
 
 #pragma once
 #include "../framework/parameters.h"
+#include "../auxil/lookup_table.h"
 
 class Stem_flow_module {
 
 public:
     Stem_flow_module(const Parameters& params);
     virtual ~Stem_flow_module();
+
+
     virtual void Init() = 0;
     virtual double Get_Stem_flow(double psi_stem, double psi_leaf) = 0;
+    void Update_min_conductivity_fractions();
 
 protected:
     const Parameters& params;
+    std::vector<double> min_frac_con_per_segment;
+    std::vector<double> actual_frac_con_per_segment;
 
 };
 
@@ -24,11 +30,13 @@ class Linear_stem_flow : public Stem_flow_module{
 public:
     Linear_stem_flow(const Parameters& params);
     void Init() override;
-    double Get_Stem_flow(double psi_stem, double psi_leaf) override;
+    double Get_Stem_flow(double psi_root, double psi_leaf) override;
 
 private:
     double b;
     double c;
+    Lookup_table k_xylem_loss_table;
+
 };
 
 

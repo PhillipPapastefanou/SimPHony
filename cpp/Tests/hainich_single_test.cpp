@@ -101,7 +101,7 @@ Hainich_Single_Test::Hainich_Single_Test() {
 
 
     auto start_clock = std::chrono::high_resolution_clock::now();
-    Leaf_Stem_Implicit_Model model(params, input);
+    Leaf_Stem_Ground_Implicit_Model model(params, input);
 
     model.Set_derived_parameters();
     model.Set_initial_conditions(psi_leaf_init, psi_stem_init);

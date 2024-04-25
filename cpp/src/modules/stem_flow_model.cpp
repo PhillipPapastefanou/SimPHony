@@ -9,13 +9,27 @@
 
 Stem_flow_module::Stem_flow_module(const Parameters &params) :
         params(params){
+
+    min_frac_con_per_segment.resize(params.n_stem_segments);
+    // Setting the fraction of healthy xylem to 100% at the beginning
+    for (auto& value:min_frac_con_per_segment ) {
+        value = 1.0;
+    }
+    actual_frac_con_per_segment.resize(params.n_stem_segments);
 }
 
 Stem_flow_module::~Stem_flow_module() {
 }
 
+void Stem_flow_module::Update_min_conductivity_fractions() {
 
-Linear_stem_flow::Linear_stem_flow(const Parameters &params) : Stem_flow_module(params) {
+    for (int n = 0; n < params.n_stem_segments; ++n) {
+        min_frac_con_per_segment[n] = std::min(min_frac_con_per_segment[n], actual_frac_con_per_segment[n]);
+    }
+}
+
+
+Linear_stem_flow::Linear_stem_flow(const Parameters &params) : Stem_flow_module(params), k_xylem_loss_table() {
 }
 
 void Linear_stem_flow::Init(){
@@ -25,36 +39,83 @@ void Linear_stem_flow::Init(){
     double x2 = 0.88;
 
     if (params.psi50_xylem < params.psi88_xylem){
-        std::cout << "Error: psi50(" << params.psi50_xylem <<") is smaller  than pis88(";
+        std::cout << "Error: psi50(" << params.psi50_xylem <<") is smaller  than psi88(";
         std::cout << params.psi88_xylem << ")! This is physically impossible and must be fixed!" << std::endl;
         exit(99);
     }
 
     c = log(log(1. - x1)/log(1. - x2))/(log(-params.psi50_xylem) - log(-params.psi88_xylem));
     b = -params.psi50_xylem/std::pow(-log(1. - x1), (1./c));
+
+    double psi_min = params.psi88_xylem * 4.0;
+    double psi_max = 0.0;
+    double delta_psi_step = 0.01;
+
+    std::vector<double> psi_values;
+    std::vector<double> k_loss_values;
+
+    for (double psi = psi_min; psi < psi_max; psi += delta_psi_step) {
+        psi_values.push_back( psi);
+        k_loss_values.push_back(std::exp(-std::pow(-psi / b, c)));
+    }
+
+    k_xylem_loss_table.Init(psi_values, k_loss_values);
 }
 
 
-double Linear_stem_flow::Get_Stem_flow(double psi_stem, double psi_leaf) {
+double Linear_stem_flow::Get_Stem_flow(double psi_root, double psi_leaf) {
 
-    // The factor of two reflects the water uptake from the middle of the Stem to the canopy only
-    // All Pressures are in [MPa]
-    double DeltaP_LS = psi_stem - psi_leaf - (params.rho_water * params.grav * params.canopy_height / 2.0) * params.PaToMPa;
+    // Water potential drop per stem segment
+    double delta_psi_per_segment = (psi_root - psi_leaf) / params.n_stem_segments;
 
-    // Prevent negative pressure differences to avoid letting the water flow down the tree
-    if(DeltaP_LS < 0.0)
-        DeltaP_LS = 0.0;
+    // If the differences of the leaf water potential and the psi bottom layer are zero
+    // assume no water flow
+    if (std::abs(delta_psi_per_segment) < 1E-12){
+        return 0.0;
+    }
 
-    // Calculate the average between leaf and stem water potential [MPa]
-    double psi_avg = (psi_leaf + psi_stem) / 2.0;
+    // Height of each segment [m]
+    double segment_height =  params.canopy_height / params.n_stem_segments;
 
-    // Estimate the xylem conductance based on the satured xylem and the PLC of the xylem
-    // [mol m-1 s-1 MPa-1]
-    double k_xylem = params.k_xylem_sat * std::exp( -std::pow(-psi_avg / b, c));
+    // Hydrostatic perssure per segment [MPa]
+    double psi_hydrostatic_per_segment = (params.rho_water * params.grav *segment_height) * params.PaToMPa;
 
-    // Calculate the stem water flow J [mol m-2 s-1]
-    // This is essentially Darcy's law
-    return DeltaP_LS * k_xylem * params.huber_value / (params.eta_LS * params.canopy_height / 2.0);
+    // Total water flow through the stem [mol m-2 s-1]
+    double stem_water_flow = 0.0;
+
+    // Loop through segments
+    // Starting from the lowest segment and iterate until we reach the top
+    for (int n = 0; n < params.n_stem_segments; ++n) {
+
+        // Calculate lower and upper water potential of each segment
+        const double psi_lower_seg = psi_root - n * delta_psi_per_segment;
+        const double psi_upper_seg = psi_root - (n + 1) * delta_psi_per_segment;
+
+        // Calculate the average water potential between segments [MPa]
+        double psi_avg_seg = (psi_lower_seg + psi_upper_seg) / 2.0;
+
+        // Loss of hydraulic conductivity per segment [0-1]
+        actual_frac_con_per_segment[n] = k_xylem_loss_table.Get(psi_avg_seg);
+
+        if (params.sustain_xylem_damage){
+            double min_fraction = std::min(min_frac_con_per_segment[n], actual_frac_con_per_segment[n]);
+            actual_frac_con_per_segment[n] = min_fraction;
+        }
+
+        // Water uptake is the differennce between the segments minus the hydrostatic pressure [MPA]
+        double delta_psi_uptake = delta_psi_per_segment - psi_hydrostatic_per_segment;
+        // Prevent negative pressure differences to avoid letting the water flow down the tree
+        if(delta_psi_uptake < 0.0)
+            delta_psi_uptake = 0.0;
+
+        // Accumulate stem water flow per segment
+        stem_water_flow += delta_psi_uptake * actual_frac_con_per_segment[n] * params.k_xylem_sat;
+    }
+
+    // Multiply with constants
+    stem_water_flow *= params.huber_value / (params.eta_LS * params.canopy_height);
+
+    return stem_water_flow;
 }
 
 Kirchhoff_Weibull_stem_flow::Kirchhoff_Weibull_stem_flow(const Parameters &params) : Stem_flow_module(params) {
@@ -82,7 +143,7 @@ double Kirchhoff_Weibull_stem_flow::KirchhoffIntegral(double psi) {
 double Kirchhoff_Weibull_stem_flow::Get_Stem_flow(double psi_stem, double psi_leaf) {
 
     // Calculate hydrostatic pressure
-    double psi_hydro = (params.rho_water * params.grav * params.canopy_height / 2.0) * params.PaToMPa;
+    double psi_hydro = (params.rho_water * params.grav * params.canopy_height) * params.PaToMPa;
 
     // If leaf wand soil water potential are (almost) identical we avoid the divide by zero calcuation and
     // return zero water flow
@@ -101,7 +162,7 @@ double Kirchhoff_Weibull_stem_flow::Get_Stem_flow(double psi_stem, double psi_le
     // Solving the conductivity integral
     double J_unit = KirchhoffIntegral(- psi_leaf) - KirchhoffIntegral(- psi_stem);
 
-    return J_unit * params.k_xylem_sat * flow_psi_coeff * params.huber_value / (params.eta_LS * params.canopy_height / 2.0);
+    return J_unit * params.k_xylem_sat * flow_psi_coeff * params.huber_value / (params.eta_LS * params.canopy_height);
 }
 
 double Kirchhoff_Piecewise_Erf::g_erf(double psi50, double slope, double psi_q, double q) {
@@ -157,10 +218,10 @@ void Kirchhoff_Piecewise_Erf::Init() {
     b = -params.psi50_xylem/std::pow(-log(1. - x1), (1./c));
 
     q95 = 0.95;
-    psi_95 = -b*std::pow(-log(q95), 1.0/c);
+    psi_95 = -b * std::pow(-log(q95), 1.0/c);
 
     q05 = 0.05;
-    psi_05 = -b*std::pow(-log(q05), 1.0/c);
+    psi_05 = -b * std::pow(-log(q05), 1.0/c);
 
     slope_low = FindKirchhoffSlope(params.psi50_xylem, psi_05, q05);
     slope_up = FindKirchhoffSlope(params.psi50_xylem, psi_95, q95);
@@ -183,7 +244,7 @@ double Kirchhoff_Piecewise_Erf::KirchhoffIntegralSplit(double psi) {
 
 double Kirchhoff_Piecewise_Erf::Get_Stem_flow(double psi_stem, double psi_leaf) {
     // Calculate hydrostatic pressure
-    double psi_hydro = (params.rho_water * params.grav * params.canopy_height / 2.0) * params.PaToMPa;
+    double psi_hydro = (params.rho_water * params.grav * params.canopy_height) * params.PaToMPa;
 
     // If leaf wand soil water potential are (almost) identical we avoid the divide by zero calcuation and
     // return zero water flow
@@ -202,5 +263,5 @@ double Kirchhoff_Piecewise_Erf::Get_Stem_flow(double psi_stem, double psi_leaf) 
     // Solving the conductivity integral
     double J_unit = KirchhoffIntegralSplit(psi_stem) - KirchhoffIntegralSplit(psi_leaf);
 
-    return J_unit * params.k_xylem_sat * flow_psi_coeff * params.huber_value / (params.eta_LS * params.canopy_height / 2.0);
+    return J_unit * params.k_xylem_sat * flow_psi_coeff * params.huber_value / (params.eta_LS * params.canopy_height);
 }

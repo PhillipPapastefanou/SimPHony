@@ -70,7 +70,7 @@ void Simulation_Multi_Hainich::Run(double steplen, DateTime timestart, DateTime 
         Parameters& parameters = std::get<0>(parameter_list[r]);
         int parameter_index = std::get<1>(parameter_list[r]);
 
-        Leaf_Stem_Implicit_Model model(parameters, *input);
+        Leaf_Stem_Ground_Implicit_Model model(parameters, *input);
         model.Set_derived_parameters();
         model.Set_initial_conditions(init_psi_leaf, init_psi_stem);
         model.Run(steplen,timestart,timeend);

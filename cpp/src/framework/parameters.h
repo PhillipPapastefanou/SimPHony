@@ -23,6 +23,7 @@ public:
     ~Parameters();
 
     const double SEC_IN_DAY = 86400.0;
+    const double SEC_IN_HOUR = 3600.0;
     const double CM_IN_M = 100.0;
     const double KG_H2O_To_Mol = 1000.0 / 18.0;
     const double G_H2O_To_Mol = 1.0 / 18.0;
@@ -153,9 +154,28 @@ public:
     double solver_precision = 1E-10;
 
 
-    // Analysis_Swiss paramters
+    // Number of stem segments between psi_L und psi_S
+    double n_stem_segments = 10;
+
+    // Whether xylem damage is permanent or not to each segment
+    bool sustain_xylem_damage = false;
+    // Parameter describing at which levels xylem damage is permanent
+    double permanent_xylem_fraction_threshold = 0.88;
+
+    // Analysis_Swiss paramters [-]
     double sigma_log_likelyhood = 1.0;
 
+    // Maximum leaf water potential [MPa]
+    double max_leaf_water_potential = -1E-3;
+    // Maximum leaf water potential change per hour [MPa]
+    double max_psi_leaf_change_per_hour = 1.0;
+    // Multiplier to estimate the minimum leaf water potential
+    // psi_leaf_min = muliplier x psi_88
+    double minimum_psi_leaf_multiplier = 4.0;
+    // Maximum stem water potential [MPa]
+    double max_stem_water_potential = -1E-10;
+
+    bool verbose = false;
 
 private:
 };

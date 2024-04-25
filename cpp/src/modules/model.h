@@ -10,12 +10,12 @@
 #include "stem_flow_model.h"
 
 class Bisection_psi_leaf;
-class Bisection_psi_stem;
+class Bisection_psi_stem_ground;
 
-class Leaf_Stem_Implicit_Model{
+class Leaf_Stem_Ground_Implicit_Model{
 
 public:
-    Leaf_Stem_Implicit_Model(const Parameters& parameters, const Input& input);
+    Leaf_Stem_Ground_Implicit_Model(const Parameters& parameters, const Input& input);
 
     void Set_derived_parameters();
 
@@ -58,44 +58,40 @@ private:
     vector<double> ik_soil;
 
 
-    // Derived parameters [MPa]
+    // Derived parameters
+
+    // Adjusted gompertz function parameter [MPa]
     double psi_gomp_50;
     // Rooting fraction per laye [-]
     vector<double> root_fraction_player;
     // Soil layer depths
     vector<double> soil_layer_depth_acc;
+    // Minimum leaf water potential
+    double min_leaf_water_potential;
 
     /// Stem water flow models
     std::unique_ptr<Stem_flow_module> stem_flow_module;
 
-
     /// Main model solvers
     std::unique_ptr<Bisection_psi_leaf> solver_psi_leaf;
-    std::unique_ptr<Bisection_psi_stem> solver_psi_stem;
-
+    std::unique_ptr<Bisection_psi_stem_ground> solver_psi_stem_ground;
 
     /// Main states
     /// Leaf water potential at average canopy height [MPa]
     double psi_leaf;
-
-    /// Stem water potential at the mean height of the stem [MPa]
-    double psi_stem;
+    /// Root water potential at the bottom of the stem [MPa]
+    double psi_stem_ground;
+    /// Stem water potential segments between stem ground and canopy [MPa]
+    std::vector<double> psi_stem_segments;
 
 
     // Main functions
-
-    // Derivative of the leaf water potential. Internal function.
-    // [MPa s-1]
+    /// Derivative of the leaf water potential. Internal function [MPa s-1]
     double d_psi_leaf(double psi_leaf, double psi_stem);
-
-    // Derivative of the stem water potential. Internal function.
-    double d_psi_stem(double psi_leaf, double psi_stem);
-
-
-    /// Derived or helper states
-    /// Forcing pressure between leaf and soil water potential [MPA]
-    /// Driving force for the water to be taken up the plant
-    double DeltaP_LS;
+    /// Derivative of the root water potential. Internal function.
+    double d_psi_stem_ground(double psi_leaf, double psi_stem);
+    /// Update the stem water potential segments
+    void update_psi_stems();
 
     /// Stomatal conductance [mol H2O m-2 s-1]
     double gs;
@@ -136,18 +132,20 @@ private:
 };
 
 
-class Bisection_psi_leaf : public Bisection_solver_interface {
+class Bisection_psi_leaf : public Bisection_two_layer_solver_interface {
 
 public:
-    Bisection_psi_leaf(Leaf_Stem_Implicit_Model& model , double precision, int max_steps): Bisection_solver_interface(model, precision, max_steps){}
+    Bisection_psi_leaf(Leaf_Stem_Ground_Implicit_Model& model , double precision, int max_steps, double global_min, double global_max):
+    Bisection_two_layer_solver_interface(model, precision, max_steps, global_min, global_max){}
 protected:
     double f(double x) override;
 };
 
-class Bisection_psi_stem : public Bisection_solver_interface {
+class Bisection_psi_stem_ground : public Bisection_two_layer_solver_interface {
 
 public:
-    Bisection_psi_stem(Leaf_Stem_Implicit_Model& model , double precision, int max_steps): Bisection_solver_interface(model, precision, max_steps){}
+    Bisection_psi_stem_ground(Leaf_Stem_Ground_Implicit_Model& model , double precision, int max_steps, double global_min, double global_max ):
+    Bisection_two_layer_solver_interface(model, precision, max_steps, global_min, global_max){}
 protected:
     double f(double x) override;
 };

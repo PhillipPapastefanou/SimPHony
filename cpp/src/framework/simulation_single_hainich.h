@@ -34,7 +34,7 @@ private:
     std::unique_ptr<Parameters> parameters;
     std::unique_ptr<Input_Hainich> input;
     std::unique_ptr<TimeSeries> sap_series;
-    std::unique_ptr<Leaf_Stem_Implicit_Model> model;
+    std::unique_ptr<Leaf_Stem_Ground_Implicit_Model> model;
     std::unique_ptr<AnalysisHainich> analysis;
 };
 

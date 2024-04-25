@@ -7,12 +7,12 @@
 #include "time_series.h"
 #include "../framework/parameters.h"
 
-class Leaf_Stem_Implicit_Model;
+class Leaf_Stem_Ground_Implicit_Model;
 class AnalysisHainich {
 
 
 public:
-    AnalysisHainich(Leaf_Stem_Implicit_Model* model, const Parameters& parameters);
+    AnalysisHainich(Leaf_Stem_Ground_Implicit_Model* model, const Parameters& parameters);
 
     void CompareSapwood(const TimeSeries& time_series);
 

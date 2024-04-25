@@ -2,13 +2,14 @@
 #include "../Tests/hainich_single_test.h"
 #include "../Tests/multi_test.h"
 #include "framework/date_time.h"
+#include "../Tests/water_flow_segments_approx_test.h"
 #include <ctime>
 #include <iostream>
 #include <iomanip>
 #include <string>
 #include <sstream>
-#include "modules/stem_flow_model.h"
-#include <vector>
+
+
 
 int main(int argc, char* argv[]) {
 
@@ -24,28 +25,31 @@ int main(int argc, char* argv[]) {
 //
 //    int x = 3 ;
 
-    Parameters parameters;
+//    Parameters parameters;
+//
+//    std::vector<std::unique_ptr<Stem_flow_module> > modules;
+//
+//    parameters.psi50_xylem = -2;
+//    parameters.psi88_xylem= -4;
+//
+//    modules.push_back(std::make_unique<Linear_stem_flow>(parameters));
+//    modules.push_back(std::make_unique<Kirchhoff_Weibull_stem_flow>(parameters));
+//    modules.push_back(std::make_unique<Kirchhoff_Piecewise_Erf>(parameters));
+//
+//
+//    for (auto& module: modules) {
+//        module->Init();
+//    }
+//
+//    double psi_leaf = -1;
+//    double psi_stem_ground = -0.25;
+//
+//    for (auto& module: modules) {
+//        std::cout << module->Get_Stem_flow(psi_stem_ground, psi_leaf) << std::endl;
+//    }
 
-    std::vector<std::unique_ptr<Stem_flow_module> > modules;
 
-    parameters.psi50_xylem = -2;
-    parameters.psi88_xylem= -4;
-
-    modules.push_back(std::make_unique<Linear_stem_flow>(parameters));
-    modules.push_back(std::make_unique<Kirchhoff_Weibull_stem_flow>(parameters));
-    modules.push_back(std::make_unique<Kirchhoff_Piecewise_Erf>(parameters));
-
-
-    for (auto& module: modules) {
-        module->Init();
-    }
-
-    double psi_leaf = -1;
-    double psi_stem = -0.25;
-
-    for (auto& module: modules) {
-        std::cout << module->Get_Stem_flow(psi_stem, psi_leaf) << std::endl;
-    }
+    //Water_flow_segmented_test water_flow_test;
 
     Swiss_Single_Test single_test;
     //Multi_Test single_test;

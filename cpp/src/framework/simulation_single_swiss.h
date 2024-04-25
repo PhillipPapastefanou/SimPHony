@@ -37,7 +37,7 @@ private:
     std::unique_ptr<Input> input;
     std::unique_ptr<Swiss_Drought_Trees> swiss_trees;
 
-    std::unique_ptr<Leaf_Stem_Implicit_Model> model;
+    std::unique_ptr<Leaf_Stem_Ground_Implicit_Model> model;
     std::unique_ptr<Analysis_Swiss> analysis;
 
 
