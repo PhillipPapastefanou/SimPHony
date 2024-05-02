@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include "../modules/soil_layer.h"
 //#include <numbers>
 
 enum class Conductivity_fraction_module_type{
@@ -41,6 +42,11 @@ struct Constants{
     // Gravitational constant [kg m-1 s-2]
     const double GRAVITY = 9.81;
 
+    // Maximum leaf water potential [MPa]
+    double MAX_LEAF_WATER_POTENTIAL = -1E-3;
+    // Maximum stem water potential [MPa]
+    double MAX_STEM_WATER_POTENTIAL = -1E-10;
+
 };
 
 
@@ -49,6 +55,10 @@ class Parameters
 public:
     Parameters();
     ~Parameters();
+    void Set_derived();
+
+    // Universal parameter ID
+    int id = -1;
 
     // Parameters assumed to be constants and will not change
     Constants constants;
@@ -71,9 +81,9 @@ public:
     // Convert to [mol H2O m-3 MPa-1]
     double stem_hydraulic_capacitance_max = 20.0 * constants.KG_H2O_To_Mol;
 
-    // Meinzer et al 2010: Could be up 1-10 kg H2O m-1 s-1 MPa-1 (Maximum specific conductivity)
-    // Meinzer et al 2010: 0.05- 10 kg H2O m-1 s-1 MPa-1 (Xylem specific conductivity)
+
     // Xylem saturated Hydraulic conductivity [mol m-1 s-1 MPa-1]
+    // Manon: up to 1.5, but this value is per Hubervalue and height (so need to be multiplied by that)
     double k_xylem_sat = 150/1800.0;
     // Huber value [m2 m-2] equals 1/klatosa (leaf area to sapwood area)
     // From sperry et al
@@ -111,18 +121,11 @@ public:
     // Todo Fix the different types
     Soil_water_module_type soil_water_type = Soil_water_module_type::Saxton06;
 
-    // Soil depths in m
-    std::vector<double> soil_depths;
-
     // Index of current soil profile index if multiple water contents per sites are available
     int soil_profile_index = 0;
 
     // Jackson rooting parameter [-]
     double jackson_root_beta  = 0.96;
-
-    // Van Looy et al 4.8 - 62 [cm d-1]
-    // Saturated soil hydraulic conductance [m s-1]
-    std::vector<double> k_soil_sats;
 
     // Saturated volumetric water content [m3 m-3]
     double theta_s = 0.8;
@@ -159,14 +162,9 @@ public:
     // Used for output scaling onlny
     double tree_density = 1.0;
 
-    std::vector<double> organic_matter_fracs;
-    std::vector<double> sand_fracs;
-    std::vector<double> clay_fracs;
-
     // Auxiliary parameters
     // Todo connect to solvers
     double solver_precision = 1E-10;
-
 
     // Number of stem segments between psi_L und psi_S
     double n_stem_segments = 10;
@@ -179,15 +177,14 @@ public:
     // Analysis_Swiss paramters [-]
     double sigma_log_likelyhood = 1.0;
 
-    // Maximum leaf water potential [MPa]
-    double max_leaf_water_potential = -1E-3;
+
+
     // Maximum leaf water potential change per hour [MPa]
     double max_psi_leaf_change_per_hour = 1.0;
     // Multiplier to estimate the minimum leaf water potential
     // psi_leaf_min = muliplier x psi_88
     double minimum_psi_leaf_multiplier = 4.0;
-    // Maximum stem water potential [MPa]
-    double max_stem_water_potential = -1E-10;
+
 
 
     // Enable loss through the bakr loss
@@ -199,5 +196,9 @@ public:
 
     Conductivity_fraction_module_type  conductivity_fraction_type = Conductivity_fraction_module_type::Weibull;
 
+    // Data stored in each soil layer
+    std::vector<Soil_layer> soil_layers;
+
 private:
+
 };

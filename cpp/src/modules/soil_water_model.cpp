@@ -16,17 +16,17 @@ Soil_water_module::~Soil_water_module() {
 
 void Campbell_Soil_Water::CalculatePsiAndKs() {
 
-    if (parameters.k_soil_sats.size() != 1){
-        std::cout << "Campbell soil module only works for a single conductivity 1" ;
+    if (parameters.soil_layers.size() != 1){
+        std::cout << "Campbell soil module only works for a single soil layer" ;
         exit(99);
     }
 
     std::cout << "Warning: The Campbell soil module is not properly implemented. Please check the equations" << std::endl;
     const double b = parameters.camp_b;
-    const double Ks = parameters.k_soil_sats[0];
+    const double Ks = parameters.soil_layers[0].k_soil_sat;
     const double theta_s = parameters.theta_s;
     const double psi_s_ref = parameters.camp_psi_soil_ref;
-    int nsoil = parameters.soil_depths.size();
+    int nsoil = parameters.soil_layers.size();
 
     vector<vector<float> > theta_array = input_module.theta_per_layer;
     this->psi_s_array.resize(theta_array.size());
@@ -104,38 +104,20 @@ void Saxton06_Soil_Water::CalculatePsiAndKs() {
     this->ks_array.resize(theta_array.size());
 
     int number_of_layers_in_input = theta_array[0].size();
-    int nsoil = parameters.soil_depths.size();
+    int nsoil = parameters.soil_layers.size();
 
     if(nsoil != number_of_layers_in_input){
-        std::cout << "Numbers of soil layers does not match number of layers in input";
+        std::cout << "Number of soil layers does not match number of layers in input";
         exit(99);
     }
 
-    if (parameters.sand_fracs.size() != nsoil){
-        std::cout << "Invalid number of sand fracs supplied: " << parameters.sand_fracs.size();
-        exit(99);
-    }
 
-    if (parameters.clay_fracs.size() != nsoil){
-        std::cout << "Invalid number of clay fracs supplied: " << parameters.sand_fracs.size();
-        exit(99);
-    }
 
-    if (parameters.organic_matter_fracs.size() != nsoil){
-        std::cout << "Invalid number of organic_matter_fracs supplied: " << parameters.sand_fracs.size();
-        exit(99);
-    }
+    Ks.resize(nsoil);
+    sand_fracs.resize(nsoil);
+    clay_fracs.resize(nsoil);
+    orgmat_fracs.resize(nsoil);
 
-    if (parameters.k_soil_sats.size() != nsoil){
-        std::cout << "Invalid number of soil hydraulic conductivities supplied: " << parameters.sand_fracs.size();
-        exit(99);
-    }
-
-    Ks = parameters.k_soil_sats;
-
-    sand_fracs = parameters.sand_fracs;
-    clay_fracs = parameters.clay_fracs;
-    orgmat_fracs = parameters.organic_matter_fracs;
 
     theta_t_33.resize(nsoil);
     theta_33.resize(nsoil);
@@ -147,8 +129,17 @@ void Saxton06_Soil_Water::CalculatePsiAndKs() {
     B.resize(nsoil);
     A.resize(nsoil);
 
+
+
     for (int is = 0; is < nsoil; ++is) {
-        theta_t_33[is] = calc_theta_33_t(is);
+
+        Soil_layer layer = parameters.soil_layers[is];
+
+        Ks[is] = layer.k_soil_sat;
+        sand_fracs[is] = layer.sand_fraction;
+        clay_fracs[is] = layer.clay_fraction;
+        orgmat_fracs[is] = layer.organic_matter_fraction;
+
 
         theta_t_33[is]      = calc_theta_33_t(is);
         theta_33[is]        = calc_theta_33(is);
@@ -162,7 +153,6 @@ void Saxton06_Soil_Water::CalculatePsiAndKs() {
         B[is]       = calc_B(is);
         A[is]       = calc_A(is, B[is]);
     }
-
 
 
     //Todo make an option to include the calculation of KS
@@ -356,10 +346,10 @@ void Van_Gnuchten_Soil_Water::CalculatePsiAndKs() {
     vector<vector<float> > theta_array = input_module.theta_per_layer;
     psi_s_array.resize(theta_array.size());
     ks_array.resize(theta_array.size());
-    int nsoil = parameters.soil_depths.size();
+    int nsoil = parameters.soil_layers.size();
 
     if(nsoil != theta_array.front().size()){
-        std::cout << "Numbers of soil layers does not match number of layers in input";
+        std::cout << "Number of soil layers does not match number of layers in input";
         exit(99);
     }
 
@@ -403,7 +393,7 @@ void Van_Gnuchten_Soil_Water::CalculatePsiAndKs() {
             psi_row[s_h] = 1.0/1000.0 * std::pow(se, -1.0 / m) * ( -1.0 + std::pow(se, 1.0 / m)) * std::pow(alpha, -n);
 
             // Todo reenable to account for differents sats
-            double Ks = parameters.k_soil_sats[0];
+            double Ks = parameters.soil_layers[0].k_soil_sat;
             // Convert from pressure head m to MPa
             Ks *= 1000.0/g;
 

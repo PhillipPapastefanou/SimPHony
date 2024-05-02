@@ -8,21 +8,22 @@
 
 Root_distribution_model::Root_distribution_model(const Parameters &parameters) {
 
-    int nlayers = parameters.soil_depths.size();
+
+    int nlayers = parameters.soil_layers.size();
     root_fractions.resize(nlayers);
     soil_depths_acc.resize(nlayers);
 
     // Accumulate soil depths
-    soil_depths_acc[0] = parameters.soil_depths[0];
+    soil_depths_acc[0] = parameters.soil_layers[0].depth;
     for (int i = 1; i < nlayers; ++i) {
-        soil_depths_acc[i] = soil_depths_acc[i - 1] + parameters.soil_depths[i - 1];
+        soil_depths_acc[i] = soil_depths_acc[i - 1] + parameters.soil_layers[i - 1].depth;
     }
 
     // Compute non-normalized root distributions according to jackson et al. 1996
     double rf_sum = 0.0;
     for (int i = 0; i < nlayers; ++i) {
         double rf  = std::pow(parameters.jackson_root_beta, 100.0 * soil_depths_acc[i]) -
-                     std::pow(parameters.jackson_root_beta, 100.0 * (soil_depths_acc[i] + parameters.soil_depths[i]));
+                     std::pow(parameters.jackson_root_beta, 100.0 * (soil_depths_acc[i] + parameters.soil_layers[i].depth));
         rf_sum += rf;
         root_fractions[i] = rf;
     }

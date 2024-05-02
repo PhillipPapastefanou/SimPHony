@@ -26,6 +26,7 @@ set(headers
         io/time_series.h
         modules/stem_flow_model.h
         modules/conductivity_model.h
+        modules/soil_layer.h
         auxil/lookup_table.h
         framework/water_potential_solver.h
         framework/solver_indiv_eulerimp.h
@@ -45,6 +46,7 @@ set(source
         modules/soil_water_model.cpp
         modules/root_distribution_model.cpp
         modules/conductivity_model.cpp
+        modules/soil_layer.cpp
         auxil/csv_reader.cpp
         framework/parameters.cpp
         io/input_swiss.cpp

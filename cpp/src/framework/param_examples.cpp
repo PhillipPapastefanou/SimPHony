@@ -19,7 +19,7 @@ void Parameter_Examples::Define() {
 
     Baseline_one.root_area_index = 24;
 
-    Baseline_one.soil_depths.assign(11, 0.1);
+    Baseline_one.soil_layers.resize(3);
 
     Baseline_one.jackson_root_beta = 0.96;
     Baseline_one.theta_r = 0.0972;
@@ -34,6 +34,6 @@ void Parameter_Examples::Define() {
     Baseline_one.camp_psi_soil_ref = -1.5E-6;
 
     for (int i = 0; i < 3; ++i) {
-        Baseline_one.k_soil_sats.push_back(1.0/100.0/86400.0);
+        Baseline_one.soil_layers[i].k_soil_sat = 1.0/100.0/86400.0;
     }
 }

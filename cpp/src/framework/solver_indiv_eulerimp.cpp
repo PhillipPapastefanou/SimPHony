@@ -120,10 +120,17 @@ double Solver_Indiv_Euler_Imp::d_psi_stem_ground(double psi_leaf, double psi_ste
 
 
     G = 0.0;
-    for (int s = 0; s < params.soil_depths.size(); ++s) {
-        Gi[s] = root_fraction_player[s] * k_soil_sl[s] * std::sqrt(params.root_area_index) /
-                PI / params.soil_depths[s] * (psi_soil_sl[s] - psi_stem) / GRAVITY * MPA_TO_PA;
+    for (int s = 0; s < params.soil_layers.size(); ++s) {
+        Soil_layer sl = params.soil_layers[s];
 
+        Gi[s] = sl.root_fraction * k_soil_sl[s] * std::sqrt(params.root_area_index) /
+                PI / sl.depth * (psi_soil_sl[s] - psi_stem) / GRAVITY * MPA_TO_PA;
+
+        // Avoid water from flowing down from the stem via roots to the soil
+        if (Gi[s] < 0.0)
+            Gi[s] = 0.0;
+
+        G += Gi[s];
         // Avoid water from flowing down from the stem via roots to the soil
         if (Gi[s] < 0.0)
             Gi[s] = 0.0;
@@ -168,7 +175,7 @@ void Solver_Indiv_Euler_Imp::update_psi_stem_ground() {
     // For given leaf water potential AND stem water flow J (esimated by the leaf water potential routen)
     // Solve for stem water potential: Minmum value is the leaf water potential and the maximum value is the
     // maximum stem water potential (close to 0.0)
-    bool converged = solver_psi_stem_ground->Solve(psi_leaf, params.max_stem_water_potential);
+    bool converged = solver_psi_stem_ground->Solve(psi_leaf, params.constants.MAX_STEM_WATER_POTENTIAL);
 
     // Normal routine: Stem water potential found in rang
     if (converged)
@@ -182,7 +189,7 @@ void Solver_Indiv_Euler_Imp::update_psi_stem_ground() {
         // Therefore, calculate stem water potential AND the stem water flow
         // assuming constant leaf water potential (from timestep before), but variable stem water flow J
         calc_J_stem = true;
-        converged = solver_psi_stem_ground->Solve(psi_leaf_prev_ts, params.max_stem_water_potential);
+        converged = solver_psi_stem_ground->Solve(psi_leaf_prev_ts, params.constants.MAX_STEM_WATER_POTENTIAL);
 
 
         // We found a solution of stem water flow
@@ -206,12 +213,12 @@ void Solver_Indiv_Euler_Imp::update_psi_stem_ground() {
                 calc_J_stem = true;
 
                 // Re-estimate psi_stem AND J
-                converged = solver_psi_stem_ground->Solve(psi_leaf, params.max_leaf_water_potential);
+                converged = solver_psi_stem_ground->Solve(psi_leaf, params.constants.MAX_LEAF_WATER_POTENTIAL);
                 psi_stem_ground = solver_psi_stem_ground->Get_solution();
 
                 if (!converged) {
                     std::cout << "Could not determine stem water potential between " << psi_leaf << " and ";
-                    std::cout << params.max_leaf_water_potential;
+                    std::cout << params.constants.MAX_LEAF_WATER_POTENTIAL;
                     std::cout << "with variable J depending on psi_stem." << std::endl;
                     std::cout << "This situation is considered quite unlikely" << std::endl;
 
@@ -263,7 +270,7 @@ void Solver_Indiv_Euler_Imp::update_psi_stem_ground() {
         }
         else {
             std::cout << "Could not determine stem water potential between " << psi_leaf << " and ";
-            std::cout << params.max_leaf_water_potential;
+            std::cout << params.constants.MAX_LEAF_WATER_POTENTIAL;
             std::cout << "with variable J depending on psi_stem." << std::endl;
             std::cout << "This situation is considered quite unlikely" << std::endl;
 
@@ -277,6 +284,7 @@ void Solver_Indiv_Euler_Imp::update_psi_stem_ground() {
                 std::cout << "Leaf water potential is still in well functioning range." << std::endl;
                 std::cout << "This problem deserves a deeper investigation..." << std::endl;
                 std::cout << "Terminate program as we cannot ensure physical reliability of the model." << std::endl;
+                std::cout << "ID of parameter file: " << params.id << std::endl;
                 exit(99);
             }
         }
@@ -300,7 +308,7 @@ void Solver_Indiv_Euler_Imp::update_psi_leaf() {
 
     // Constrain leaf water potential to a maximum value close to 0.0;
     // Avoiding positive values of psi_leaf
-    psi_leaf_upper = std::min(psi_leaf_upper, params.max_leaf_water_potential);
+    psi_leaf_upper = std::min(psi_leaf_upper, params.constants.MAX_LEAF_WATER_POTENTIAL);
 
 
     // Solve for leaf water potential...
@@ -318,7 +326,7 @@ void Solver_Indiv_Euler_Imp::update_psi_leaf() {
 
         // Check again if leaf water potential is recovering quicker than the standard boundaries allow
         // We allow this to happen, as it much less problematic thant a more negative drop in leaf water potential
-        bool converged = solver_psi_leaf->Solve(psi_leaf, params.max_leaf_water_potential);
+        bool converged = solver_psi_leaf->Solve(psi_leaf, params.constants.MAX_LEAF_WATER_POTENTIAL);
         if (converged) {
             psi_leaf = solver_psi_leaf->Get_solution();
         }

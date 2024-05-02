@@ -13,21 +13,14 @@
 class Model{
 
 public:
-    Model(const Parameters& parameters, const Input& input);
-
+    Model(Parameters& parameters, const Input& input);
     void Set_derived_parameters();
-
     void Set_initial_conditions(double psi_leaf_zero, double psi_soil_zero);
-
     void Run(DateTime begin, DateTime end);
-
     const Output& Get_output();
-
-
 private:
     // Input references
     const Parameters& params;
-
     const Input& input_module;
 
     vector<float> input_vpd;

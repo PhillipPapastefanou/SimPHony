@@ -55,10 +55,6 @@ protected:
     double beta_stom_cond;
     // Adjusted gompertz function parameter [MPa]
     double psi_gomp_50;
-    // Rooting fraction per laye [-]
-    std::vector<double> root_fraction_player;
-    // Soil layer depths
-    std::vector<double> soil_layer_depth_acc;
 
 
 
@@ -99,7 +95,6 @@ protected:
 
     /// Stem water flow models
     std::unique_ptr<Stem_flow_module> stem_flow_module;
-
 
     /// Derived states
     double min_leaf_water_potential;

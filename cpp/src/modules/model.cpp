@@ -15,12 +15,12 @@ int Model::time_index(double elapsed_seconds) {
 }
 
 Model::Model
-(const Parameters &parameters, const Input &input):
+(Parameters &parameters, const Input &input):
 params(parameters),
 input_module(input),
 output(parameters)
 {
-
+    parameters.Set_derived();
 }
 
 void Model::Set_derived_parameters() {
@@ -52,12 +52,10 @@ void Model::Set_derived_parameters() {
     // std::cout << "Using " << water_model_str << " soil water model." << std::endl;
 
     soil_water_module->CalculatePsiAndKs();
-
     input_k_soil = soil_water_module->Get_ks();
     input_psi_soil = soil_water_module->Get_psi();
     input_anet = input_module.anet;
     input_vpd = input_module.vpd;
-
 
     //water_potential_solver= std::make_unique<Solver_RKF>(params);
     water_potential_solver= std::make_unique<Solver_Indiv_Euler_Imp>(params);
@@ -136,10 +134,8 @@ void Model::add_output() {
     for (auto& e: ks_soil_f)
         e *= 1.0;
     output.Add_ks_indiv(ks_soil_f);
-
     output.Add_anet(ianet);
     output.Add_vpd(ivpd);
-
 }
 
 const Output &Model::Get_output() {

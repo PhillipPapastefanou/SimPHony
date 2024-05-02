@@ -8,6 +8,7 @@
 #include <sstream>
 #include <iostream>
 #include <memory>
+#include <cstring>
 using std::string;
 
 Parameter_CSV_Reader::Parameter_CSV_Reader(std::string filename): reader(filename, true, ','), check_if_found(false) {
@@ -63,6 +64,28 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
         n_conversion = 0;
 
         vector<string> row = values[i];
+
+        val = "id";
+        pos = get_position(val);
+        if(pos <  row.size())
+            params.id = std::stoi(row[pos]);
+
+        val = "verbose";
+        pos = get_position(val);
+        if(pos <  row.size())
+            params.verbose = (strcasecmp("true",row[pos].c_str()) == 0);
+
+
+        val = "max_psi_leaf_change_per_hour";
+        pos = get_position(val);
+        if(pos <  row.size())
+            params.max_psi_leaf_change_per_hour = std::stod(row[pos]);
+
+        val = "minimum_psi_leaf_multiplier";
+        pos = get_position(val);
+        if(pos <  row.size())
+            params.minimum_psi_leaf_multiplier = std::stod(row[pos]);
+
 
         val = "root_area_index";
         pos = get_position(val);
@@ -137,12 +160,19 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
         val = "soil_depths";
         pos = get_position(val);
         if(pos <  row.size()){
-            params.soil_depths.resize(0);
+
+            std::vector<double> soil_depths;
+            soil_depths.resize(0);
             std::string input = row[pos];
             std::string word;
             std::stringstream row_str(input);
             while (getline(row_str, word, ';')) {
-                params.soil_depths.push_back(std::stod(word));
+                soil_depths.push_back(std::stod(word));
+            }
+
+            params.soil_layers.resize(soil_depths.size());
+            for (int j = 0; j < params.soil_layers.size(); ++j) {
+                params.soil_layers[j].depth = soil_depths[j];
             }
         }
 
@@ -150,12 +180,13 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
         val = "k_soil_sats";
         pos = get_position(val);
         if(pos <  row.size()){
-            params.k_soil_sats.resize(0);
             std::string input = row[pos];
             std::string word;
             std::stringstream row_str(input);
+            int i = 0;
             while (getline(row_str, word, ';')) {
-                params.k_soil_sats.push_back(std::stod(word));
+                params.soil_layers[i].k_soil_sat = std::stod(word);
+                i++;
             }
         }
 
@@ -220,36 +251,39 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
         val = "sand_fracs";
         pos = get_position(val);
         if(pos <  row.size()){
-            params.sand_fracs.resize(0);
             std::string input = row[pos];
             std::string word;
             std::stringstream row_str(input);
+            int i = 0;
             while (getline(row_str, word, ';')) {
-                params.sand_fracs.push_back(std::stod(word));
+                params.soil_layers[i].sand_fraction = std::stod(word);
+                i++;
             }
         }
 
         val = "clay_fracs";
         pos = get_position(val);
         if(pos <  row.size()){
-            params.clay_fracs.resize(0);
             std::string input = row[pos];
             std::string word;
             std::stringstream row_str(input);
+            int i = 0;
             while (getline(row_str, word, ';')) {
-                params.clay_fracs.push_back(std::stod(word));
+                params.soil_layers[i].clay_fraction = std::stod(word);
+                i++;
             }
         }
 
         val = "organic_matter_fracs";
         pos = get_position(val);
         if(pos <  row.size()){
-            params.organic_matter_fracs.resize(0);
             std::string input = row[pos];
             std::string word;
             std::stringstream row_str(input);
+            int i = 0;
             while (getline(row_str, word, ';')) {
-                params.organic_matter_fracs.push_back(std::stod(word));
+                params.soil_layers[i].organic_matter_fraction = std::stod(word);
+                i++;
             }
         }
 

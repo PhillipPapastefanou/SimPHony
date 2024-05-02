@@ -38,7 +38,7 @@ void Solver_2D::Update_water_potentials() {
         double psi_leaf_lower = psi_leaf - max_psi_leaf_change_per_ts;
         double psi_leaf_upper = psi_leaf + max_psi_leaf_change_per_ts;
 
-        psi_leaf_upper = std::max(psi_leaf_upper , params.max_leaf_water_potential);
+        psi_leaf_upper = std::max(psi_leaf_upper, params.constants.MAX_LEAF_WATER_POTENTIAL);
         //psi_leaf = solver_psi_leaf->Solve(psi_leaf_lower, psi_leaf_upper);
     }
 
@@ -93,9 +93,12 @@ double Solver_2D::d_psi_stem_ground(double psi_leaf, double psi_stem) {
 //    J = stem_flow_module->Get_Stem_flow(psi_stem, this->psi_leaf);
 
     G = 0.0;
-    for (int s = 0; s < params.soil_depths.size(); ++s) {
-        Gi[s] = root_fraction_player[s] * k_soil_sl[s] * std::sqrt(params.root_area_index) /
-                PI / params.soil_depths[s] * (psi_soil_sl[s] - psi_stem) / GRAVITY * MPA_TO_PA;
+    for (int s = 0; s < params.soil_layers.size(); ++s) {
+
+        Soil_layer sl = params.soil_layers[s];
+
+        Gi[s] = sl.root_fraction * k_soil_sl[s] * std::sqrt(params.root_area_index) /
+                PI / sl.depth * (psi_soil_sl[s] - psi_stem) / GRAVITY * MPA_TO_PA;
 
         // Avoid water from flowing down from the stem via roots to the soil
         if (Gi[s] < 0.0)

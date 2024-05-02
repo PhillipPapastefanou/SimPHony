@@ -106,21 +106,20 @@ Swiss_Single_Test::Swiss_Single_Test() {
     params.stem_flow_type = Stem_flow_module_type::Linear;
     params.conductivity_fraction_type = Conductivity_fraction_module_type::Weibull;
     params.sustain_xylem_damage = false ;
-    params.stem_hydraulic_capacitance_max =  5* 1000/18.01;
+    params.stem_hydraulic_capacitance_max =  50* 1000/18.01 ;
     params.huber_value = 1/5000.0;
     params.verbose= true;
     params.d_50_close = 1.0;
 
-
-    for (int i = 0; i < params.k_soil_sats.size(); ++i) {
-        params.k_soil_sats[i] *= 1.0 ;
+    for (int i = 0; i < params.soil_layers.size(); ++i) {
+        params.soil_layers[i].k_soil_sat  *= 1.0;
     }
+
 
     params.k_xylem_sat = 1.5 * 5000 * 30 / 100;
     params.leaf_hydraulic_capacitance = 0.001* 55;
 
     //params.g_bark = params.g0 * 2;
-
 
     double psi_leaf_init = -1.0;
     double psi_stem_init = -0.3;

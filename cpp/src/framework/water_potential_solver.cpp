@@ -40,7 +40,7 @@ void Water_Potential_Solver::init_base() {
     min_leaf_water_potential = params.psi88_xylem * params.minimum_psi_leaf_multiplier;
     max_psi_leaf_change_per_ts = params.max_psi_leaf_change_per_hour * dts / SEC_IN_HOUR;
 
-    Gi.resize(params.soil_depths.size());
+    Gi.resize(params.soil_layers.size());
 
     switch (params.stem_flow_type) {
 
@@ -63,11 +63,6 @@ void Water_Potential_Solver::init_base() {
     }
     stem_flow_module->Init();
     psi_stem_segments.resize(params.n_stem_segments);
-
-    Root_distribution_model root_model(params);
-    root_fraction_player = root_model.Get_root_fractions();
-    soil_layer_depth_acc = root_model.Get_soil_layer_depth_acc();
-
 
     // Gompertz function parameter estimates
     psi_gomp_50 = params.psi_leaf_50_close;

@@ -53,7 +53,6 @@ Hainich_Single_Test::Hainich_Single_Test() {
     params.k_xylem_sat = 100;
 
     params.root_area_index = 24;
-    params.soil_depths= {0.08, 0.16, 0.32};
 
     params.jackson_root_beta = 0.96;
     params.theta_r = 0.0972;
@@ -65,22 +64,20 @@ Hainich_Single_Test::Hainich_Single_Test() {
     params.camp_b = 6.2;
     params.camp_psi_soil_ref = -2.5E-3;
 
-    params.k_soil_sats.resize(3);
-    for (int i = 0; i < 3; ++i) {
-        params.k_soil_sats[i] = 0.02/100.0/3600;
+
+    params.soil_layers.resize(3);
+    params.soil_layers[0].depth = 0.08;
+    params.soil_layers[1].depth = 0.16;
+    params.soil_layers[2].depth = 0.32;
+
+
+    for (int i = 0; i < params.soil_layers.size(); ++i) {
+        params.soil_layers[i].k_soil_sat = 0.02/100.0/3600;
+        params.soil_layers[i].clay_fraction = 0.6;
+        params.soil_layers[i].sand_fraction = 0.025;
+        params.soil_layers[i].organic_matter_fraction = 0.005;
     }
-    params.clay_fracs.resize(3);
-    for (int i = 0; i < 3; ++i) {
-        params.clay_fracs[i] = 0.6;
-    }
-    params.sand_fracs.resize(3);
-    for (int i = 0; i < 3; ++i) {
-        params.sand_fracs[i] = 0.025;
-    }
-    params.organic_matter_fracs.resize(3);
-    for (int i = 0; i < 3; ++i) {
-        params.organic_matter_fracs[i] = 0.05;
-    }
+
 
     params.psi50_xylem = -3.5;
     params.psi88_xylem = -5.5;

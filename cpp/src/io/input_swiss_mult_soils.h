@@ -28,7 +28,6 @@ public:
 private:
     std::unique_ptr<InputCollection> theta_parser;
     std::unique_ptr<InputCollection> forcing_parser;
-    
     vector<float> rad;
 
     string theta_file;
