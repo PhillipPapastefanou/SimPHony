@@ -34,7 +34,7 @@ void Output::Add_psi_leaf(float psi_leaf) {
 }
 
 void Output::Add_psi_stem_ground(float psi_root) {
-    psi_root_a.push_back(psi_root);
+    psi_stem_ground_a.push_back(psi_root);
 }
 
 void Output::Add_psi_stems_seg(vector<float> psi_stem_seg) {
@@ -101,7 +101,7 @@ const vector<float> &Output::Get_psi_leaf() const {
 }
 
 const vector<float> &Output::Get_psi_stem() const {
-    return psi_root_a;
+    return psi_stem_ground_a;
 }
 
 const vector<vector<float> > &Output::Get_psi_soil_indiv() const {

@@ -3,6 +3,7 @@
 #include "../Tests/multi_test.h"
 #include "framework/date_time.h"
 #include "../Tests/water_flow_segments_approx_test.h"
+#include "auxil/rkf_solver.h"
 #include <ctime>
 #include <iostream>
 #include <iomanip>
@@ -32,7 +33,7 @@ int main(int argc, char* argv[]) {
 //    parameters.psi50_xylem = -2;
 //    parameters.psi88_xylem= -4;
 //
-//    modules.push_back(std::make_unique<Linear_stem_flow>(parameters));
+//    modules.push_back(std::make_unique<Linear_Segmented_flow>(parameters));
 //    modules.push_back(std::make_unique<Kirchhoff_Weibull_stem_flow>(parameters));
 //    modules.push_back(std::make_unique<Kirchhoff_Piecewise_Erf>(parameters));
 //
@@ -42,12 +43,15 @@ int main(int argc, char* argv[]) {
 //    }
 //
 //    double psi_leaf = -1;
-//    double psi_stem_ground = -0.25;
+//    double psi_stem_ground_a = -0.25;
 //
 //    for (auto& module: modules) {
-//        std::cout << module->Get_Stem_flow(psi_stem_ground, psi_leaf) << std::endl;
+//        std::cout << module->Get_Stem_flow(psi_stem_ground_a, psi_leaf) << std::endl;
 //    }
 
+
+    //RKF_Solver solver;
+    //solver.calc();
 
     //Water_flow_segmented_test water_flow_test;
 

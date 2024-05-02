@@ -86,7 +86,7 @@ private:
     vector<vector<float> > Gaa;
 
     vector<float> psi_leaf_a;
-    vector<float> psi_root_a;
+    vector<float> psi_stem_ground_a;
     vector<vector<float> > psi_stem_a;
     vector<vector<float> > psi_soil_aa;
 

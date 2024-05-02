@@ -1,5 +1,6 @@
 set(headers
         auxil/amath.h
+        auxil/rkf_solver.h
         modules/model.h
         io/analysis_hainich.h
         framework/simulation_single_swiss.h
@@ -24,7 +25,12 @@ set(headers
         io/input_collection.h
         io/time_series.h
         modules/stem_flow_model.h
+        modules/conductivity_model.h
         auxil/lookup_table.h
+        framework/water_potential_solver.h
+        framework/solver_indiv_eulerimp.h
+        framework/solver_2D.h
+        framework/solver_rkf.h
         ../Tests/water_flow_segments_approx_test.h
         )
 
@@ -35,8 +41,10 @@ set(source
         framework/simulation_multi_hainich.cpp
         framework/simulation_single_hainich.cpp
         auxil/solvers.cpp
+        auxil/rkf_solver.cpp
         modules/soil_water_model.cpp
         modules/root_distribution_model.cpp
+        modules/conductivity_model.cpp
         auxil/csv_reader.cpp
         framework/parameters.cpp
         io/input_swiss.cpp
@@ -55,6 +63,10 @@ set(source
         io/time_series.cpp
         modules/stem_flow_model.cpp
         auxil/lookup_table.cpp
+        framework/water_potential_solver.cpp
+        framework/solver_indiv_eulerimp.cpp
+        framework/solver_2D.cpp
+        framework/solver_rkf.cpp
         ../Tests/water_flow_segments_approx_test.cpp
         )
 

@@ -5,32 +5,32 @@
 #pragma once
 #include <functional>
 
-class Leaf_Stem_Ground_Implicit_Model;
+class Solver_Indiv_Euler_Imp;
 
-class Bisection_two_layer_solver_interface {
+class Bisection_solver_interface {
 
 public:
-    Bisection_two_layer_solver_interface(Leaf_Stem_Ground_Implicit_Model& model,
-                                         double prec,
-                                         int max_steps,
-                                         double global_min,
-                                         double global_max);
+    Bisection_solver_interface(Solver_Indiv_Euler_Imp& model,
+                               double prec,
+                               int max_steps);
+
     int Get_nsteps_converged();
-    double Solve(double lower_bound, double upper_bound, int solver_level = 1);
+    double Solve(double lower_bound, double upper_bound);
+
+    double Get_solution();
 
 protected:
     virtual double f(double x) = 0;
-    Leaf_Stem_Ground_Implicit_Model& model;
+    Solver_Indiv_Euler_Imp& model;
+
 
 private:
+    const int nmax_errors = 2;
     double prec;
     int max_steps;
 
-    double global_min;
-    double global_max;
-
+    double solution;
     int steps_converged;
-    const int nmax_errors = 2;
     int n_errors;
 };
 

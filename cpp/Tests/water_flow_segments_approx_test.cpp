@@ -22,7 +22,7 @@ Water_flow_segmented_test::Water_flow_segmented_test() {
     parameters.canopy_height = 1.0;
 
     modules.push_back(std::make_unique<Kirchhoff_Weibull_stem_flow>(parameters));
-    modules.push_back(std::make_unique<Linear_stem_flow>(parameters));
+    modules.push_back(std::make_unique<Linear_Segmented_flow>(parameters));
 
 
     for (auto& module: modules) {

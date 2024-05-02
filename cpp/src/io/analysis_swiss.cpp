@@ -8,8 +8,8 @@
 #include "swiss_drought_trees.h"
 #include <iostream>
 
-Analysis_Swiss::Analysis_Swiss(Leaf_Stem_Ground_Implicit_Model* model, const Swiss_Drought_Trees& swiss_drought_trees):
-output(model->Get_output()), swiss_drought_trees(swiss_drought_trees), dts(model->dts) {
+Analysis_Swiss::Analysis_Swiss(Model* model, const Swiss_Drought_Trees& swiss_drought_trees):
+output(model->Get_output()), swiss_drought_trees(swiss_drought_trees) {
 
     this->swiss_psi_leaf_states = std::make_shared<Tree_Psi_Leaf_State>(swiss_drought_trees, model->Get_output().Get_dates());
 }

@@ -48,6 +48,7 @@ Swiss_Single_Test::Swiss_Single_Test() {
 
 
     // Default parameters
+//    Parameters params = reader.Get_parameter_list()[460];
     Parameters params = reader.Get_parameter_list()[460];
 
     //params.k_xylem_sat = 600;
@@ -101,18 +102,24 @@ Swiss_Single_Test::Swiss_Single_Test() {
 //    params.organic_matter_fracs[2] = 0.06;
 //
 //    params.soil_profile_index = 4;
-//
+
     params.stem_flow_type = Stem_flow_module_type::Linear;
-    params.sustain_xylem_damage = true;
-    params.stem_hydraulic_capacitance_max = 500.0;
+    params.conductivity_fraction_type = Conductivity_fraction_module_type::Weibull;
+    params.sustain_xylem_damage = false ;
+    params.stem_hydraulic_capacitance_max =  5* 1000/18.01;
+    params.huber_value = 1/5000.0;
     params.verbose= true;
+    params.d_50_close = 1.0;
+
 
     for (int i = 0; i < params.k_soil_sats.size(); ++i) {
-        params.k_soil_sats[i] *= 2.0;
+        params.k_soil_sats[i] *= 1.0 ;
     }
 
-    params.k_xylem_sat = 10000.0;
-    params.leaf_hydraulic_capacitance = 10.0;
+    params.k_xylem_sat = 1.5 * 5000 * 30 / 100;
+    params.leaf_hydraulic_capacitance = 0.001* 55;
+
+    //params.g_bark = params.g0 * 2;
 
 
     double psi_leaf_init = -1.0;
@@ -125,12 +132,12 @@ Swiss_Single_Test::Swiss_Single_Test() {
 
     auto start_clock = std::chrono::high_resolution_clock::now();
 
-    Leaf_Stem_Ground_Implicit_Model model(params, input);
+    Model model(params, input);
     model.Set_derived_parameters();
     model.Set_initial_conditions(psi_leaf_init, psi_stem_init);
 
     // Length model in seconds
-    long steplen      = 1800;
+    params.dts      = 1800;
 
 //    double timestart    = 30*2*24 * 0.0;
 //    double timeend      = 30*2*24 * 213;
@@ -138,7 +145,7 @@ Swiss_Single_Test::Swiss_Single_Test() {
     DateTime begin = input.dates.front();
     DateTime end = input.dates.back();
 
-    model.Run(steplen, begin, end);
+    model.Run(begin, end);
     Analysis_Swiss analysis(&model, swiss_drought_tress);
     analysis.Run();
 

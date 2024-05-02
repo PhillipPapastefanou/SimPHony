@@ -22,7 +22,7 @@ public:
 
     void Set_water_pot_initials(double psi_leaf, double psi_stem);
 
-    void Run(double steplen, DateTime timestart, DateTime timeend);
+    void Run(DateTime timestart, DateTime timeend);
 
     std::vector<AnalysisHainich> Get_analysis_list();
 

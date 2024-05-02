@@ -8,7 +8,6 @@
 #include "../modules/model.h"
 #include <iostream>
 
-
 Simulation_Multi_Hainich::Simulation_Multi_Hainich() {
 
 }
@@ -56,24 +55,28 @@ void Simulation_Multi_Hainich::Set_water_pot_initials(double psi_leaf, double ps
     init_psi_stem = psi_stem;
 }
 
-void Simulation_Multi_Hainich::Run(double steplen, DateTime timestart, DateTime timeend) {
+void Simulation_Multi_Hainich::Run(DateTime timestart, DateTime timeend) {
 
     std::cout << "Rank " << rank << ": Performing " << parameter_list.size() << " simulations." << std:: endl;
 
     auto start_simulatio = std::chrono::high_resolution_clock::now();
     auto start_timer = std::chrono::high_resolution_clock::now();
 
-    sap_series->GenerateModelObsIndexes(timestart, timeend, steplen);
+    if (parameter_list.size() == 0){
+        std::cout << "No Parameter list specified. Skipping!" << std:: endl;
+    }
+
+    sap_series->GenerateModelObsIndexes(timestart, timeend, std::get<0>(parameter_list[0]).dts);
 
     for (int r = 0; r < parameter_list.size(); ++r) {
 
         Parameters& parameters = std::get<0>(parameter_list[r]);
         int parameter_index = std::get<1>(parameter_list[r]);
 
-        Leaf_Stem_Ground_Implicit_Model model(parameters, *input);
+        Model model(parameters, *input);
         model.Set_derived_parameters();
         model.Set_initial_conditions(init_psi_leaf, init_psi_stem);
-        model.Run(steplen,timestart,timeend);
+        model.Run(timestart,timeend);
 
         // Data analysis after simulation
         AnalysisHainich analysis(&model, parameters);

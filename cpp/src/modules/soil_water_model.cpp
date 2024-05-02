@@ -172,7 +172,7 @@ void Saxton06_Soil_Water::CalculatePsiAndKs() {
 
     for (int is = 0; is < nsoil; ++is) {
         // Convert from pressure head m to MPa
-        Ks[is] *= 1000.0/parameters.grav;
+        Ks[is] *= 1000.0/parameters.constants.GRAVITY;
 
         //Account for the density of water
         // 1 m = 1000 kg m-2
@@ -193,8 +193,6 @@ void Saxton06_Soil_Water::CalculatePsiAndKs() {
         for (float& wcont : theta_list) {
             wcont *= parameters.theta_emp_multiplier;
         }
-
-
         int navail_soil_in_data = theta_list.size();
 
         vector<double> psi_row(nsoil);
@@ -365,7 +363,7 @@ void Van_Gnuchten_Soil_Water::CalculatePsiAndKs() {
         exit(99);
     }
 
-    const double g       = parameters.grav;
+    const double g       = parameters.constants.GRAVITY;
     const double alpha   = parameters.alpha_genucht;
     const double n       = parameters.n_genucht;
     const double eta     = parameters.neta_genucht;

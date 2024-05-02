@@ -13,7 +13,6 @@ public:
 
     Parameters Baseline_one;
 
-
 };
 
 

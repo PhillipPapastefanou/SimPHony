@@ -85,7 +85,6 @@ Hainich_Single_Test::Hainich_Single_Test() {
     params.psi50_xylem = -3.5;
     params.psi88_xylem = -5.5;
     params.tree_density = 100.0 / 10000.0;
-
     params.sigma_log_likelyhood = 0.01;
 
     double psi_leaf_init = -1.0;
@@ -101,7 +100,7 @@ Hainich_Single_Test::Hainich_Single_Test() {
 
 
     auto start_clock = std::chrono::high_resolution_clock::now();
-    Leaf_Stem_Ground_Implicit_Model model(params, input);
+    Model model(params, input);
 
     model.Set_derived_parameters();
     model.Set_initial_conditions(psi_leaf_init, psi_stem_init);
@@ -117,10 +116,10 @@ Hainich_Single_Test::Hainich_Single_Test() {
     DateTime end = input.dates[10000];
 
 
-    sap_data.GenerateModelObsIndexes(begin, end, steplen);
+    sap_data.GenerateModelObsIndexes(begin, end, params.dts);
 
 
-    model.Run(steplen, begin, end);
+    model.Run(begin, end);
 
     AnalysisHainich analysis(&model, params);
     analysis.CompareSapwood(sap_data);

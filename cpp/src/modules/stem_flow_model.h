@@ -5,13 +5,13 @@
 #pragma once
 #include "../framework/parameters.h"
 #include "../auxil/lookup_table.h"
+#include "../modules/conductivity_model.h"
 
 class Stem_flow_module {
 
 public:
     Stem_flow_module(const Parameters& params);
     virtual ~Stem_flow_module();
-
 
     virtual void Init() = 0;
     virtual double Get_Stem_flow(double psi_stem, double psi_leaf) = 0;
@@ -22,21 +22,24 @@ protected:
     std::vector<double> min_frac_con_per_segment;
     std::vector<double> actual_frac_con_per_segment;
 
+    const double gravity;
+    const double rho_water;
+    const double PA_TO_MPA;
+    const double MPaToPa;
+
 };
 
 
-class Linear_stem_flow : public Stem_flow_module{
+class Linear_Segmented_flow : public Stem_flow_module{
 
 public:
-    Linear_stem_flow(const Parameters& params);
+    Linear_Segmented_flow(const Parameters& params);
     void Init() override;
-    double Get_Stem_flow(double psi_root, double psi_leaf) override;
+    double Get_Stem_flow(double psi_stem_ground, double psi_leaf) override;
 
 private:
-    double b;
-    double c;
+    std::unique_ptr<Condutivity_Module> conductivity_module;
     Lookup_table k_xylem_loss_table;
-
 };
 
 

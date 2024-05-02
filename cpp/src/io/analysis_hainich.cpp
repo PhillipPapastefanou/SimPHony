@@ -7,8 +7,8 @@
 #include <algorithm>
 #include <iostream>
 
-AnalysisHainich::AnalysisHainich(Leaf_Stem_Ground_Implicit_Model* model, const Parameters& parameters):
-output(model->Get_output()), dts(model->dts), parameters(parameters),
+AnalysisHainich::AnalysisHainich(Model* model, const Parameters& parameters):
+output(model->Get_output()), parameters(parameters),
 sigma_log_likelyhood(parameters.sigma_log_likelyhood){
 }
 
@@ -36,9 +36,9 @@ void AnalysisHainich::CompareSapwood(const TimeSeries &time_series) {
         G_mod_arr.push_back(G_raw[index]);
 
         //Convert from kg to g
-        J_obs *= parameters.KG_to_G;
+        J_obs *= parameters.constants.KG_to_G;
         //Conver from g to molH2o
-        J_obs *= parameters.G_H2O_To_Mol;
+        J_obs *= parameters.constants.G_H2O_To_Mol;
         // Multiply from flux m_sapwood^2 to flux m_total_area^2
         J_obs *= parameters.tree_density;
         J_obs_arr.push_back(J_obs);

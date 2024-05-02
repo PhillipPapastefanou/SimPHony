@@ -5,7 +5,7 @@
 #include "output.h"
 #include <memory>
 
-class Leaf_Stem_Ground_Implicit_Model;
+class Model;
 class TimeSlice;
 class Swiss_Drought_Trees;
 class Tree_Psi_Leaf_State;
@@ -13,7 +13,7 @@ class Tree_Psi_Leaf_State;
 class Analysis_Swiss {
 
 public:
-    Analysis_Swiss(Leaf_Stem_Ground_Implicit_Model* model, const Swiss_Drought_Trees& swiss_drought_trees);
+    Analysis_Swiss(Model* model, const Swiss_Drought_Trees& swiss_drought_trees);
 
     void Run();
 

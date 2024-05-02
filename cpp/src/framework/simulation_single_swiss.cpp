@@ -27,7 +27,7 @@ void Simulation_Single_Swiss::Init_parameters_default() {
 
 void Simulation_Single_Swiss::Set_water_pot_initials(double psi_leaf, double psi_stem) {
 
-    model = std::make_unique<Leaf_Stem_Ground_Implicit_Model>(*parameters, *input);
+    model = std::make_unique<Model>(*parameters, *input);
 
     model->Set_derived_parameters();
 
@@ -35,9 +35,9 @@ void Simulation_Single_Swiss::Set_water_pot_initials(double psi_leaf, double psi
 
 }
 
-void Simulation_Single_Swiss::Run(double steplen, DateTime timestart, DateTime timeend) {
+void Simulation_Single_Swiss::Run(DateTime timestart, DateTime timeend) {
 
-    model->Run(steplen,timestart,timeend);
+    model->Run(timestart,timeend);
 
     analysis = std::make_unique<Analysis_Swiss>(model.get(), *swiss_trees);
 

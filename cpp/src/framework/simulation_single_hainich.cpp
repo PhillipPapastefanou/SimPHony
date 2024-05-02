@@ -22,17 +22,17 @@ void Simulation_Single_Hainich::Init_input(std::string forcing_file, std::string
 
 void Simulation_Single_Hainich::Set_water_pot_initials(double psi_leaf, double psi_stem) {
 
-    model = std::make_unique<Leaf_Stem_Ground_Implicit_Model>(*parameters, *input);
+    model = std::make_unique<Model>(*parameters, *input);
     model->Set_derived_parameters();
     model->Set_initial_conditions(psi_leaf, psi_stem);
 
 }
 
-void Simulation_Single_Hainich::Run(double steplen, DateTime timestart, DateTime timeend) {
+void Simulation_Single_Hainich::Run(DateTime timestart, DateTime timeend) {
 
-    sap_series->GenerateModelObsIndexes(timestart, timeend, steplen);
+    sap_series->GenerateModelObsIndexes(timestart, timeend, parameters->dts);
 
-    model->Run(steplen,timestart,timeend);
+    model->Run(timestart,timeend);
 
     analysis = std::make_unique<AnalysisHainich>(model.get(), *parameters);
     analysis->CompareSapwood(*sap_series);

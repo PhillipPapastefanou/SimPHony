@@ -23,7 +23,7 @@ public:
     void Init_parameters_filename(string filename, int index);
 
     void Set_water_pot_initials(double psi_leaf, double psi_stem);
-    void Run(double stepleng, DateTime timestart, DateTime timeend);
+    void Run(DateTime timestart, DateTime timeend);
 
     Output Get_output();
     AnalysisHainich Get_analysis();
@@ -34,7 +34,7 @@ private:
     std::unique_ptr<Parameters> parameters;
     std::unique_ptr<Input_Hainich> input;
     std::unique_ptr<TimeSeries> sap_series;
-    std::unique_ptr<Leaf_Stem_Ground_Implicit_Model> model;
+    std::unique_ptr<Model> model;
     std::unique_ptr<AnalysisHainich> analysis;
 };
 

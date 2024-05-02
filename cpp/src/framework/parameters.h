@@ -4,6 +4,11 @@
 #include <cmath>
 //#include <numbers>
 
+enum class Conductivity_fraction_module_type{
+    Weibull,
+    Logit,
+};
+
 enum class Stem_flow_module_type{
     Linear,
     KirchhoffWeibull,
@@ -16,12 +21,9 @@ enum class Soil_water_module_type{
     VanGenuchten
 };
 
-class Parameters
-{
-public:
-    Parameters();
-    ~Parameters();
+struct Constants{
 
+    public:
     const double SEC_IN_DAY = 86400.0;
     const double SEC_IN_HOUR = 3600.0;
     const double CM_IN_M = 100.0;
@@ -30,20 +32,32 @@ public:
     const double KG_to_G = 1000.0;
     const double PaToMPa = std::pow(10, -6);
     const double MPaToPa = std::pow(10, +6);
+
     //const double PI = std::numbers::pi;
     //Todo Use C constants again. Does not work on the MPI cluster atm
     const double PI = 3.14159265359;
     // Density of water [kg m-3]
-    const double rho_water = 998.0;
+    const double RHO_WATER = 998.0;
     // Gravitational constant [kg m-1 s-2]
-    const double grav = 9.81;
+    const double GRAVITY = 9.81;
+
+};
+
+
+class Parameters
+{
+public:
+    Parameters();
+    ~Parameters();
+
+    // Parameters assumed to be constants and will not change
+    Constants constants;
 
     // Root area index [1]
     // Katul et al: 5.5 - 14.2
     double root_area_index = 10.0;
 
     // Plant height [m]
-    // From Arend et al 2021 SI
     double canopy_height = 20.0;
 
     Stem_flow_module_type stem_flow_type = Stem_flow_module_type::Linear;
@@ -55,7 +69,7 @@ public:
     // From Meinzer et al. 2011 Figure 13.2
     // Range: 10 - 500 kg H2O m-3 MPa-1
     // Convert to [mol H2O m-3 MPa-1]
-    double stem_hydraulic_capacitance_max = 20.0 * KG_H2O_To_Mol;
+    double stem_hydraulic_capacitance_max = 20.0 * constants.KG_H2O_To_Mol;
 
     // Meinzer et al 2010: Could be up 1-10 kg H2O m-1 s-1 MPa-1 (Maximum specific conductivity)
     // Meinzer et al 2010: 0.05- 10 kg H2O m-1 s-1 MPa-1 (Xylem specific conductivity)
@@ -100,7 +114,7 @@ public:
     // Soil depths in m
     std::vector<double> soil_depths;
 
-    // Index of current soil profile index if multipe water contents per sites are available
+    // Index of current soil profile index if multiple water contents per sites are available
     int soil_profile_index = 0;
 
     // Jackson rooting parameter [-]
@@ -175,7 +189,15 @@ public:
     // Maximum stem water potential [MPa]
     double max_stem_water_potential = -1E-10;
 
+
+    // Enable loss through the bakr loss
+    double g_bark = 0.0;
     bool verbose = false;
+
+    //Simulation timestep lenght
+    double dts = 1800.0;
+
+    Conductivity_fraction_module_type  conductivity_fraction_type = Conductivity_fraction_module_type::Weibull;
 
 private:
 };

@@ -8,7 +8,11 @@
 #include <iostream>
 
 Stem_flow_module::Stem_flow_module(const Parameters &params) :
-        params(params){
+        params(params),
+        gravity(params.constants.GRAVITY),
+        rho_water(params.constants.RHO_WATER),
+        MPaToPa(params.constants.MPaToPa),
+        PA_TO_MPA(params.constants.PaToMPa){
 
     min_frac_con_per_segment.resize(params.n_stem_segments);
     // Setting the fraction of healthy xylem to 100% at the beginning
@@ -29,44 +33,48 @@ void Stem_flow_module::Update_min_conductivity_fractions() {
 }
 
 
-Linear_stem_flow::Linear_stem_flow(const Parameters &params) : Stem_flow_module(params), k_xylem_loss_table() {
+Linear_Segmented_flow::Linear_Segmented_flow(const Parameters &params) : Stem_flow_module(params), k_xylem_loss_table() {
 }
 
-void Linear_stem_flow::Init(){
-
-    // Obtain Weibull parameters from psi50 and psi88
-    double x1 = 0.5;
-    double x2 = 0.88;
-
-    if (params.psi50_xylem < params.psi88_xylem){
-        std::cout << "Error: psi50(" << params.psi50_xylem <<") is smaller  than psi88(";
-        std::cout << params.psi88_xylem << ")! This is physically impossible and must be fixed!" << std::endl;
-        exit(99);
-    }
-
-    c = log(log(1. - x1)/log(1. - x2))/(log(-params.psi50_xylem) - log(-params.psi88_xylem));
-    b = -params.psi50_xylem/std::pow(-log(1. - x1), (1./c));
+void Linear_Segmented_flow::Init(){
 
     double psi_min = params.psi88_xylem * 4.0;
     double psi_max = 0.0;
     double delta_psi_step = 0.01;
 
+
+    switch (params.conductivity_fraction_type) {
+        case Conductivity_fraction_module_type::Weibull: {
+            conductivity_module = std::make_unique<WeibullCDF>(params);
+            break;
+        }
+
+        case Conductivity_fraction_module_type::Logit: {
+            conductivity_module = std::make_unique<Logit>(params);
+            break;
+        }
+        default:{
+            std::cout << "Invalid conductivity module specified" << std::endl;
+            exit(99);
+        }
+    }
+    conductivity_module->Init();
+
     std::vector<double> psi_values;
     std::vector<double> k_loss_values;
 
     for (double psi = psi_min; psi < psi_max; psi += delta_psi_step) {
-        psi_values.push_back( psi);
-        k_loss_values.push_back(std::exp(-std::pow(-psi / b, c)));
+        psi_values.push_back(psi);
+        k_loss_values.push_back(conductivity_module->Get_fraction(psi));
     }
-
     k_xylem_loss_table.Init(psi_values, k_loss_values);
 }
 
 
-double Linear_stem_flow::Get_Stem_flow(double psi_root, double psi_leaf) {
+double Linear_Segmented_flow::Get_Stem_flow(double psi_stem_ground, double psi_leaf) {
 
     // Water potential drop per stem segment
-    double delta_psi_per_segment = (psi_root - psi_leaf) / params.n_stem_segments;
+    double delta_psi_per_segment = (psi_stem_ground - psi_leaf) / params.n_stem_segments;
 
     // If the differences of the leaf water potential and the psi bottom layer are zero
     // assume no water flow
@@ -78,7 +86,7 @@ double Linear_stem_flow::Get_Stem_flow(double psi_root, double psi_leaf) {
     double segment_height =  params.canopy_height / params.n_stem_segments;
 
     // Hydrostatic perssure per segment [MPa]
-    double psi_hydrostatic_per_segment = (params.rho_water * params.grav *segment_height) * params.PaToMPa;
+    double psi_hydrostatic_per_segment = (rho_water * gravity *segment_height) * PA_TO_MPA;
 
     // Total water flow through the stem [mol m-2 s-1]
     double stem_water_flow = 0.0;
@@ -88,8 +96,8 @@ double Linear_stem_flow::Get_Stem_flow(double psi_root, double psi_leaf) {
     for (int n = 0; n < params.n_stem_segments; ++n) {
 
         // Calculate lower and upper water potential of each segment
-        const double psi_lower_seg = psi_root - n * delta_psi_per_segment;
-        const double psi_upper_seg = psi_root - (n + 1) * delta_psi_per_segment;
+        const double psi_lower_seg = psi_stem_ground - n * delta_psi_per_segment;
+        const double psi_upper_seg = psi_stem_ground - (n + 1) * delta_psi_per_segment;
 
         // Calculate the average water potential between segments [MPa]
         double psi_avg_seg = (psi_lower_seg + psi_upper_seg) / 2.0;
@@ -102,7 +110,7 @@ double Linear_stem_flow::Get_Stem_flow(double psi_root, double psi_leaf) {
             actual_frac_con_per_segment[n] = min_fraction;
         }
 
-        // Water uptake is the differennce between the segments minus the hydrostatic pressure [MPA]
+        // Water uptake is the difference between the segments minus the hydrostatic pressure [MPA]
         double delta_psi_uptake = delta_psi_per_segment - psi_hydrostatic_per_segment;
         // Prevent negative pressure differences to avoid letting the water flow down the tree
         if(delta_psi_uptake < 0.0)
@@ -143,7 +151,7 @@ double Kirchhoff_Weibull_stem_flow::KirchhoffIntegral(double psi) {
 double Kirchhoff_Weibull_stem_flow::Get_Stem_flow(double psi_stem, double psi_leaf) {
 
     // Calculate hydrostatic pressure
-    double psi_hydro = (params.rho_water * params.grav * params.canopy_height) * params.PaToMPa;
+    double psi_hydro = (rho_water * gravity * params.canopy_height) * PA_TO_MPA;
 
     // If leaf wand soil water potential are (almost) identical we avoid the divide by zero calcuation and
     // return zero water flow
@@ -244,7 +252,7 @@ double Kirchhoff_Piecewise_Erf::KirchhoffIntegralSplit(double psi) {
 
 double Kirchhoff_Piecewise_Erf::Get_Stem_flow(double psi_stem, double psi_leaf) {
     // Calculate hydrostatic pressure
-    double psi_hydro = (params.rho_water * params.grav * params.canopy_height) * params.PaToMPa;
+    double psi_hydro = (rho_water * gravity * params.canopy_height) * PA_TO_MPA;
 
     // If leaf wand soil water potential are (almost) identical we avoid the divide by zero calcuation and
     // return zero water flow

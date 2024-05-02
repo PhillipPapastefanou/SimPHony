@@ -24,7 +24,7 @@ public:
     void Init_parameters_filename(string filename, int index);
 
     void Set_water_pot_initials(double psi_leaf, double psi_stem);
-    void Run(double stepleng, DateTime timestart, DateTime timeend);
+    void Run(DateTime timestart, DateTime timeend);
 
     Output Get_output();
     Analysis_Swiss Get_analysis();
@@ -37,10 +37,8 @@ private:
     std::unique_ptr<Input> input;
     std::unique_ptr<Swiss_Drought_Trees> swiss_trees;
 
-    std::unique_ptr<Leaf_Stem_Ground_Implicit_Model> model;
+    std::unique_ptr<Model> model;
     std::unique_ptr<Analysis_Swiss> analysis;
-
-
 
 };
 

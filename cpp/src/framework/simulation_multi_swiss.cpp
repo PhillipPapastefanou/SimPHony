@@ -10,8 +10,6 @@
 
 Simulation_Multi_Swiss::Simulation_Multi_Swiss() : rank(0) {
 
-
-
 }
 
 void Simulation_Multi_Swiss::Init_input(std::string theta_file, std::string forcing_file, std::string swiss_trees_folder, int rank) {
@@ -66,10 +64,10 @@ void Simulation_Multi_Swiss::Run(double steplen, DateTime timestart, DateTime ti
         Parameters& parameters = std::get<0>(parameter_list[r]);
         int parameter_index = std::get<1>(parameter_list[r]);
 
-        Leaf_Stem_Ground_Implicit_Model model(parameters, *input);
+        Model model(parameters, *input);
         model.Set_derived_parameters();
         model.Set_initial_conditions(init_psi_leaf, init_psi_stem);
-        model.Run(steplen,timestart,timeend);
+        model.Run(timestart,timeend);
 
         // Data analysis after simulation
         Analysis_Swiss analysis(&model, *swiss_trees);
