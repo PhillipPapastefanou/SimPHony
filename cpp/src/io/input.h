@@ -11,6 +11,7 @@ class Input {
 
 public:
     Input(const Parameters& parameters);
+    virtual ~Input();
 
     virtual void Add_Forcing_File(std::string file) = 0;
     virtual void Add_Soilwater_File(std::string file) = 0;

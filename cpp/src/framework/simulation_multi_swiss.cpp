@@ -15,6 +15,10 @@ Simulation_Multi_Swiss::Simulation_Multi_Swiss() : rank(0) {
 void Simulation_Multi_Swiss::Init_input(std::string theta_file, std::string forcing_file, std::string swiss_trees_folder, int rank) {
 
     this->rank = rank;
+    this->theta_file = theta_file;
+    this->forcing_file = forcing_file;
+
+
 
     if(parameter_list.empty()){
         std::cout << "Parameter list is empty." << std::endl;
@@ -22,20 +26,20 @@ void Simulation_Multi_Swiss::Init_input(std::string theta_file, std::string forc
         exit(99);
     }
     const Parameters& params = std::get<0>(parameter_list.front());
+
+    swiss_trees = std::make_unique<Swiss_Drought_Trees>(swiss_trees_folder);
+
+    //Create dummy input
     input = std::make_unique<Input_Swiss_Multi_Soils>(params);
     input->Add_Soilwater_File(theta_file);
     input->Add_Forcing_File(forcing_file);
     input->Read_N_Parse();
-
-    swiss_trees = std::make_unique<Swiss_Drought_Trees>(swiss_trees_folder);
 }
 
 void Simulation_Multi_Swiss::Init_Full_Parameter_Setups(string filename, std::vector<int> ids) {
 
     Parameter_CSV_Reader param_reader(filename);
-
     param_reader.Parse_Full_Files();
-
     vector<Parameters> all_parameters_list = param_reader.Get_parameter_list();
 
     for (int i = 0; i < ids.size(); ++i) {
@@ -43,8 +47,6 @@ void Simulation_Multi_Swiss::Init_Full_Parameter_Setups(string filename, std::ve
         std::tuple<Parameters, int> parameter_setup = std::make_tuple(all_parameters_list[index_of_interest], index_of_interest);
         parameter_list.push_back(parameter_setup);
     }
-
-
 }
 
 void Simulation_Multi_Swiss::Set_water_pot_initials(double psi_leaf, double psi_stem) {
@@ -52,7 +54,7 @@ void Simulation_Multi_Swiss::Set_water_pot_initials(double psi_leaf, double psi_
     init_psi_stem = psi_stem;
 }
 
-void Simulation_Multi_Swiss::Run(double steplen, DateTime timestart, DateTime timeend) {
+void Simulation_Multi_Swiss::Run(DateTime timestart, DateTime timeend) {
 
     std::cout << "Rank " << rank << ": Performing " << parameter_list.size() << " simulations." << std:: endl;
 
@@ -61,16 +63,24 @@ void Simulation_Multi_Swiss::Run(double steplen, DateTime timestart, DateTime ti
 
     for (int r = 0; r < parameter_list.size(); ++r) {
 
-        Parameters& parameters = std::get<0>(parameter_list[r]);
-        int parameter_index = std::get<1>(parameter_list[r]);
+        Parameters& params = std::get<0>(parameter_list[r]);
 
-        Model model(parameters, *input);
+        // Parameter index is not yet being used
+        int parameter_index = std::get<1>(parameter_list[r]);
+        //params.verbose= true;
+
+        input = std::make_unique<Input_Swiss_Multi_Soils>(params);
+        input->Add_Soilwater_File(theta_file);
+        input->Add_Forcing_File(forcing_file);
+        input->Read_N_Parse();
+
+        Model model(params, *input);
         model.Set_derived_parameters();
         model.Set_initial_conditions(init_psi_leaf, init_psi_stem);
         model.Run(timestart,timeend);
 
         // Data analysis after simulation
-        Analysis_Swiss analysis(&model, *swiss_trees);
+        Analysis_Swiss analysis(&model, *swiss_trees, params);
         analysis.Run();
         analysis_list.push_back(analysis);
 

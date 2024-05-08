@@ -17,6 +17,10 @@ Condutivity_Module::Condutivity_Module(const Parameters& params):
 
 }
 
+Condutivity_Module::~Condutivity_Module() {
+
+}
+
 void WeibullCDF::Init() {
 
     // Obtain Weibull parameters from psi50 and psi88

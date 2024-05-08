@@ -24,14 +24,6 @@ void Solver_Indiv_Euler_Imp::Update_water_potentials() {
         T = 0.0;
         J = 0.0;
         G = 0.0;
-
-        if (params.verbose){
-            std::cout << " Psi leaf  " << psi_leaf;
-            std::cout << " Psi stem ground  " << psi_stem_ground << std::endl;
-            std::cout <<   "T : " << T;
-            std::cout <<   " J : " << J;
-            std::cout << " G: " << G << std::endl;
-        }
     }
 
     // Regular solver solver routine
@@ -40,10 +32,6 @@ void Solver_Indiv_Euler_Imp::Update_water_potentials() {
 
         if (psi_leaf > min_leaf_water_potential + 0.5){
             update_psi_stem_ground();
-        }
-
-        if (psi_leaf < -4.0) {
-            double x = 3;
         }
 
     }
@@ -178,8 +166,10 @@ void Solver_Indiv_Euler_Imp::update_psi_stem_ground() {
     bool converged = solver_psi_stem_ground->Solve(psi_leaf, params.constants.MAX_STEM_WATER_POTENTIAL);
 
     // Normal routine: Stem water potential found in rang
-    if (converged)
+    if (converged){
         psi_stem_ground = solver_psi_stem_ground->Get_solution();
+    }
+
 
 
     // Stem water potential cannot fulfill the previously estimated J by leaf water potential. Therefore, the solution
@@ -189,7 +179,7 @@ void Solver_Indiv_Euler_Imp::update_psi_stem_ground() {
         // Therefore, calculate stem water potential AND the stem water flow
         // assuming constant leaf water potential (from timestep before), but variable stem water flow J
         calc_J_stem = true;
-        converged = solver_psi_stem_ground->Solve(psi_leaf_prev_ts, params.constants.MAX_STEM_WATER_POTENTIAL);
+        converged = solver_psi_stem_ground->Solve(psi_leaf_prev_ts, params.constants.MAX_STEM_WATER_POTENTIAL );
 
 
         // We found a solution of stem water flow
@@ -213,14 +203,15 @@ void Solver_Indiv_Euler_Imp::update_psi_stem_ground() {
                 calc_J_stem = true;
 
                 // Re-estimate psi_stem AND J
-                converged = solver_psi_stem_ground->Solve(psi_leaf, params.constants.MAX_LEAF_WATER_POTENTIAL);
+                converged = solver_psi_stem_ground->Solve(psi_leaf, params.constants.MAX_STEM_WATER_POTENTIAL);
                 psi_stem_ground = solver_psi_stem_ground->Get_solution();
 
                 if (!converged) {
                     std::cout << "Could not determine stem water potential between " << psi_leaf << " and ";
-                    std::cout << params.constants.MAX_LEAF_WATER_POTENTIAL;
+                    std::cout << params.constants.MAX_STEM_WATER_POTENTIAL;
                     std::cout << "with variable J depending on psi_stem." << std::endl;
                     std::cout << "This situation is considered quite unlikely" << std::endl;
+                    std::cout << "ID of parameter file: " << params.id << std::endl;
 
                     if (psi_leaf < params.psi88_xylem){
                         std::cout << "Leaf water potential is already quite negative" << std::endl;
@@ -228,11 +219,21 @@ void Solver_Indiv_Euler_Imp::update_psi_stem_ground() {
                         psi_leaf = min_leaf_water_potential;
                     }
 
+                    else if(std::abs(psi_leaf_prev_ts - psi_stem_ground_prev_ts) < 0.1){
+                        std::cout << "Leaf water potential and stem water potential are very close" << std::endl;
+                        std::cout << "Do not update T and G and leave leaf water potential as is" << std::endl;
+                        std::cout << "Set J to zero" << std::endl;
+                        psi_stem_ground = psi_stem_ground_prev_ts;
+                        J = 0.0;
+                    }
+
                     else{
                         std::cout << "Leaf water potential is still in well functioning range." << std::endl;
                         std::cout << "This problem deserves a deeper investigation..." << std::endl;
-                        std::cout << "Terminate program as we cannot ensure physical reliability of the model." << std::endl;
-                        exit(99);
+                        //std::cout << "Terminate program as we cannot ensure physical reliability of the model." << std::endl;
+                        //exit(99);
+                        std::cout << "1: Set J to zero" << std::endl;
+                        J = 0.0;
                     }
                 }
             }
@@ -269,10 +270,11 @@ void Solver_Indiv_Euler_Imp::update_psi_stem_ground() {
 
         }
         else {
-            std::cout << "Could not determine stem water potential between " << psi_leaf << " and ";
-            std::cout << params.constants.MAX_LEAF_WATER_POTENTIAL;
-            std::cout << "with variable J depending on psi_stem." << std::endl;
-            std::cout << "This situation is considered quite unlikely" << std::endl;
+ //          std::cout << "Could not determine stem water potential between " << psi_leaf << " and ";
+//            std::cout << params.constants.MAX_STEM_WATER_POTENTIAL;
+//            std::cout << "with variable J depending on psi_stem." << std::endl;
+//            std::cout << "This situation is considered quite unlikely" << std::endl;
+//            std::cout << "ID of parameter file: " << params.id << std::endl;
 
             if (psi_leaf < params.psi88_xylem){
                 std::cout << "Leaf water potential is already quite negative" << std::endl;
@@ -280,12 +282,25 @@ void Solver_Indiv_Euler_Imp::update_psi_stem_ground() {
                 psi_leaf = min_leaf_water_potential;
             }
 
+            else if(std::abs(psi_leaf_prev_ts - psi_stem_ground_prev_ts) < 0.1){
+//                std::cout << "Leaf water potential and stem water potential are very close" << std::endl;
+//                std::cout << "Do not update T and G and leave leaf water potential as is" << std::endl;
+//                std::cout << "Set J to zero" << std::endl;
+                J = 0.0;
+            }
+
             else{
+                std::cout << "Could not determine stem water potential between " << psi_leaf << " and ";
+                std::cout << params.constants.MAX_STEM_WATER_POTENTIAL;
+                std::cout << "with variable J depending on psi_stem." << std::endl;
+                std::cout << "This situation is considered quite unlikely" << std::endl;
+                std::cout << "ID of parameter file: " << params.id << std::endl;
                 std::cout << "Leaf water potential is still in well functioning range." << std::endl;
                 std::cout << "This problem deserves a deeper investigation..." << std::endl;
-                std::cout << "Terminate program as we cannot ensure physical reliability of the model." << std::endl;
-                std::cout << "ID of parameter file: " << params.id << std::endl;
-                exit(99);
+                //std::cout << "Terminate program as we cannot ensure physical reliability of the model." << std::endl;
+                std::cout << "2: Set J to zero" << std::endl;
+                J = 0.0;
+                //exit(99);
             }
         }
     }

@@ -5,9 +5,12 @@ import xarray as xr
 from time import perf_counter
 
 from hydro_standalone import Simulation_Multi_Hainich
+from hydro_standalone import Simulation_Multi_Swiss
 from hydro_standalone import DateTime
 from contrib.config import Config
 from numpy import random
+from enum import Enum
+
 
 class ParallelSetupIndividual:
     def __init__(self, comm, rank, size):
@@ -16,7 +19,6 @@ class ParallelSetupIndividual:
         self.size = size
         self.rank = rank
         self.is_root = rank == 0
-
         random.seed(seed=123)
 
     def init(self, config : Config):
@@ -27,7 +29,6 @@ class ParallelSetupIndividual:
             self._initialise_counts()
 
     def _calculate_gridpoints(self):
-
         # Get the length of the paramter input files
         df = pd.read_csv(self.config.parameter_input_file_list)
         n = df.shape[0]
@@ -102,15 +103,12 @@ class ParallelSetupIndividual:
         self.sim.Init_input(self.config.forcing_file, self.config.sap_file, self.rank)
         self.sim.Set_water_pot_initials(-1.0, -0.3)
 
-        # in seconds
-        steplen = 1800
-
         # Steplenght should be 30 mins
         format = "%Y-%m-%d %H:%M:%S"
         timestart = DateTime("2023-6-1 00:00:00", format)
         timeend = DateTime("2023-10-1 00:00:00", format)
 
-        self.sim.Run(steplen, timestart, timeend)
+        self.sim.Run(timestart, timeend)
         self.comm.Barrier()
 
         if self.is_root:
@@ -163,9 +161,7 @@ class ParallelSetupIndividual:
 
         di = pd.DataFrame(np.array(parameter_list), columns=full_parameters.columns)
         di['LL'] = ll_list
-
         ds = di.to_xarray()
-
         ds.to_netcdf(f"{self.config.output_path}ParameterRanks{self.rank}.nc")
 
 

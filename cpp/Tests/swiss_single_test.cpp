@@ -145,7 +145,7 @@ Swiss_Single_Test::Swiss_Single_Test() {
     DateTime end = input.dates.back();
 
     model.Run(begin, end);
-    Analysis_Swiss analysis(&model, swiss_drought_tress);
+    Analysis_Swiss analysis(&model, swiss_drought_tress, params);
     analysis.Run();
 
     auto end_clock = std::chrono::high_resolution_clock::now();

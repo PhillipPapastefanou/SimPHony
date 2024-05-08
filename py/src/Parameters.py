@@ -1,6 +1,10 @@
 import numpy as np
 from enum import Enum
 
+class Conductivity_Fraction_Module_Type(Enum):
+    Weibull = 0
+    Logit = 1
+
 class Soil_Water_Model_Type(Enum):
     VanGenuchten    = 0
     Saxton06        = 1
@@ -15,9 +19,30 @@ class Stem_Flow_Model_Type(Enum):
 class Parameters:
 
     def __init__(self):
+        # Universal parameter id
+        self.id = -1
 
-        # Root zone depth [m]
-        self.root_zone_depth = 0.3
+        # Simulation timestep length [s]
+        self.dts = 1800.0
+
+        # In seconds
+        self.dts_input = 1800
+
+
+        # Extended shell output
+        self.verbose = False
+        # Maximum leaf water potential change per hour [MPa]
+        self.max_psi_leaf_change_per_hour = 1.0;
+        # Multiplier to estimate the minimum leaf water potential
+        # psi_leaf_min = minimum_psi_leaf_multiplier x psi_88
+        self.minimum_psi_leaf_multiplier = 4.0;
+
+
+        self.conductivity_fraction_type = Conductivity_Fraction_Module_Type.Weibull.name
+
+        self.sustain_xylem_damage = False
+
+
         # Root area index [1]
         # Xu et al: 24
         # Katul et al: 5.5 - 14.2
@@ -25,15 +50,9 @@ class Parameters:
         # Plant height [m]
         # From Arend et al 2021 SI
         self.canopy_height = 20
-        # Density of water [kg m-3]
-        self.rho_water = 998
-        # Gravitational constant [kg m-1 m-2]
-        self.grav = 9.81
-
 
         # Stemflow type module
-        self.stem_flow_type = Stem_Flow_Model_Type.Linear
-
+        self.stem_flow_type = Stem_Flow_Model_Type.Linear.name
 
         # Viscosity of the leaf to sap flow [1] ??? To be double checked
         self.eta_LS = 1.0 # 1.0 = Water
@@ -77,8 +96,7 @@ class Parameters:
         # From Medlynn 1.6 - 12
         self.g1 = 1.5
 
-        self.soil_water_model_type_enum = Soil_Water_Model_Type.VanGenuchten
-        self.soil_water_model_type =  self.soil_water_model_type_enum.name
+        self.soil_water_model_type =  Soil_Water_Model_Type.VanGenuchten.name
 
         # Soil depths
         self.soil_depths = np.repeat(0.1, 3);
@@ -91,8 +109,7 @@ class Parameters:
 
         # Saturated soil hydraulic conductance [m s-1]
         self.k_soil_sats = self.array_to_list_entry(np.array([1.0 / 100.0 / 86400.0, 1.0 / 100.0 / 86400.0, 1.0 / 100.0 / 86400.0]))
-
-        self.sand_fracs =self.array_to_list_entry( np.array([0.03, 0.03, 0.03]))
+        self.sand_fracs = self.array_to_list_entry(np.array([0.03, 0.03, 0.03]))
         self.clay_fracs = self.array_to_list_entry(np.array([0.5, 0.5, 0.5]))
         self.organic_matter_fracs = self.array_to_list_entry(np.array([0.05, 0.05, 0.05]))
 
@@ -113,8 +130,6 @@ class Parameters:
         # Solver precision
         self.solver_precision = 1E-10
 
-        # In seconds
-        self.input_step_len = 1800
 
         # Number of trees per m-2
         self.tree_density = 1/20.0

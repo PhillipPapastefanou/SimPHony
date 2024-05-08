@@ -15,7 +15,7 @@ int Model::time_index(double elapsed_seconds) {
 }
 
 Model::Model
-(Parameters &parameters, const Input &input):
+(Parameters &parameters, Input &input):
 params(parameters),
 input_module(input),
 output(parameters)

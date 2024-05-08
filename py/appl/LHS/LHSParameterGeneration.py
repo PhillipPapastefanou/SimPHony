@@ -32,7 +32,7 @@ sample = sample.T
 
 sel_cols = []
 
-sand_fracs          = rescale(sample[0], min=0.025, max = 0.035)
+sand_fracs          = rescale(sample[0], min = 0.025, max = 0.035)
 clay_fracs          = rescale(sample[1], min = 0.49, max = 0.55)
 org_matter_fracs    = rescale(sample[2], min = 0.025, max = 0.065)
 
@@ -41,7 +41,7 @@ sel_cols.append("clay_frac")
 sel_cols.append("organic_matter_frac")
 
 cstem_s         = rescale(sample[3],      min=0.5, max=1000)
-lai_s           = rescale_mean(sample[4], mean=4.8, percent=30)
+lai_s           = rescale_mean(sample[4], mean = 2.5, percent=50)
 g0_s            = rescale(sample[5],      min=0, max = 0.1)
 
 sel_cols.append("stem_hydraulic_capacitance")
@@ -49,8 +49,8 @@ sel_cols.append("leaf_area_index")
 sel_cols.append("g0")
 
 
-k_xylems_sats   = rescale(sample[6], min=np.log10(0.0001), max=np.log10(1000))
-huber_values    =  rescale(sample[7], min = 1/8000, max= 1/2000)
+k_xylems_sats   = rescale(sample[6], min=np.log10(1.5 * 5000 * 30 / 100), max=np.log10(1.5 * 5000 * 30))
+huber_values    =  rescale(sample[7], min = 1/6000, max= 1/4000)
 
 sel_cols.append("huber_value")
 sel_cols.append("k_xylem_sat")
@@ -65,8 +65,8 @@ sel_cols.append("d_50_close")
 sel_cols.append("g1")
 sel_cols.append("jackson_root_beta")
 # From Saxton et al 2006 in mm h-1
-k_min = 0.1
-k_max = 1000.0
+k_min = 0.01
+k_max = 10
 # Convert to m s-1
 k_min /= (1000 * 3600)
 k_max /= (1000 * 3600)
@@ -79,6 +79,9 @@ sel_cols.append("tree_density")
 plist = ParametersList()
 for i in range(ncombs):
     params = Parameters()
+
+    params.id = i
+
     params.huber_value = 1.0 / 1500.0
     params.canopy_height = 30.0
     params.g0 = 0.01;

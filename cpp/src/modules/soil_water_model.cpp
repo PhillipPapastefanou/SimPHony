@@ -141,6 +141,7 @@ void Saxton06_Soil_Water::CalculatePsiAndKs() {
         orgmat_fracs[is] = layer.organic_matter_fraction;
 
 
+
         theta_t_33[is]      = calc_theta_33_t(is);
         theta_33[is]        = calc_theta_33(is);
         theta_s_33_t[is]    = calc_theta_s_33_t(is);
@@ -153,6 +154,8 @@ void Saxton06_Soil_Water::CalculatePsiAndKs() {
         B[is]       = calc_B(is);
         A[is]       = calc_A(is, B[is]);
     }
+
+
 
 
     //Todo make an option to include the calculation of KS
@@ -174,12 +177,11 @@ void Saxton06_Soil_Water::CalculatePsiAndKs() {
 
 
 
-
     for (int i = 0; i < theta_array.size(); ++i) {
 
         vector<float> theta_list = theta_array[i];
-        // Resize all theta water contents of each layers
 
+        // Resize all theta water contents of each layers
         for (float& wcont : theta_list) {
             wcont *= parameters.theta_emp_multiplier;
         }
@@ -220,6 +222,7 @@ void Saxton06_Soil_Water::CalculatePsiAndKs() {
         ks_array[i] = k_row;
 
     }
+
 
 
 }

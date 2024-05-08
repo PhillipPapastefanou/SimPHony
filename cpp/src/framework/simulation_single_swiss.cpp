@@ -39,7 +39,7 @@ void Simulation_Single_Swiss::Run(DateTime timestart, DateTime timeend) {
 
     model->Run(timestart,timeend);
 
-    analysis = std::make_unique<Analysis_Swiss>(model.get(), *swiss_trees);
+    analysis = std::make_unique<Analysis_Swiss>(model.get(), *swiss_trees, *parameters);
 
     analysis->Run();
 }

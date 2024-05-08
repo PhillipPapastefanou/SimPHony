@@ -22,7 +22,7 @@ public:
 
     void Set_water_pot_initials(double psi_leaf, double psi_stem);
 
-    void Run(double steplen, DateTime timestart, DateTime timeend);
+    void Run(DateTime timestart, DateTime timeend);
 
     std::vector<Analysis_Swiss> Get_analysis_list();
 
@@ -30,7 +30,12 @@ public:
     DateTime Get_last_year();
 private:
 
+
+
     int rank;
+
+    std::string theta_file;
+    std::string forcing_file;
 
     std::unique_ptr<Input_Swiss_Multi_Soils> input;
     std::unique_ptr<Swiss_Drought_Trees> swiss_trees;

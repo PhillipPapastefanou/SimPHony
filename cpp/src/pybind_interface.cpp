@@ -89,7 +89,7 @@ PYBIND11_MODULE(hydro_standalone, handle){
             def("Run", &Analysis_Swiss::Run).
             def("Get_rmse", &Analysis_Swiss::Get_rmse).
             def("Get_time_slices", &Analysis_Swiss::Get_time_slices).
-            def(py::init<Model*, Swiss_Drought_Trees >());
+            def(py::init<Model*, Swiss_Drought_Trees , Parameters>());
 
     py::class_<AnalysisHainich>(handle, "AnalysisHainich").
             def("Get_Rmse_G", &AnalysisHainich::Get_Rmse_G).

@@ -44,11 +44,11 @@ double Bisection_solver_interface::Solve(double lower_bound, double upper_bound)
         }
 
         // We are converging against a value on the edge of the boundaries.
-        if ((std::abs(s0 - upper_bound) < 1E-8) && (std::abs(s1 - upper_bound) < 1E-8)){
+        if ((std::abs(s0 - upper_bound) < 1E-14) && (std::abs(s1 - upper_bound) < 1E-14)){
             return false;
         }
 
-        if ((std::abs(s0 - lower_bound) < 1E-10) && (std::abs(s1 - lower_bound) < 1E-10)){
+        if ((std::abs(s0 - lower_bound) < 1E-14) && (std::abs(s1 - lower_bound) < 1E-14)){
             return false;
         }
 

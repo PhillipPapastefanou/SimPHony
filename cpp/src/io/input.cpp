@@ -7,3 +7,7 @@
 Input::Input(const Parameters& parameters):parameters(parameters) {
 
 }
+
+Input::~Input() {
+
+}

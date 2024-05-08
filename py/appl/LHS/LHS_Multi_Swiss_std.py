@@ -13,6 +13,7 @@ sys.path.append('/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicSt
 from src.Parameters import Parameters
 from src.Parameters import Soil_Water_Model_Type
 from src.Parameters import Stem_Flow_Model_Type
+from src.Parameters import Conductivity_Fraction_Module_Type
 from contrib.ParametersList import ParametersList
 from scipy.stats import qmc
 
@@ -32,8 +33,9 @@ class Subslicer:
         self.i +=1
         return self.array[self.i]
 
-ncombs = 1000000
+ncombs = 100000
 path = '/Net/Groups/BSI/work_scratch/ppapastefanou/simulations/plant_hydraulics_standalone/2024/swiss/constraind_more_k/input/'
+path = '/Users/pp/data/Simulations/A08_Hydraulics_standalone/2024/Major_update/swiss/local/base/input/'
 
 if not os.path.exists(path):
     os.makedirs(path)
@@ -66,7 +68,7 @@ sel_cols.append("clay_frac_02")
 sel_cols.append("clay_frac_03")
 
 k_soil_sats_log = np.zeros((3, ncombs))
-k_soil_sats_log[0]        = rescale(slicer.get(), min=-16, max = -5)
+k_soil_sats_log[0]        = rescale(slicer.get(), min= -7.5, max =-5.5)
 k_soil_sats_log[1]        = k_soil_sats_log[0] - 8
 k_soil_sats_log[2]        = k_soil_sats_log[0] - 9
 
@@ -78,17 +80,17 @@ g0_s            = rescale(slicer.get(), min=0.03, max = 0.1)
 sel_cols.append("g0")
 g1_s            = rescale(slicer.get(), min = 0.5, max = 4.5)
 sel_cols.append("g1")
-k_xylems_sats_log   = rescale(slicer.get(), min=np.log10(90), max=np.log10(900))
+k_xylems_sats_log   = rescale(slicer.get(), min=np.log10(1.5 * 30* 5000/100), max=np.log10(1.5 * 30 * 5000 / 1))
 sel_cols.append("k_xylem_sat")
 
-huber_values    =  rescale(slicer.get(), min = 1/8000, max= 1/3000)
+huber_values    =  rescale(slicer.get(), min = 1/6000, max= 1/4000)
 sel_cols.append("huber_value")
 
-cstem_s         = rescale(slicer.get(), min=5, max=1000)
+cstem_s_log         = rescale(slicer.get(), min=np.log10(0.5 *1000.0/18.0), max=np.log10(0.5 * 200 *1000.0/18.0))
 sel_cols.append("kappa_stem")
 lai_s           = rescale(slicer.get(), min= 2 , max = 6)
 sel_cols.append("lai")
-cleaf_s         = rescale(slicer.get(), min = 0.004, max = 0.8)
+cleaf_s         = rescale(slicer.get(), min = 0.0001*55.0, max = 0.002*55.0)
 #cleaf_s         = rescale(slicer.get(), min = 0.04, max = 0.4)
 sel_cols.append("kappa_leaf")
 d_50close_s     = rescale(slicer.get(), min = 1.0, max = 5.0)
@@ -115,6 +117,9 @@ plist = ParametersList()
 for i in range(ncombs):
     params = Parameters()
 
+    params.id = i
+    params.dts = 1800.0
+
     params.root_area_index = root_area_indexes[i]
 
     params.soil_depths = np.array([0.1, 0.3, 0.4])
@@ -125,7 +130,7 @@ for i in range(ncombs):
     params.sand_fracs = params.array_to_list_entry(sand_fracs[:,i])
     params.clay_fracs = params.array_to_list_entry(clay_fracs[:,i])
 
-    params.stem_hydraulic_capacitance = cstem_s[i]
+    params.stem_hydraulic_capacitance = 10**cstem_s_log[i]
     params.leaf_area_index = lai_s[i]
     params.g0 = g0_s[i]
     params.g1 = g1_s[i]
@@ -146,21 +151,26 @@ for i in range(ncombs):
     pressure = 1.013 * 100000.0  # Pa
     c_a = 415
 
-    params.soil_water_model_type_enum = Soil_Water_Model_Type.Saxton06
-    params.soil_water_model_type = params.soil_water_model_type_enum.name
+    params.soil_water_model_type = Soil_Water_Model_Type.Saxton06.name
 
-    params.stem_flow_type_enum = Stem_Flow_Model_Type.Linear
-    params.stem_flow_type = params.stem_flow_type_enum.name
+    params.stem_flow_type = Stem_Flow_Model_Type.Linear.name
+
+    params.conductivity_fraction_type = Conductivity_Fraction_Module_Type.Weibull.name
 
     params.soil_profile_index = int(loc_index[i])
 
     if i % 50000 == 0:
         print(i/ncombs * 100.0)
 
+    params.sustain_xylem_damage =False
+    params.verbose = False
+
+    params.max_psi_leaf_change_per_hour = 1.0
+
     plist.Add(params)
 
-plist.Write_Full_Parameter_File(f"{path}SwissParameterListLowerLow12_4{ncombs}.csv")
-plist.Write_Partial_Parameter_File(f"{path}SwissPartialParameterListLowerLow12_4{ncombs}.csv", sel_cols)
+plist.Write_Full_Parameter_File(f"{path}SwissParameterList_03_05{ncombs}.csv")
+plist.Write_Partial_Parameter_File(f"{path}SwissPartialParameterList_03_05{ncombs}.csv", sel_cols)
 
 
 # from hydro_standalone import Simulation_Multi

@@ -43,9 +43,9 @@ struct Constants{
     const double GRAVITY = 9.81;
 
     // Maximum leaf water potential [MPa]
-    double MAX_LEAF_WATER_POTENTIAL = -1E-3;
+    double MAX_LEAF_WATER_POTENTIAL = -1E-12;
     // Maximum stem water potential [MPa]
-    double MAX_STEM_WATER_POTENTIAL = -1E-10;
+    double MAX_STEM_WATER_POTENTIAL = -1E-16;
 
 };
 
@@ -191,7 +191,7 @@ public:
     double g_bark = 0.0;
     bool verbose = false;
 
-    //Simulation timestep lenght
+    //Simulation timestep length [s]
     double dts = 1800.0;
 
     Conductivity_fraction_module_type  conductivity_fraction_type = Conductivity_fraction_module_type::Weibull;

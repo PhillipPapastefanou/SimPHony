@@ -95,41 +95,34 @@ tree_folder_path = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydrauli
 
 
 theta_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/swiss/Water_content_MultiSoils.csv";
-
 forcing_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/swiss/Forcing_Inter.csv";
-
-parameters_list = "/Users/pp/data/Simulations/A08_Hydraulics_standalone/2024/swiss/LHS/14-4/Best_Alive_avg.csv";
-parameters_list = "/Users/pp/data/Simulations/A08_Hydraulics_standalone/2024/swiss/LHS/14-4/Best_Dead_0.csv";
-
+#parameters_list = "/Users/pp/data/Simulations/A08_Hydraulics_standalone/2024/swiss/LHS/14-4/Best_Alive_avg.csv";
+parameters_list = "/Users/pp/data/temp/siml/SwissParameterList_03_051000.csv";
 tree_folder_path = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/swiss/Trees";
-
 
 
 from hydro_standalone import Simulation_Single_Swiss
 from hydro_standalone import Simulation_Multi_Swiss
 from hydro_standalone import DateTime
-u = 10
+u = 80
 
-sim = Simulation_Single_Swiss()
-sim.Init_parameters_fn_single(parameters_list, u)
-sim.Init_input(theta_file, forcing_file, tree_folder_path)
-sim.Set_water_pot_initials(-1.0, -0.3)
-
-# sim = Simulation_Multi()
-# sim.Init_Full_Parameter_Setups(parameters_list, np.arange(0,100))
-# sim.Init_input(theta_file, forcing_file, tree_folder_path, 0)
+# sim = Simulation_Single_Swiss()
+# sim.Init_parameters_fn_single(parameters_list, u)
+# sim.Init_input(theta_file, forcing_file, tree_folder_path)
 # sim.Set_water_pot_initials(-1.0, -0.3)
 
-# in seconds
-steplen = 1800
+sim = Simulation_Multi_Swiss()
+sim.Init_Full_Parameter_Setups(parameters_list, np.arange(0, 2))
+sim.Init_input(theta_file, forcing_file, tree_folder_path, 0)
+sim.Set_water_pot_initials(-1.0, -0.1)
+
 
 format = "%Y-%m-%d %H:%M:%S"
 timestart = DateTime("2018-4-01 00:00:00", format)
 timeend   = DateTime("2018-12-01 00:00:00", format)
 
 
-
-sim.Run(steplen, timestart, timeend)
+sim.Run(timestart, timeend)
 output = sim.Get_output()
 an = sim.Get_analysis()
 
@@ -241,6 +234,6 @@ ax.set_xlim((df.index[0]), (df.index[-1]))
 plt.subplots_adjust(hspace= 0.5, bottom = 0.2)
 #plt.plot(in_thetas[0:2*24*2])
 plt.tight_layout()
-plt.savefig(f"Swiss_{params.stem_flow_type.name}_Water_flow_obs_model{u}.png", dpi = 300)
+plt.savefig(f"Swiss_{params.stem_flow_type}_Water_flow_obs_model{u}.png", dpi = 300)
 plt.show()
 

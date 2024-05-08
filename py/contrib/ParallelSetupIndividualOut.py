@@ -120,7 +120,7 @@ class ParallelSetupIndividual:
             timeend = DateTime("2018-12-1 00:00:00", format)
 
 
-        self.sim.Run(steplen, timestart, timeend)
+        self.sim.Run(timestart, timeend)
         self.comm.Barrier()
 
         if self.is_root:

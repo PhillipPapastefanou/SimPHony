@@ -8,6 +8,7 @@ class Condutivity_Module {
 
 public:
     Condutivity_Module(const Parameters& params);
+    virtual ~Condutivity_Module();
 
     virtual void Init() = 0;
     virtual double Get_fraction(double psi) = 0;
