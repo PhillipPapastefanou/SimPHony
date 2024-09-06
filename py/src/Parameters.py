@@ -113,18 +113,17 @@ class Parameters:
         self.clay_fracs = self.array_to_list_entry(np.array([0.5, 0.5, 0.5]))
         self.organic_matter_fracs = self.array_to_list_entry(np.array([0.05, 0.05, 0.05]))
 
-        self.theta_r = 0.105
-        self.alpha_genucht = 1.0
-        self.n_genucht = 6.0
-        self.neta_genucht = 0.5
-
-        #Campbell 1974/ Clapp and STuff 1978 shape parameter [1]
-        self.camp_b = 10.4
+        # Residual soil water content [1]
+        self.theta_r =  self.array_to_list_entry(np.array([0.105, 0.105, 0.105]))
         # Saturation soil water content [1]
-        self.theta_s  = 0.426
-        # Reference Soil water potential [MPa]
-        # from Clapp 1978: -15.3 cm
-        self.camp_psi_soil_ref = -1.50042 * 10 ** (-6)
+        self.theta_s =  self.array_to_list_entry(np.array([0.426, 0.426, 0.426]))
+        #Campbell 1974/ Clapp and STuff 1978 shape parameter [1]
+        self.camp_b =  self.array_to_list_entry(np.array([8.4, 8.4, 8.4]))
+
+        # Reference Soil water potential [m]
+        self.psi_soil_sat =  self.array_to_list_entry(np.array([-0.153, -0.153, -0.153]))
+        # Reference Soil water potential [m]
+        self.pore_size_ind =  self.array_to_list_entry(np.array([0.5, 0.5, 0.5]))
 
 
         # Solver precision

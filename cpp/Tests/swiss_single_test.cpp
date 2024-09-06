@@ -76,7 +76,7 @@ Swiss_Single_Test::Swiss_Single_Test() {
 //
 //    params.theta_s = 0.43;
 //    params.camp_b = 4.5;
-//    params.camp_psi_soil_ref = -4.5E-3;
+//    params.psi_soil_sat = -4.5E-3;
 //
 //    params.psi50_xylem = -3.5;
 //    params.psi88_xylem = -5.0;
@@ -103,21 +103,45 @@ Swiss_Single_Test::Swiss_Single_Test() {
 //
 //    params.soil_profile_index = 4;
 
+    params.soil_water_type = Soil_water_module_type::VanGenuchten;
+    params.soil_profile_index = 5;
+
     params.stem_flow_type = Stem_flow_module_type::Linear;
     params.conductivity_fraction_type = Conductivity_fraction_module_type::Weibull;
     params.sustain_xylem_damage = false ;
-    params.stem_hydraulic_capacitance_max =  50* 1000/18.01 ;
+    params.stem_hydraulic_capacitance_max =  0.1* 1000/18.01 ;
     params.huber_value = 1/5000.0;
     params.verbose= true;
     params.d_50_close = 1.0;
 
-    for (int i = 0; i < params.soil_layers.size(); ++i) {
-        params.soil_layers[i].k_soil_sat  *= 1.0;
+//    for (int i = 0; i < params.soil_layers.size(); ++i) {
+//        params.soil_layers[i].k_soil_sat  *= 1.0;
+//    }
+
+
+    for (Soil_layer& layer : params.soil_layers) {
+
+        layer.psi_soil_sat = -0.31655;
+        layer.theta_s = 0.42685;
+        layer.theta_r = 0.033675;
+        layer.camp_b = 5.4763;
+        layer.pore_size_ind = 0.24985;
+        layer.k_soil_sat = 9.8084e-06;
     }
 
 
+    for (Soil_layer& layer : params.soil_layers) {
+
+        layer.psi_soil_sat = -0.31655;
+        layer.theta_s = 0.52685;
+        layer.theta_r = 0.13675;
+        layer.camp_b = 5.4763;
+        layer.pore_size_ind = 0.24985;
+        layer.k_soil_sat = 9.8084e-06;
+    }
+
     params.k_xylem_sat = 1.5 * 5000 * 30 / 100;
-    params.leaf_hydraulic_capacitance = 0.001* 55;
+    params.leaf_hydraulic_capacitance = 0.00011* 55;
 
     //params.g_bark = params.g0 * 2;
 

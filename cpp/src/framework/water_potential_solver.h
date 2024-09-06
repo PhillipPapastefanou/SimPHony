@@ -39,12 +39,7 @@ protected:
 
 
     const Parameters& params;
-    const double GRAVITY;
-    const double rho_water;
-    const double PaToMPa;
-    const double MPA_TO_PA;
-    const double SEC_IN_HOUR;
-    const double PI;
+
 
 
     double dts;
@@ -86,7 +81,9 @@ protected:
 
 
     /// Model input
+    // List of soil water potentials per soil layer [m]
     std::vector<double> psi_soil_sl;
+    // List of conductivities per soil layer [m s-1]
     std::vector<double> k_soil_sl;
     double anet;
     double vpd;

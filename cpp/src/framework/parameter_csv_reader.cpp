@@ -200,38 +200,68 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
 
         val = "theta_s";
         pos = get_position(val);
-        if(pos <  row.size())
-            params.theta_s = std::stod(row[pos]);
+        if(pos <  row.size()){
+            std::string input = row[pos];
+            std::string word;
+            std::stringstream row_str(input);
+            int i = 0;
+            while (getline(row_str, word, ';')) {
+                params.soil_layers[i].theta_s = std::stod(word);
+                i++;
+            }
+        }
 
         val = "theta_r";
         pos = get_position(val);
-        if(pos <  row.size())
-            params.theta_r = std::stod(row[pos]);
+        if(pos <  row.size()){
+            std::string input = row[pos];
+            std::string word;
+            std::stringstream row_str(input);
+            int i = 0;
+            while (getline(row_str, word, ';')) {
+                params.soil_layers[i].theta_r = std::stod(word);
+                i++;
+            }
+        }
 
-        val = "alpha_genucht";
+        val = "pore_size_ind";
         pos = get_position(val);
-        if(pos <  row.size())
-            params.alpha_genucht = std::stod(row[pos]);
-
-        val = "n_genucht";
-        pos = get_position(val);
-        if(pos <  row.size())
-            params.n_genucht = std::stod(row[pos]);
-
-        val = "neta_genucht";
-        pos = get_position(val);
-        if(pos <  row.size())
-            params.neta_genucht = std::stod(row[pos]);
+        if(pos <  row.size()){
+            std::string input = row[pos];
+            std::string word;
+            std::stringstream row_str(input);
+            int i = 0;
+            while (getline(row_str, word, ';')) {
+                params.soil_layers[i].pore_size_ind = std::stod(word);
+                i++;
+            }
+        }
 
         val = "camp_b";
         pos = get_position(val);
-        if(pos <  row.size())
-            params.camp_b = std::stod(row[pos]);
+        if(pos <  row.size()){
+            std::string input = row[pos];
+            std::string word;
+            std::stringstream row_str(input);
+            int i = 0;
+            while (getline(row_str, word, ';')) {
+                params.soil_layers[i].camp_b = std::stod(word);
+                i++;
+            }
+        }
 
-        val = "camp_psi_soil_ref";
+        val = "psi_soil_sat";
         pos = get_position(val);
-        if(pos <  row.size())
-            params.camp_psi_soil_ref = std::stod(row[pos]);
+        if(pos <  row.size()){
+            std::string input = row[pos];
+            std::string word;
+            std::stringstream row_str(input);
+            int i = 0;
+            while (getline(row_str, word, ';')) {
+                params.soil_layers[i].psi_soil_sat = std::stod(word);
+                i++;
+            }
+        }
 
         val = "solver_precision";
         pos = get_position(val);

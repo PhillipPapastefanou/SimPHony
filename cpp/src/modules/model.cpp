@@ -2,11 +2,13 @@
 #include <cmath>
 #include <iostream>
 
-#include "soil_water_model.h"
+#include "soil_water/soil_water_model.h"
+#include "soil_water/saxton.h"
+#include "soil_water/campbell.h"
+#include "soil_water/van_genuchten.h"
 #include "../framework/solver_indiv_eulerimp.h"
 
 void Model::Set_initial_conditions(double psi_leaf_zero, double psi_stem_zero) {
-
     water_potential_solver->Init_water_potentials(psi_leaf_zero, psi_stem_zero);
 }
 
@@ -29,17 +31,17 @@ void Model::Set_derived_parameters() {
     switch (params.soil_water_type) {
 
         case Soil_water_module_type::Saxton06:{
-            soil_water_module = std::make_unique<Saxton06_Soil_Water>(params, input_module);
+            soil_water_module = std::make_unique<Saxton06>(params, input_module);
             water_model_str = "Saxton06";
             break;
         }
         case Soil_water_module_type::Campbell:{
-            soil_water_module = std::make_unique<Campbell_Soil_Water>(params, input_module);
+            soil_water_module = std::make_unique<Campbell>(params, input_module);
             water_model_str = "Campbell";
             break;
         }
         case Soil_water_module_type::VanGenuchten:{
-            soil_water_module = std::make_unique<Van_Gnuchten_Soil_Water>(params, input_module);
+            soil_water_module = std::make_unique<Van_Genuchten>(params, input_module);
             water_model_str = "VanGnuchten";
             break;
         }
@@ -53,12 +55,12 @@ void Model::Set_derived_parameters() {
 
     soil_water_module->CalculatePsiAndKs();
     input_k_soil = soil_water_module->Get_ks();
-    input_psi_soil = soil_water_module->Get_psi();
+    input_psi_soil = soil_water_module->Get_psi_head();
     input_anet = input_module.anet;
     input_vpd = input_module.vpd;
 
     //water_potential_solver= std::make_unique<Solver_RKF>(params);
-    water_potential_solver= std::make_unique<Solver_Indiv_Euler_Imp>(params);
+    water_potential_solver = std::make_unique<Solver_Indiv_Euler_Imp>(params);
     water_potential_solver->Init_solver();
 }
 
@@ -128,6 +130,10 @@ void Model::add_output() {
     output.Add_DateTime(time_start.AddSeconds(ts));
 
     vector<float> psi_soil_f(ipsi_soil.begin(), ipsi_soil.end());
+    // Convert hydraulic head to MPa
+    for (int i = 0; i < psi_soil_f.size(); ++i) {
+        psi_soil_f[i] *= params.constants.HydraulicHeadInMtoMPa;
+    }
     output.Add_psi_soil_indiv(psi_soil_f);
 
     vector<float> ks_soil_f(ik_soil.begin(), ik_soil.end());

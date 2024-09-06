@@ -11,13 +11,7 @@
 //
 //}
 
-Water_Potential_Solver::Water_Potential_Solver(const Parameters& params): params(params),
-                                                                          GRAVITY(params.constants.GRAVITY),
-                                                                          rho_water(params.constants.RHO_WATER),
-                                                                          MPA_TO_PA(params.constants.MPaToPa),
-                                                                          PaToMPa(params.constants.PaToMPa),
-                                                                          PI(params.constants.PI),
-                                                                          SEC_IN_HOUR(params.constants.SEC_IN_HOUR){
+Water_Potential_Solver::Water_Potential_Solver(const Parameters& params): params(params){
 
 }
 
@@ -38,7 +32,7 @@ void Water_Potential_Solver::init_base() {
 
     // Calculate minimum leaf water potential
     min_leaf_water_potential = params.psi88_xylem * params.minimum_psi_leaf_multiplier;
-    max_psi_leaf_change_per_ts = params.max_psi_leaf_change_per_hour * dts / SEC_IN_HOUR;
+    max_psi_leaf_change_per_ts = params.max_psi_leaf_change_per_hour * dts / params.constants.SEC_IN_HOUR;
 
     Gi.resize(params.soil_layers.size());
 
@@ -74,8 +68,12 @@ void Water_Potential_Solver::init_base() {
 
 void Water_Potential_Solver::Update_forcing(std::vector<double> psi_soil_sl, std::vector<double> k_soil_sl, double anet,
                                             double vpd, double ca, double pressure) {
+
+
     this->psi_soil_sl = psi_soil_sl;
     this->k_soil_sl = k_soil_sl;
+
+
     this->anet = anet;
     this->vpd = vpd;
     this->ca = ca;
@@ -108,6 +106,7 @@ void Water_Potential_Solver::Update_output(Output &output) {
     vector<float> Gi_f(Gi.begin(), Gi.end());
     for (auto& e: Gi_f)
         e *= 1.0;
+
     output.Add_G_indiv(Gi_f);
     output.Add_psi_leaf(psi_leaf);
     output.Add_psi_stem_ground(psi_stem_ground);

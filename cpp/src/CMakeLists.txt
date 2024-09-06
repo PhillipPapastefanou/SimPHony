@@ -8,7 +8,10 @@ set(headers
         framework/simulation_multi_swiss.h
         framework/simulation_multi_hainich.h
         auxil/solvers.h
-        modules/soil_water_model.h
+        modules/soil_water/soil_water_model.h
+        modules/soil_water/saxton.h
+        modules/soil_water/campbell.h
+        modules/soil_water/van_genuchten.h
         modules/root_distribution_model.h
         io/input_swiss.h
         io/input_swiss_mult_soils.h
@@ -33,6 +36,7 @@ set(headers
         framework/solver_2D.h
         framework/solver_rkf.h
         ../Tests/water_flow_segments_approx_test.h
+        ../Tests/soil_models_test.h
         )
 
 set(source
@@ -43,7 +47,10 @@ set(source
         framework/simulation_single_hainich.cpp
         auxil/solvers.cpp
         auxil/rkf_solver.cpp
-        modules/soil_water_model.cpp
+        modules/soil_water/soil_water_model.cpp
+        modules/soil_water/saxton.cpp
+        modules/soil_water/campbell.cpp
+        modules/soil_water/van_genuchten.cpp
         modules/root_distribution_model.cpp
         modules/conductivity_model.cpp
         modules/soil_layer.cpp
@@ -70,6 +77,7 @@ set(source
         framework/solver_2D.cpp
         framework/solver_rkf.cpp
         ../Tests/water_flow_segments_approx_test.cpp
+        ../Tests/soil_models_test.cpp
         )
 
 include(add_model_sources)

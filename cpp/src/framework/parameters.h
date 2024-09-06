@@ -25,6 +25,7 @@ enum class Soil_water_module_type{
 struct Constants{
 
     public:
+
     const double SEC_IN_DAY = 86400.0;
     const double SEC_IN_HOUR = 3600.0;
     const double CM_IN_M = 100.0;
@@ -41,6 +42,11 @@ struct Constants{
     const double RHO_WATER = 998.0;
     // Gravitational constant [kg m-1 s-2]
     const double GRAVITY = 9.81;
+
+    const double HydraulicHeadInMtoMPa =  GRAVITY / 1000.0;
+    const double MPaToHydraulicHeadM =  1.0 / HydraulicHeadInMtoMPa;
+
+
 
     // Maximum leaf water potential [MPa]
     double MAX_LEAF_WATER_POTENTIAL = -1E-12;
@@ -127,24 +133,9 @@ public:
     // Jackson rooting parameter [-]
     double jackson_root_beta  = 0.96;
 
-    // Saturated volumetric water content [m3 m-3]
-    double theta_s = 0.8;
-
     // Empirical water content multiplier [-]
     // Should be 1.0 for runs where the given wcont is known precisely
     double theta_emp_multiplier = 1.0;
-
-    // Van Genuchten parameters
-    double theta_r = 0.105;
-    double alpha_genucht = 1.0;
-    double n_genucht = 6.0;
-    double neta_genucht = 0.5;
-
-    // Campbell 1974 / Clapp and Stuff 1978 shape parameter [1]
-    double camp_b = 8.4;
-    // Reference Soil water potential [MPa]
-    // from Clapp 1978: -15.3 cm
-    double camp_psi_soil_ref = -1.50042 * std::pow(10, -6);
 
     /// Input parameters
     /// Length of one timestep in [s]

@@ -15,7 +15,8 @@ config.tree_folder_path = "/Users/pp/Documents/Repos/plant_hydro_standalone/data
 config.location = Location.Swiss
 
 #config.parameter_input_file_list = f"ParameterList{20000000}.csv"
-config.parameter_input_file_list = f"/Users/pp/data/Simulations/A08_Hydraulics_standalone/2024/Major_update/swiss/local/base/input/SwissParameterList_03_05100000.csv";
+#config.parameter_input_file_list = f"/Users/pp/data/Simulations/A08_Hydraulics_standalone/2024/Major_update/swiss/local/base/input/SwissParameterList_03_05100000.csv";
+config.parameter_input_file_list = f"LHS/generator_files/SwissParameterListWide_24_1000.csv";
 
 sys.path.append(config.build_path)
 #from contrib.ParallelRunFull import ParallelSetupFull

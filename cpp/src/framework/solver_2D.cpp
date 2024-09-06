@@ -32,7 +32,7 @@ void Solver_2D::Update_water_potentials() {
         // Normal solver routine
     else{
         // Convert to maximum change per timestep [MPa]
-        const double max_psi_leaf_change_per_ts =  params.max_psi_leaf_change_per_hour * dts / SEC_IN_HOUR;
+        const double max_psi_leaf_change_per_ts =  params.max_psi_leaf_change_per_hour * dts / params.constants.SEC_IN_HOUR;
 
         // Calculate leaf water potential boundaries for bisection solver
         double psi_leaf_lower = psi_leaf - max_psi_leaf_change_per_ts;
@@ -90,15 +90,24 @@ double Solver_2D::d_psi_stem_ground(double psi_leaf, double psi_stem) {
     // in case it is updated two times.
 
     // Update stem water flow
-//    J = stem_flow_module->Get_Stem_flow(psi_stem, this->psi_leaf);
+    // J = stem_flow_module->Get_Stem_flow(psi_stem, this->psi_leaf);
 
     G = 0.0;
     for (int s = 0; s < params.soil_layers.size(); ++s) {
 
-        Soil_layer sl = params.soil_layers[s];
+        const Soil_layer& sl = params.soil_layers[s];
 
-        Gi[s] = sl.root_fraction * k_soil_sl[s] * std::sqrt(params.root_area_index) /
-                PI / sl.depth * (psi_soil_sl[s] - psi_stem) / GRAVITY * MPA_TO_PA;
+        // Convert k soil from volume to mass flow:
+        double k_soil = k_soil_sl[s] * params.constants.RHO_WATER;
+
+        // Convert from kg to mol H2O
+        k_soil *= params.constants.KG_H2O_To_Mol;
+
+        // Convert from MPA to hydraulic head
+        double psi_stem_hh = psi_stem * params.constants.MPaToHydraulicHeadM;
+
+        Gi[s] = sl.root_fraction * k_soil * std::sqrt(params.root_area_index) /
+                params.constants.PI / sl.depth * (psi_soil_sl[s] - psi_stem_hh);
 
         // Avoid water from flowing down from the stem via roots to the soil
         if (Gi[s] < 0.0)

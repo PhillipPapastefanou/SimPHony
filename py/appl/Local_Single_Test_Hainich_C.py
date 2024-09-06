@@ -69,7 +69,6 @@ plist.Write_Full_Parameter_File("ParameterList1.csv")
 forcing_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/hainich/Meteo_Hainich_dT30min_forcing_PHS.csv"
 sap_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/hainich/SAP_Hainich_Fagus-mean_dT30min_prog.csv"
 
-
 df_sap = pd.read_csv(sap_file)
 df_sap['datetime']  = pd.to_datetime(df_sap['datetime'])
 # Convert from kg H2O to mol H2O
@@ -94,17 +93,9 @@ timeend   = DateTime("2023-7-2 00:00:00", format)
 timestart = DateTime("2023-6-1 00:00:00", format)
 timeend   = DateTime("2023-10-1 00:00:00", format)
 
-# timestart = DateTime("2023-09-1 00:00:00", format)
-# timeend   = DateTime("2023-10-1 00:00:00", format)
-#
-# timestart = DateTime("2023-09-1 00:00:00", format)
-# timeend   = DateTime("2023-9-3 00:00:00", format)
-#
-#
-# timestart = DateTime("2023-7-1 00:00:00", format)
-# timeend   = DateTime("2023-8-1 00:00:00", format)
 
-sim.Run(steplen, timestart, timeend)
+
+sim.Run(timestart, timeend)
 output = sim.Get_output()
 
 an = sim.Get_analysis()

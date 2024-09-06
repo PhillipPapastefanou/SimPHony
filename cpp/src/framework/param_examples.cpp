@@ -22,18 +22,18 @@ void Parameter_Examples::Define() {
     Baseline_one.soil_layers.resize(3);
 
     Baseline_one.jackson_root_beta = 0.96;
-    Baseline_one.theta_r = 0.0972;
-    Baseline_one.alpha_genucht = 1.0;
-    Baseline_one.n_genucht = 5.0;
-    Baseline_one.neta_genucht = 0.5;
+
+//    Baseline_one.theta_r = 0.033;
+//    Baseline_one.pore_size_ind = 0.24985;
+//    Baseline_one.theta_s = 0.42685;
+//    Baseline_one.camp_b = 10.4;
+//    Baseline_one.psi_soil_sat = -1.5E-6;
+//
     Baseline_one.theta_emp_multiplier = 1.0;
 
 
-    Baseline_one.theta_s = 0.426;
-    Baseline_one.camp_b = 10.4;
-    Baseline_one.camp_psi_soil_ref = -1.5E-6;
 
     for (int i = 0; i < 3; ++i) {
-        Baseline_one.soil_layers[i].k_soil_sat = 1.0/100.0/86400.0;
+        Baseline_one.soil_layers[i].k_soil_sat = 9.8084e-06;
     }
 }

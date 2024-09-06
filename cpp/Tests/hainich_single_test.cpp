@@ -50,33 +50,31 @@ Hainich_Single_Test::Hainich_Single_Test() {
     params.leaf_area_index = 4.8;
     params.leaf_hydraulic_capacitance = 1.0;
     params.stem_hydraulic_capacitance_max = 100 * 1000 / 18.0;
-    params.k_xylem_sat = 100;
+    params.k_xylem_sat = 10;
 
     params.root_area_index = 24;
-
     params.jackson_root_beta = 0.96;
-    params.theta_r = 0.0972;
-    params.alpha_genucht = 1.0;
-    params.n_genucht = 5.0;
-    params.neta_genucht = 0.5;
-
-    params.theta_s = 0.52;
-    params.camp_b = 6.2;
-    params.camp_psi_soil_ref = -2.5E-3;
-
 
     params.soil_layers.resize(3);
+
+
+    for (Soil_layer& layer: params.soil_layers) {
+        layer.k_soil_sat = 0.02/100.0/3600;
+        layer.clay_fraction = 0.6;
+        layer.sand_fraction = 0.025;
+        layer.organic_matter_fraction = 0.005;
+
+        layer.theta_r =  0.0972;
+        layer.theta_s =  0.52;
+        layer.camp_b =  6.2;
+        layer.psi_soil_sat = -2.5E-3;
+        layer.pore_size_ind = 0.24985;
+    }
+
     params.soil_layers[0].depth = 0.08;
     params.soil_layers[1].depth = 0.16;
     params.soil_layers[2].depth = 0.32;
 
-
-    for (int i = 0; i < params.soil_layers.size(); ++i) {
-        params.soil_layers[i].k_soil_sat = 0.02/100.0/3600;
-        params.soil_layers[i].clay_fraction = 0.6;
-        params.soil_layers[i].sand_fraction = 0.025;
-        params.soil_layers[i].organic_matter_fraction = 0.005;
-    }
 
 
     params.psi50_xylem = -3.5;

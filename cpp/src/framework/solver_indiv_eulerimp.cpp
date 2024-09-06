@@ -49,7 +49,7 @@ void Solver_Indiv_Euler_Imp::Update_water_potentials() {
         std::cout << " G: " << G << std::endl;
         std::cout << " T_G: " << T_G << std::endl;
         std::cout <<   "VPD : " << vpd ;
-        std::cout << " psi_soil: " << psi_soil_sl[0];
+        std::cout << " psi_soil: " << psi_soil_sl[0]*params.constants.HydraulicHeadInMtoMPa;
         std::cout << " K_soil: " << k_soil_sl[0] << std::endl;
         std::cout << ""<< std::endl;
     }
@@ -106,24 +106,27 @@ double Solver_Indiv_Euler_Imp::d_psi_stem_ground(double psi_leaf, double psi_ste
         J = stem_flow_module->Get_Stem_flow(psi_stem, psi_leaf);
     }
 
-
     G = 0.0;
     for (int s = 0; s < params.soil_layers.size(); ++s) {
-        Soil_layer sl = params.soil_layers[s];
 
-        Gi[s] = sl.root_fraction * k_soil_sl[s] * std::sqrt(params.root_area_index) /
-                PI / sl.depth * (psi_soil_sl[s] - psi_stem) / GRAVITY * MPA_TO_PA;
+        const Soil_layer& sl = params.soil_layers[s];
+
+        // Convert k soil from volume to mass flow:
+        double k_soil = k_soil_sl[s] * params.constants.RHO_WATER;
+
+        // Convert from kg to mol H2O
+        k_soil *= params.constants.KG_H2O_To_Mol;
+
+        // Convert from MPA to hydraulic head
+        double psi_stem_hh = psi_stem * params.constants.MPaToHydraulicHeadM;
+
+        Gi[s] = sl.root_fraction * k_soil * std::sqrt(params.root_area_index) /
+                params.constants.PI / sl.depth * (psi_soil_sl[s] - psi_stem_hh);
 
         // Avoid water from flowing down from the stem via roots to the soil
         if (Gi[s] < 0.0)
             Gi[s] = 0.0;
 
-        G += Gi[s];
-        // Avoid water from flowing down from the stem via roots to the soil
-        if (Gi[s] < 0.0)
-            Gi[s] = 0.0;
-
-        // Sum up the water flow of each layer
         G += Gi[s];
     }
 

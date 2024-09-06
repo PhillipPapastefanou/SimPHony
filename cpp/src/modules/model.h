@@ -2,7 +2,7 @@
 #include "../framework/parameters.h"
 #include "../io/input_swiss.h"
 #include <vector>
-#include "soil_water_model.h"
+#include "soil_water/soil_water_model.h"
 #include "../auxil/solvers.h"
 #include "../io/output.h"
 #include "model.h"
@@ -39,9 +39,9 @@ private:
     double ipressure;
     // Ambient CO2 concentration [ppm]
     double ica;
-    // List of soil water potentials per soil layer [MPa]
+    // List of soil water potentials per soil layer [m] (hydraulic head)
     vector<double> ipsi_soil;
-    // List of conductivities per soil layer [mol H2O m-1 MPA-1 s-1]
+    // List of conductivities per soil layer [m s-1]
     vector<double> ik_soil;
 
     std::unique_ptr<Water_Potential_Solver> water_potential_solver;
