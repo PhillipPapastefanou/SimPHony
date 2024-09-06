@@ -32,7 +32,7 @@ class Subslicer:
         return self.array[self.i]
 
 ncombs = 1000
-path = '/Net/Groups/BSI/work_scratch/ppapastefanou/simulations/plant_hydraulics_standalone/2024/swiss/extremelow_ks/input/'
+#path = '/Net/Groups/BSI/work_scratch/ppapastefanou/simulations/plant_hydraulics_standalone/2024/swiss/extremelow_ks/input/'
 path = '/Users/pp/Documents/Repos/plant_hydro_standalone/py/appl/LHS/generator_files/'
 seed   = 123456789
 sampler = qmc.LatinHypercube(d = 21, seed= seed)
@@ -161,7 +161,7 @@ for i in range(ncombs):
     pressure = 1.013 * 100000.0  # Pa
     c_a = 415
 
-    params.soil_water_model_type_enum = Soil_Water_Model_Type.Saxton06
+    params.soil_water_model_type_enum = Soil_Water_Model_Type.Campbell
     params.soil_water_model_type = params.soil_water_model_type_enum.name
 
     params.stem_flow_type_enum = Stem_Flow_Model_Type.Linear

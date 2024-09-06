@@ -4,6 +4,7 @@
 
 #pragma once
 #include <vector>
+#include <algorithm>
 
 class Lookup_table {
 

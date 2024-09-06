@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include <memory>
 #include "../framework/parameters.h"
 #include "../auxil/lookup_table.h"
 #include "../modules/conductivity_model.h"
