@@ -123,7 +123,6 @@ void Model::Run(DateTime begin, DateTime end) {
 
 }
 
-
 void Model::add_output() {
 
     output.Add_Timestep(ts);

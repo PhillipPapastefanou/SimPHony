@@ -9,7 +9,7 @@ public:
     double sand_fraction;
     double clay_fraction;
 
-    // Saturated soil hydraulic conductance [m s-1]
+    // Saturated soil hydraulic conductivity [m s-1]
     double k_soil_sat;
     // Soil layer depth [m]
     double depth;

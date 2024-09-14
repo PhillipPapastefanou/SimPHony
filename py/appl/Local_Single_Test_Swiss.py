@@ -69,7 +69,7 @@ params = Parameters()
 # params.organic_matter_fracs = np.array2string(params.organic_matter_fracs, separator=';')
 # params.organic_matter_fracs = params.organic_matter_fracs[1:-1]
 #
-params.k_soil_sats = np.array([1.0 / 100.0 / 86400.0, 1.0 / 100.0 / 86400.0, 1.0 / 100.0 / 86400.0]) * 0.01
+params.k_soil_sats = np.array([1.0 / 100.0 / 86400.0, 1.0 / 100.0 / 86400.0, 1.0 / 100.0 / 86400.0]) * 0.1
 params.k_soil_sats = np.array2string(params.k_soil_sats, separator=';')
 params.k_soil_sats = params.k_soil_sats[1:-1]
 
@@ -80,14 +80,26 @@ params.camp_b = params.camp_b[1:-1]
 
 params.camp_psi_soil_ref = -123123123
 
-params.stem_hydraulic_capacitance = 100 * 1000/18.0
 
 #params.soil_water_model_type = Soil_Water_Model_Type.Campbell.name
 params.soil_water_model_type = Soil_Water_Model_Type.Campbell.name
 
 params.soil_profile_index = 1;
 
+params.canopy_height = 30
 
+params.k_xylem_sat = 14 * 1000/18
+
+params.stem_hydraulic_capacitance = 500* 1000/18
+
+params.leaf_hydraulic_capacitance = 1
+
+params.g0 = 0.01
+
+params.leaf_area_index = 5
+
+
+#params.g1 = 5.2
 
 
 # params.organic_matter_frac= 0.064
@@ -133,7 +145,7 @@ sim.Set_water_pot_initials(-1.0, -0.1)
 
 format = "%Y-%m-%d %H:%M:%S"
 timestart = DateTime("2018-4-01 00:00:00", format)
-timeend   = DateTime("2018-12-01 00:00:00", format)
+timeend   = DateTime("2018-11-01 00:00:00", format)
 
 
 sim.Run(timestart, timeend)
@@ -181,6 +193,8 @@ df['Gs'] = output.Get_G_per_sap()
 df['Js'] = output.Get_J_per_sap()
 df.set_index('date', inplace = True)
 
+df  = df.loc['2018-07-29':'2018-7-29']
+
 ax = fig.add_subplot(3,2,1)
 ax.plot(df['vpd'], label = 'VPD', c= 'tab:red')
 ax.legend()
@@ -219,11 +233,11 @@ ax.set_xlabel("Time")
 ax.tick_params(axis='x', labelrotation=45)
 ax.xaxis.set_major_formatter(formatter)
 ax.set_xlim((df.index[0]), (df.index[-1]))
-ax.set_ylim((-10,0))
+#ax.set_ylim((-10,0))
 
 ax = fig.add_subplot(3,2,5)
 ax.plot(df['T'], label = 'T', c= 'tab:blue')
-ax.plot(df['J'], label = 'J',  c= 'tab:orange')
+ax.plot(df['J'], label = 'J', c= 'tab:orange')
 ax.plot(df['G'], label = 'G', c = 'black')
 ax.legend()
 ax.set_ylabel("Water flows")

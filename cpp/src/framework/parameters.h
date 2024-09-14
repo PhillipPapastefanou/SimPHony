@@ -46,8 +46,6 @@ struct Constants{
     const double HydraulicHeadInMtoMPa =  GRAVITY / 1000.0;
     const double MPaToHydraulicHeadM =  1.0 / HydraulicHeadInMtoMPa;
 
-
-
     // Maximum leaf water potential [MPa]
     double MAX_LEAF_WATER_POTENTIAL = -1E-12;
     // Maximum stem water potential [MPa]
@@ -63,7 +61,7 @@ public:
     ~Parameters();
     void Set_derived();
 
-    // Universal parameter ID
+    // Universal parameter setting ID
     int id = -1;
 
     // Parameters assumed to be constants and will not change
@@ -76,6 +74,8 @@ public:
     // Plant height [m]
     double canopy_height = 20.0;
 
+    // Stem flow module type
+    //
     Stem_flow_module_type stem_flow_type = Stem_flow_module_type::Linear;
 
     // Viscosity of the leaf to sap flow [1] ??? To be double checked
@@ -88,7 +88,7 @@ public:
     double stem_hydraulic_capacitance_max = 20.0 * constants.KG_H2O_To_Mol;
 
 
-    // Xylem saturated Hydraulic conductivity [mol m-1 s-1 MPa-1]
+    // Xylem saturated hydraulic conductivity [mol m-1 s-1 MPa-1]
     // Manon: up to 1.5, but this value is per Hubervalue and height (so need to be multiplied by that)
     double k_xylem_sat = 150/1800.0;
     // Huber value [m2 m-2] equals 1/klatosa (leaf area to sapwood area)
