@@ -31,9 +31,9 @@ class Subslicer:
         self.i +=1
         return self.array[self.i]
 
-ncombs = 1000
-#path = '/Net/Groups/BSI/work_scratch/ppapastefanou/simulations/plant_hydraulics_standalone/2024/swiss/extremelow_ks/input/'
-path = '/Users/pp/Documents/Repos/plant_hydro_standalone/py/appl/LHS/generator_files/'
+ncombs = 1000000
+path = '/Net/Groups/BSI/work_scratch/ppapastefanou/simulations/plant_hydraulics_standalone/2024/swiss/2024_soil_water_updates/'
+#path = '/Users/pp/Documents/Repos/plant_hydro_standalone/py/appl/LHS/generator_files/'
 seed   = 123456789
 sampler = qmc.LatinHypercube(d = 21, seed= seed)
 sample = sampler.random(n = ncombs)
@@ -62,7 +62,7 @@ slicer = Subslicer(array=sample)
 # sel_cols.append("clay_frac_03")
 
 k_soil_sats_log = np.zeros((3, ncombs))
-k_soil_sats_log[0]        = rescale(slicer.get(), min=-12, max = -6)
+k_soil_sats_log[0]        = rescale(slicer.get(), min=-11, max = -7)
 k_soil_sats_log[1]        = k_soil_sats_log[0]
 k_soil_sats_log[2]        = k_soil_sats_log[0]
 
@@ -88,23 +88,30 @@ sel_cols.append("camp_b_01")
 sel_cols.append("camp_b_02")
 sel_cols.append("camp_b_03")
 
+theta_s = np.zeros((3, ncombs))
+theta_s[0]        = rescale(slicer.get(), min=0.45, max = 0.55)
+theta_s[1]        = theta_s[0]
+theta_s[2]        = theta_s[0]
 
+sel_cols.append("theta_s_01")
+sel_cols.append("theta_s_02")
+sel_cols.append("theta_s_03")
 
-g0_s            = rescale(slicer.get(), min=0.03, max = 0.1)
+g0_s            = rescale(slicer.get(), min=0.04, max = 0.06)
 sel_cols.append("g0")
 g1_s            = rescale(slicer.get(), min = 0.5, max = 4.5)
 sel_cols.append("g1")
-k_xylems_sats_log   = rescale(slicer.get(), min=np.log10(1), max=np.log10(200))
+k_xylems_sats_log   = rescale(slicer.get(), min=np.log10(100), max=np.log10(2000))
 sel_cols.append("k_xylem_sat")
 
-huber_values    =  rescale(slicer.get(), min = 1/10000, max= 1/2000)
+huber_values    =  rescale(slicer.get(), min = 1/6000, max= 1/4000)
 sel_cols.append("huber_value")
 
-cstem_s         = rescale(slicer.get(), min=0.5, max=1000)
+cstem_s_log         = rescale(slicer.get(), min=np.log10(10), max=np.log10(10000))
 sel_cols.append("kappa_stem")
-lai_s           = rescale(slicer.get(), min= 2 , max = 6)
+lai_s           = rescale(slicer.get(), min= 3, max = 6)
 sel_cols.append("lai")
-cleaf_s         = rescale_mean(slicer.get(), mean=1.0, percent=50)
+cleaf_s_log        = rescale(slicer.get(), min=np.log10(0.05), max=np.log10(1))
 sel_cols.append("kappa_leaf")
 d_50close_s     = rescale(slicer.get(), min = 1.0, max = 5.0)
 sel_cols.append("d50_close")
@@ -123,7 +130,7 @@ sel_cols.append("psi_50_xylem")
 psi88_xylems_offset    = rescale(slicer.get(), min = 0.6, max = 1.0)
 sel_cols.append("psi_88_xylem")
 
-root_area_indexes    = rescale(slicer.get(), min = 5, max = 20)
+root_area_indexes    = rescale(slicer.get(), min = 1, max = 15)
 sel_cols.append("root_area_indexes")
 
 plist = ParametersList()
@@ -139,8 +146,9 @@ for i in range(ncombs):
     params.k_soil_sats = params.array_to_list_entry(10**k_soil_sats_log[:,i])
     params.camp_b = params.array_to_list_entry(camp_b[:,i])
     params.psi_soil_sat = params.array_to_list_entry(psi_soil_sat[:, i])
+    params.theta_s = params.array_to_list_entry(theta_s[:, i])
 
-    params.stem_hydraulic_capacitance = cstem_s[i]
+    params.stem_hydraulic_capacitance = 10**cstem_s_log[i]
     params.leaf_area_index = lai_s[i]
     params.g0 = g0_s[i]
     params.g1 = g1_s[i]
@@ -148,7 +156,7 @@ for i in range(ncombs):
     params.psi50_xylem = psi50_xylems[i]
     params.psi88_xylem = psi50_xylems[i] - psi88_xylems_offset[i]
     params.k_xylem_sat = 10.0**k_xylems_sats_log[i]
-    params.leaf_hydraulic_capacitance = cleaf_s[i]
+    params.leaf_hydraulic_capacitance = 10**cleaf_s_log [i]
     params.huber_value = huber_values[i]
 
     params.psi_leaf_50_close = psi_50_close_s[i]
@@ -174,8 +182,8 @@ for i in range(ncombs):
 
     plist.Add(params)
 
-plist.Write_Full_Parameter_File(f"{path}SwissParameterListWide_24_{ncombs}.csv")
-plist.Write_Partial_Parameter_File(f"{path}SwissPartialParameterListWide_24_{ncombs}.csv", sel_cols)
+plist.Write_Full_Parameter_File(f"{path}RTSwissParameterListWide_24_{ncombs}.csv")
+plist.Write_Partial_Parameter_File(f"{path}RTSwissPartialParameterListWide_24_{ncombs}.csv", sel_cols)
 
 
 # from hydro_standalone import Simulation_Multi

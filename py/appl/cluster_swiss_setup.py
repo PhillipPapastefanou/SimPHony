@@ -16,7 +16,7 @@ config.location = Location.Swiss
 
 #config.parameter_input_file_list = f"ParameterList{20000000}.csv"
 
-config.parameter_input_file_list = f"SwissParameterList10000000.csv"
+config.parameter_input_file_list = f"/Net/Groups/BSI/work_scratch/ppapastefanou/simulations/plant_hydraulics_standalone/2024/swiss/2024_soil_water_updates/TSwissParameterListWide_24_1000000.csv"
 
 sys.path.append(config.build_path)
 #from contrib.ParallelRunFull import ParallelSetupFull
