@@ -24,13 +24,13 @@ Swiss_Single_Test::Swiss_Single_Test() {
 
 //    string theta_file = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/data/swiss/Water_content_MultiSoils.csv";
 //    string forcing_file = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/data/swiss/Forcing_Inter.csv";
-//    string parameters_list = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/py/appl/LHS/SwissParameterList100.csv";
+//    string parameters_list = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/py/appl/LHS/SwissParameterListWide_24_1000.csv";
 //    string tree_folder_path = "/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone/data/swiss/Trees";
 
 
     string theta_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/swiss/Water_content_MultiSoils.csv";
     string forcing_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/swiss/Forcing_Inter.csv";
-    string parameters_list = "/Users/pp/data/Simulations/A08_Hydraulics_standalone/2024/swiss/LHS/less_ks_more_constrained/Best_Alive_avg.csv";
+    string parameters_list = "/Users/pp/Documents/Repos/plant_hydro_standalone/py/appl/LHS/generator_files/SwissParameterList_24_1000.csv";
     string tree_folder_path = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/swiss/Trees";
 
     //string forcing_file = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Forcing_Inter.csv";

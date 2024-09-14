@@ -13,9 +13,9 @@ class Parameter_CSV_Reader {
 public:
     Parameter_CSV_Reader(std::string filename);
 
+
     void Parse_Full_Files();
     void Parse_Partial_Files(const Parameters& parameters);
-
     const vector<Parameters> &Get_parameter_list() const;
 
 
@@ -29,7 +29,14 @@ private:
 
     int n_conversion;
 
+    vector<string> row;
+
     void parse_parameters(Parameters parameters, bool check_all);
+
+    void parse_value(double &param, std::string value);
+    void parse_value(int &param, std::string value);
+    void parse_value(bool &param, std::string value);
+
 
 };
 

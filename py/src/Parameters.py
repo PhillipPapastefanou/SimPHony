@@ -139,6 +139,8 @@ class Parameters:
         #Only relevant for Swiss soils at the moments
         self.soil_profile_index = 2;
 
+        self.theta_emp_multiplier = 1.0
+
     def array_to_list_entry(self, array):
         array_s = np.array2string(array, separator=';')
         return array_s[1:-1]

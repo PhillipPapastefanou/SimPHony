@@ -69,7 +69,7 @@ double Solver_2D::d_psi_leaf(double psi_leaf, double psi_stem) {
     gs = params.g0 + beta_stom_cond * (1.0 + params.g1 / std::sqrt(vpd / pressure)) * anet / ca;
 
     // Convert from Mol CO2 to Mol H2O
-    gs *= 1.6;
+    gs *= 44.0/18.0;
 
     //Bisection_psi_stem_ground bisectionPsiStemGround(*this,1E-10, 100, this->psi_leaf, params.max_leaf_water_potential);
     //psi_stem_ground = bisectionPsiStemGround.Solve(this->psi_leaf, params.max_leaf_water_potential);

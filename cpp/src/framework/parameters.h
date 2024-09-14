@@ -75,24 +75,25 @@ public:
     double canopy_height = 20.0;
 
     // Stem flow module type
-    //
+    //    Linear,
+    //    KirchhoffWeibull,
+    //    KirchhoffPiecewiseErf
     Stem_flow_module_type stem_flow_type = Stem_flow_module_type::Linear;
 
-    // Viscosity of the leaf to sap flow [1] ??? To be double checked
+    // Viscosity of the leaf to sap flow [1]
     // Todo: Check if kinematic or dynamic viscosity
      double eta_LS = 1.0; // 1.0 = Water
     // Stem hydraulic capacity [mol m-3 MPa-1]
     // From Meinzer et al. 2011 Figure 13.2
     // Range: 10 - 500 kg H2O m-3 MPa-1
     // Convert to [mol H2O m-3 MPa-1]
-    double stem_hydraulic_capacitance_max = 20.0 * constants.KG_H2O_To_Mol;
-
+    double stem_hydraulic_capacitance_max = 100 * constants.KG_H2O_To_Mol;
 
     // Xylem saturated hydraulic conductivity [mol m-1 s-1 MPa-1]
-    // Manon: up to 1.5, but this value is per Hubervalue and height (so need to be multiplied by that)
-    double k_xylem_sat = 150/1800.0;
+    // 0.5 to 10 kg m-1 s-1 MPa-1
+    double k_xylem_sat = 1.0 * constants.KG_H2O_To_Mol;
     // Huber value [m2 m-2] equals 1/klatosa (leaf area to sapwood area)
-    // From sperry et al
+    // From sperry et al 2016
     double huber_value = 1.0/3600.0;
 
     // Xylem water potential at loss of 50% conductivity [MPa]
@@ -107,7 +108,6 @@ public:
     // Data from the swiss site (half hemispherical)
     double leaf_area_index = 4.8;
     // Leaf water potential at which plants close stomates to 50 % [MPa]
-    // Something like this can be made up here...
     double psi_leaf_50_close = -2.1;
     // Slope parameter of stomatal closure
     // No reference here yet, be careful with the sign
@@ -116,12 +116,15 @@ public:
 
     // Medlyn 2011 model g0 parameter [mol m-2 s-1]
     // (also minmal stomatal condutances)
-    // From Medlyn 0 - 0.05
+    // From Medlyn 2011: 0 - 0.05
     // From the site 0.05
     double g0 = 0.005;
     // Medlyn 2011 model g1 parameter [1]
     // From Medlynn 1.6 - 12
     double g1 = 1.5;
+
+    // Bark condutance [mol m-2 s-1]
+    double g_bark = 0.0;
 
     // Soil water module type [enum]
     // Todo Fix the different types
@@ -145,7 +148,7 @@ public:
     double swdown_max = 1040;
 
     // Todo fix unit
-    // Maximum net photosythesis rate [xxx]
+    // Maximum net photosythesis rate [micro mol CO2 m-2 s-1]
     // According to the excel sheet of Arend 2021 appendix
     double anet_max = 5.7;
 
@@ -154,8 +157,7 @@ public:
     double tree_density = 1.0;
 
     // Auxiliary parameters
-    // Todo connect to solvers
-    double solver_precision = 1E-10;
+
 
     // Number of stem segments between psi_L und psi_S
     double n_stem_segments = 10;
@@ -169,17 +171,16 @@ public:
     double sigma_log_likelyhood = 1.0;
 
 
-
     // Maximum leaf water potential change per hour [MPa]
     double max_psi_leaf_change_per_hour = 1.0;
     // Multiplier to estimate the minimum leaf water potential
     // psi_leaf_min = muliplier x psi_88
     double minimum_psi_leaf_multiplier = 4.0;
 
+    // Todo connect to solvers
+    double solver_precision = 1E-10;
 
 
-    // Enable loss through the bakr loss
-    double g_bark = 0.0;
     bool verbose = false;
 
     //Simulation timestep length [s]

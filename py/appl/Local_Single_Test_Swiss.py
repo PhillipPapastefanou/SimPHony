@@ -82,19 +82,19 @@ params.camp_psi_soil_ref = -123123123
 
 
 #params.soil_water_model_type = Soil_Water_Model_Type.Campbell.name
-params.soil_water_model_type = Soil_Water_Model_Type.Campbell.name
+params.soil_water_model_type = Soil_Water_Model_Type.VanGenuchten.name
 
-params.soil_profile_index = 1;
+params.soil_profile_index = 3;
 
 params.canopy_height = 30
 
-params.k_xylem_sat = 14 * 1000/18
+params.k_xylem_sat = 10 * 1000/18
 
-params.stem_hydraulic_capacitance = 500* 1000/18
+params.stem_hydraulic_capacitance = 50* 1000/18
 
 params.leaf_hydraulic_capacitance = 1
 
-params.g0 = 0.01
+params.g0 = 0.015
 
 params.leaf_area_index = 5
 
@@ -191,9 +191,14 @@ df['J'] = output.Get_J()
 
 df['Gs'] = output.Get_G_per_sap()
 df['Js'] = output.Get_J_per_sap()
+
+
+df['gss'] = output.Get_gs()
+
+
 df.set_index('date', inplace = True)
 
-df  = df.loc['2018-07-29':'2018-7-29']
+df  = df.loc['2018-07-1':'2018-7-29']
 
 ax = fig.add_subplot(3,2,1)
 ax.plot(df['vpd'], label = 'VPD', c= 'tab:red')
@@ -241,6 +246,15 @@ ax.plot(df['J'], label = 'J', c= 'tab:orange')
 ax.plot(df['G'], label = 'G', c = 'black')
 ax.legend()
 ax.set_ylabel("Water flows")
+ax.set_xlabel("Time")
+ax.tick_params(axis='x', labelrotation=45)
+ax.xaxis.set_major_formatter(formatter)
+ax.set_xlim((df.index[0]), (df.index[-1]))
+
+ax = fig.add_subplot(3,2,6)
+ax.plot(df['gss'], label = 'gs', c= 'tab:blue')
+ax.legend()
+ax.set_ylabel("gs")
 ax.set_xlabel("Time")
 ax.tick_params(axis='x', labelrotation=45)
 ax.xaxis.set_major_formatter(formatter)

@@ -214,6 +214,15 @@ ax.tick_params(axis='x', labelrotation=45)
 ax.xaxis.set_major_formatter(formatter)
 ax.set_xlim((df.index[0]), (df.index[-1]))
 
+ax = fig.add_subplot(3,3,5)
+ax.plot(df['gss'], label = 'G', c = 'black')
+ax.legend()
+ax.set_ylabel("Water flows")
+ax.set_xlabel("Time")
+ax.tick_params(axis='x', labelrotation=45)
+ax.xaxis.set_major_formatter(formatter)
+ax.set_xlim((df.index[0]), (df.index[-1]))
+
 
 # ax = fig.add_subplot(3,2,6)
 #

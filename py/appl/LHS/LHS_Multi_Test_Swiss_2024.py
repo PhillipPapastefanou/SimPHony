@@ -31,9 +31,9 @@ class Subslicer:
         self.i +=1
         return self.array[self.i]
 
-ncombs = 1000000
-path = '/Net/Groups/BSI/work_scratch/ppapastefanou/simulations/plant_hydraulics_standalone/2024/swiss/2024_soil_water_updates/'
-#path = '/Users/pp/Documents/Repos/plant_hydro_standalone/py/appl/LHS/generator_files/'
+ncombs = 1000
+#path = '/Net/Groups/BSI/work_scratch/ppapastefanou/simulations/plant_hydraulics_standalone/2024/swiss/2024_soil_water_updates/'
+path = '/Users/pp/Documents/Repos/plant_hydro_standalone/py/appl/LHS/generator_files/'
 seed   = 123456789
 sampler = qmc.LatinHypercube(d = 21, seed= seed)
 sample = sampler.random(n = ncombs)
@@ -182,8 +182,8 @@ for i in range(ncombs):
 
     plist.Add(params)
 
-plist.Write_Full_Parameter_File(f"{path}RTSwissParameterListWide_24_{ncombs}.csv")
-plist.Write_Partial_Parameter_File(f"{path}RTSwissPartialParameterListWide_24_{ncombs}.csv", sel_cols)
+plist.Write_Full_Parameter_File(f"{path}SwissParameterList_24_{ncombs}.csv")
+plist.Write_Partial_Parameter_File(f"{path}SwissPartialParameterList_24_{ncombs}.csv", sel_cols)
 
 
 # from hydro_standalone import Simulation_Multi
