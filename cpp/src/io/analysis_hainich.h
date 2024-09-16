@@ -13,16 +13,19 @@ class AnalysisHainich {
 
 public:
     AnalysisHainich(Model* model, const Parameters& parameters);
+    ~AnalysisHainich();
 
     void CompareSapwood(const TimeSeries& time_series);
+    void ComparePsiStem(const TimeSeries& time_series);
 
-    ~AnalysisHainich();
 
     double Get_Rmse_J();
     double Get_Rmse_G();
-
     double Get_Log_Likelyhood_J();
     double Get_Log_Likelyhood_G();
+
+    double Get_Rmse_psi_stem();
+    double Get_Log_Likelyhood_psi_stem();
 
 private:
     const Output& output;
@@ -36,9 +39,12 @@ private:
 
     double rmse_J;
     double rmse_G;
-
     double log_likelyhood_J;
     double log_likelyhood_G;
+
+    double rmse_psi_stem;
+    double log_likelyhood_psi_stem;
+
 
     double normal_pdf(double mu, double x);
 

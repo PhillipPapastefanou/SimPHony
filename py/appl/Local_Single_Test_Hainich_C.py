@@ -33,9 +33,7 @@ params.soil_depths = params.soil_depths[1:-1]
 
 params.jackson_root_beta = 0.96
 
-params.soil_water_model_type_enum = Soil_Water_Model_Type.Saxton06
-params.soil_water_model_type = params.soil_water_model_type_enum.name
-
+params.soil_water_model_type = Soil_Water_Model_Type.VanGenuchten.name
 params.k_soil_sat = 10 / 100.0 / 86400.0
 params.theta_s = 0.6
 
@@ -213,6 +211,6 @@ ax.set_xlim((df.index[0]), (df.index[-1]))
 plt.subplots_adjust(hspace= 0.5, bottom = 0.2)
 #plt.plot(in_thetas[0:2*24*2])
 plt.tight_layout()
-plt.savefig("Water_flow_obs_model.png", dpi = 300)
-plt.show()
+plt.savefig("Hainich_Water_flow_obs.png", dpi = 300)
+#plt.show()
 

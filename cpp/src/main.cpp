@@ -56,9 +56,9 @@ int main(int argc, char* argv[]) {
 
     //Water_flow_segmented_test water_flow_test;
 
-    Swiss_Single_Test single_test;
+    //Swiss_Single_Test single_test;
     //Multi_Test single_test;
-    //Hainich_Single_Test test;
+    Hainich_Single_Test test;
 
   //  Soil_Models_Test test;
 

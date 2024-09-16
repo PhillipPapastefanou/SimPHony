@@ -20,7 +20,7 @@ void TimeSeries::Load(string dt_header, string format, std::vector<int> data_ind
     data = input.get_data(data_index);
 }
 
-void TimeSeries::GenerateModelObsIndexes(DateTime begin, DateTime end, long timestep) {
+void TimeSeries::GenerateModelObsIndexesSameRes(DateTime begin, DateTime end, long timestep) {
     int i = 0;
     std::vector<std::vector<float>> slice;
     for (DateTime dt: input.dates) {
@@ -34,6 +34,30 @@ void TimeSeries::GenerateModelObsIndexes(DateTime begin, DateTime end, long time
             model_datetime_indexes.push_back(index);
         }
         i++;
+    }
+    data = slice;
+}
+
+void TimeSeries::GenerateModelObsIndexes(DateTime begin, DateTime end, long timestep) {
+    int i = 0;
+
+    DateTime running_dt_index = begin;
+    std::vector<std::vector<float>> slice;
+    for (DateTime dt: input.dates) {
+
+        while (running_dt_index < end){
+
+            if (running_dt_index == dt){
+                long s_diff = dt - begin;
+                int index = s_diff / timestep;
+                slice.push_back(data[i]);
+                model_datetime_indexes.push_back(index);
+                i++;
+                break;
+            }
+
+            running_dt_index = running_dt_index.AddSeconds(timestep);
+        }
     }
     data = slice;
 }

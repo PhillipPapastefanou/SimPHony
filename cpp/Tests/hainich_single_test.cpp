@@ -20,14 +20,14 @@ using std::string;
 
 Hainich_Single_Test::Hainich_Single_Test() {
 
-    string forcing_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/hainich/Meteo_Hainich_dT30min_forcing_PHS.csv";
-    string sap_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/hainich/SAP_Hainich_Fagus-mean_dT30min_prog.csv";
+    string forcing_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/hainich/input/Meteo_Hainich_dT30min_forcing_PHS.csv";
+    string sap_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/hainich/eval/SAP_Hainich_Fagus-mean_dT30min_prog.csv";
+    string psi_stem_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/hainich/eval/stem_water_pot.csv";
 
-    Parameter_CSV_Reader reader("/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/Model/Full_Parameter_setup_12.csv");
+    string parameters_list = "/Users/pp/Documents/Repos/plant_hydro_standalone/py/appl/LHS/generator_files/HainichParameterList_24_1000.csv";
 
-    std::string path_of_the_trees = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Trees";
 
-    //Swiss_Drought_Trees swiss_drought_tress(path_of_the_trees);
+    Parameter_CSV_Reader reader(parameters_list);
 
     auto start0 = std::chrono::high_resolution_clock::now();
 
@@ -48,13 +48,14 @@ Hainich_Single_Test::Hainich_Single_Test() {
     params.psi_leaf_50_close = -2.3;
     params.d_50_close = 10.0;
     params.leaf_area_index = 4.8;
-    params.leaf_hydraulic_capacitance = 1.0;
+    params.leaf_hydraulic_capacitance = 0.01 *1000/18.0;
     params.stem_hydraulic_capacitance_max = 100 * 1000 / 18.0;
     params.k_xylem_sat = 10;
 
-    params.root_area_index = 24;
+    params.root_area_index = 4.5;
     params.jackson_root_beta = 0.96;
 
+    params.soil_water_type = Soil_water_module_type::Campbell;
     params.soil_layers.resize(3);
 
 
@@ -75,8 +76,6 @@ Hainich_Single_Test::Hainich_Single_Test() {
     params.soil_layers[1].depth = 0.16;
     params.soil_layers[2].depth = 0.32;
 
-
-
     params.psi50_xylem = -3.5;
     params.psi88_xylem = -5.5;
     params.tree_density = 100.0 / 10000.0;
@@ -94,6 +93,10 @@ Hainich_Single_Test::Hainich_Single_Test() {
     sap_data.Load("datetime", "%Y-%m-%d %H:%M:%S", {1});
 
 
+    TimeSeries psi_stem_data(psi_stem_file, true  , ',');
+    psi_stem_data.Load("time", "%Y-%m-%d %H:%M:%S", {1});
+
+
     auto start_clock = std::chrono::high_resolution_clock::now();
     Model model(params, input);
 
@@ -103,28 +106,27 @@ Hainich_Single_Test::Hainich_Single_Test() {
     // Length model in seconds
     long steplen      = 1800;
 
-//    double timestart    = 30*2*24 * 0.0;
-//    double timeend      = 30*2*24 * 213;
-
-    DateTime begin = input.dates[1000];
-    //DateTime end = begin.AddSeconds(86400 * 20);
-    DateTime end = input.dates[10000];
-
+    DateTime begin = input.dates[0];
+    DateTime end = input.dates.back();
 
     sap_data.GenerateModelObsIndexes(begin, end, params.dts);
-
+    psi_stem_data.GenerateModelObsIndexes(begin, end, params.dts);
 
     model.Run(begin, end);
 
     AnalysisHainich analysis(&model, params);
     analysis.CompareSapwood(sap_data);
 
-
     std::cout << "RMSE G " << analysis.Get_Rmse_G() << "\n";
     std::cout << "RMSE J " << analysis.Get_Rmse_J() << "\n";
 
     std::cout << "LL G " << analysis.Get_Log_Likelyhood_G() << "\n";
     std::cout << "LL J " << analysis.Get_Log_Likelyhood_J() << "\n";
+
+    analysis.ComparePsiStem(psi_stem_data);
+
+    std::cout << "RMSE psi_stem " << analysis.Get_Rmse_psi_stem() << "\n";
+    std::cout << "LL psi_stem " << analysis.Get_Log_Likelyhood_psi_stem() << "\n";
 
 
     auto end_clock = std::chrono::high_resolution_clock::now();

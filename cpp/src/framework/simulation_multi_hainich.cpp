@@ -12,7 +12,10 @@ Simulation_Multi_Hainich::Simulation_Multi_Hainich() {
 
 }
 
-void Simulation_Multi_Hainich::Init_input(std::string forcing_file, std::string sap_flow_file, int rank) {
+void Simulation_Multi_Hainich::Init_input(std::string forcing_file,
+                                          std::string sap_flow_file,
+                                          std::string psi_stem_file,
+                                          int rank) {
 
     this->rank = rank;
 
@@ -29,6 +32,9 @@ void Simulation_Multi_Hainich::Init_input(std::string forcing_file, std::string 
 
     sap_series = std::make_unique<TimeSeries>(sap_flow_file, true, ',');
     sap_series->Load("datetime", "%Y-%m-%d %H:%M:%S", {1});
+
+    psi_stem_series = std::make_unique<TimeSeries>(psi_stem_file, true  , ',');
+    psi_stem_series->Load("time", "%Y-%m-%d %H:%M:%S", {1});
 }
 
 void Simulation_Multi_Hainich::Init_Full_Parameter_Setups(string filename, std::vector<int> ids) {
@@ -59,14 +65,14 @@ void Simulation_Multi_Hainich::Run(DateTime timestart, DateTime timeend) {
 
     std::cout << "Rank " << rank << ": Performing " << parameter_list.size() << " simulations." << std:: endl;
 
-    auto start_simulatio = std::chrono::high_resolution_clock::now();
+    auto start_simulation = std::chrono::high_resolution_clock::now();
     auto start_timer = std::chrono::high_resolution_clock::now();
 
     if (parameter_list.size() == 0){
         std::cout << "No Parameter list specified. Skipping!" << std:: endl;
     }
 
-    sap_series->GenerateModelObsIndexes(timestart, timeend, std::get<0>(parameter_list[0]).dts);
+    sap_series->GenerateModelObsIndexesSameRes(timestart, timeend, std::get<0>(parameter_list[0]).dts);
 
     for (int r = 0; r < parameter_list.size(); ++r) {
 
@@ -81,16 +87,14 @@ void Simulation_Multi_Hainich::Run(DateTime timestart, DateTime timeend) {
         // Data analysis after simulation
         AnalysisHainich analysis(&model, parameters);
         analysis.CompareSapwood(*sap_series);
+        analysis.ComparePsiStem(*psi_stem_series);
         analysis_list.push_back(analysis);
-
 
         auto end_timer = std::chrono::high_resolution_clock::now();
         auto elapsed_timer = std::chrono::duration_cast<std::chrono::milliseconds>( end_timer - start_timer);
 
-        if (elapsed_timer.count() > 10000.0){
-
-            auto elapsed_simulation = std::chrono::duration_cast<std::chrono::milliseconds>( end_timer - start_simulatio);
-
+        if (elapsed_timer.count() > parameters.constants.TMUTE_MILLISEC){
+            auto elapsed_simulation = std::chrono::duration_cast<std::chrono::milliseconds>(end_timer - start_simulation);
             std::cout << "Rank " << rank << ": Elapsed time: " << format_duration(elapsed_simulation) << " ";
             std::cout << "performed " << r << " out of " << parameter_list.size() << " simulations. "<< std::endl;
             start_timer = std::chrono::high_resolution_clock::now();

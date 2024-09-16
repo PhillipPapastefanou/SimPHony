@@ -15,6 +15,7 @@ public:
     TimeSeries(string filename, bool has_header, char delimiter);
 
     void Load(string dt_header, string format, std::vector<int> data_index);
+    void GenerateModelObsIndexesSameRes(DateTime begin, DateTime end, long timestep);
     void GenerateModelObsIndexes(DateTime begin, DateTime end, long timestep);
 
     vector<vector<float>> data;
@@ -22,6 +23,5 @@ public:
     virtual ~TimeSeries();
 private:
     InputCollection input;
-
 };
 

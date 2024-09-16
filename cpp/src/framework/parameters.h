@@ -50,6 +50,8 @@ struct Constants{
     double MAX_LEAF_WATER_POTENTIAL = -1E-12;
     // Maximum stem water potential [MPa]
     double MAX_STEM_WATER_POTENTIAL = -1E-16;
+    // Number of milliseconds to print console output
+    const double TMUTE_MILLISEC = 10000.0;
 
 };
 

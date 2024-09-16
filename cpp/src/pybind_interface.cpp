@@ -96,6 +96,8 @@ PYBIND11_MODULE(hydro_standalone, handle){
             def("Get_Rmse_J", &AnalysisHainich::Get_Rmse_J).
             def("Get_LL_G", &AnalysisHainich::Get_Log_Likelyhood_G).
             def("Get_LL_J", &AnalysisHainich::Get_Log_Likelyhood_J).
+            def("Get_Rmse_psi_stem", &AnalysisHainich::Get_Rmse_psi_stem).
+            def("Get_LL_psi_stem", &AnalysisHainich::Get_Log_Likelyhood_psi_stem).
             def(py::init<Model*, Parameters>());
 
     py::class_<TimeSlice>(handle, "TimeSlice").

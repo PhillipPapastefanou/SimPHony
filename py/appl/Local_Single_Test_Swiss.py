@@ -86,15 +86,15 @@ params.soil_water_model_type = Soil_Water_Model_Type.VanGenuchten.name
 
 params.soil_profile_index = 3;
 
-params.canopy_height = 30
+params.canopy_height = 40
 
 params.k_xylem_sat = 10 * 1000/18
 
-params.stem_hydraulic_capacitance = 50* 1000/18
+params.stem_hydraulic_capacitance = 50 * 1000/18
 
-params.leaf_hydraulic_capacitance = 1
+params.leaf_hydraulic_capacitance = 10
 
-params.g0 = 0.015
+params.g0 = 0.015  * 1.0
 
 params.leaf_area_index = 5
 

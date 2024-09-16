@@ -27,7 +27,6 @@ void AnalysisHainich::CompareSapwood(const TimeSeries &time_series) {
     std::vector<double> G_mod_arr;
     std::vector<double> J_obs_arr;
 
-
     int i = 0;
     for (auto index : time_series.model_datetime_indexes) {
         double J_obs = time_series.data[i][0];
@@ -82,7 +81,8 @@ double AnalysisHainich::calc_log_likelyhood(const vector<double> &obs, const vec
 
         // x = observation
         // mu = model value
-        llv += std::log(normal_pdf(mod_value,obs_value));
+        double normal = normal_pdf(mod_value,obs_value);
+        llv += std::log(normal);
     }
     return llv;
 }
@@ -106,8 +106,36 @@ double AnalysisHainich::Get_Log_Likelyhood_G() {
 
 double AnalysisHainich::normal_pdf(double mu, double x) {
     const double sigma = sigma_log_likelyhood;
-    double alpha = 1.0 / (std::sqrt(2.0 * 3.141592653589) * sigma);
+    double alpha = 1.0 / (std::sqrt(2.0 * parameters.constants.PI) * sigma);
     return alpha *  std::exp(-(x-mu)*(x-mu)/(2*sigma*sigma));
+}
+
+void AnalysisHainich::ComparePsiStem(const TimeSeries &time_series) {
+
+    const std::vector<float> psi_stem_raw = output.Get_psi_stem();
+
+    std::vector<double> psi_stem_mod_arr;
+    std::vector<double> psi_stem_obs_arr;
+
+    int i = 0;
+    for (auto index : time_series.model_datetime_indexes) {
+        double psi_stem_obs = time_series.data[i][0];
+        psi_stem_mod_arr.push_back(psi_stem_raw[index]);
+        psi_stem_obs_arr.push_back(psi_stem_obs);
+        i++;
+    }
+
+    rmse_psi_stem = calc_RMSE(psi_stem_mod_arr, psi_stem_obs_arr);
+
+    log_likelyhood_psi_stem = calc_log_likelyhood(psi_stem_obs_arr, psi_stem_mod_arr);
+
+}
+double AnalysisHainich::Get_Rmse_psi_stem() {
+    return rmse_psi_stem;
+}
+
+double AnalysisHainich::Get_Log_Likelyhood_psi_stem() {
+    return log_likelyhood_psi_stem;
 }
 
 

@@ -29,7 +29,7 @@ void Simulation_Multi_Swiss::Init_input(std::string theta_file, std::string forc
 
     swiss_trees = std::make_unique<Swiss_Drought_Trees>(swiss_trees_folder);
 
-    //Create dummy input
+    // Create dummy input
     input = std::make_unique<Input_Swiss_Multi_Soils>(params);
     input->Add_Soilwater_File(theta_file);
     input->Add_Forcing_File(forcing_file);
@@ -67,7 +67,6 @@ void Simulation_Multi_Swiss::Run(DateTime timestart, DateTime timeend) {
 
         // Parameter index is not yet being used
         int parameter_index = std::get<1>(parameter_list[r]);
-        //params.verbose= true;
 
         input = std::make_unique<Input_Swiss_Multi_Soils>(params);
         input->Add_Soilwater_File(theta_file);
@@ -87,7 +86,7 @@ void Simulation_Multi_Swiss::Run(DateTime timestart, DateTime timeend) {
         auto end_timer = std::chrono::high_resolution_clock::now();
         auto elapsed_timer = std::chrono::duration_cast<std::chrono::milliseconds>( end_timer - start_timer);
 
-        if (elapsed_timer.count() > 10000.0){
+        if (elapsed_timer.count() > params.constants.TMUTE_MILLISEC){
 
             auto elapsed_simulation = std::chrono::duration_cast<std::chrono::milliseconds>( end_timer - start_simulatio);
 

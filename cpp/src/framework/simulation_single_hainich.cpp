@@ -10,13 +10,19 @@ Simulation_Single_Hainich::Simulation_Single_Hainich(){
 
 }
 
-void Simulation_Single_Hainich::Init_input(std::string forcing_file, std::string sapflux_file) {
+void Simulation_Single_Hainich::Init_input(std::string forcing_file,
+                                           std::string sapflux_file,
+                                           std::string psi_stem_file) {
 
     input = std::make_unique<Input_Hainich>(*parameters);
     input->Add_Forcing_File(forcing_file);
     input->Read_N_Parse();
+
     sap_series = std::make_unique<TimeSeries>(sapflux_file, true, ',');
     sap_series->Load("datetime", "%Y-%m-%d %H:%M:%S", {1});
+
+    psi_stem_series = std::make_unique<TimeSeries>(psi_stem_file, true  , ',');
+    psi_stem_series->Load("time", "%Y-%m-%d %H:%M:%S", {1});
 }
 
 
@@ -30,12 +36,12 @@ void Simulation_Single_Hainich::Set_water_pot_initials(double psi_leaf, double p
 
 void Simulation_Single_Hainich::Run(DateTime timestart, DateTime timeend) {
 
-    sap_series->GenerateModelObsIndexes(timestart, timeend, parameters->dts);
+    sap_series->GenerateModelObsIndexesSameRes(timestart, timeend, parameters->dts);
 
     model->Run(timestart,timeend);
-
     analysis = std::make_unique<AnalysisHainich>(model.get(), *parameters);
     analysis->CompareSapwood(*sap_series);
+    analysis->ComparePsiStem(*psi_stem_series);
 }
 
 Output Simulation_Single_Hainich::Get_output() {

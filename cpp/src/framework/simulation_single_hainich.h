@@ -17,7 +17,9 @@ class Simulation_Single_Hainich {
 public:
     Simulation_Single_Hainich();
 
-    void Init_input(std::string forcing_file, std::string sapflux_file);
+    void Init_input(std::string forcing_file,
+                    std::string sapflux_file,
+                    std::string psi_stem_file);
 
     void Init_parameters_default();
     void Init_parameters_filename(string filename, int index);
@@ -33,7 +35,10 @@ private:
 
     std::unique_ptr<Parameters> parameters;
     std::unique_ptr<Input_Hainich> input;
+
     std::unique_ptr<TimeSeries> sap_series;
+    std::unique_ptr<TimeSeries> psi_stem_series;
+
     std::unique_ptr<Model> model;
     std::unique_ptr<AnalysisHainich> analysis;
 };
