@@ -18,7 +18,7 @@ using std::unique_ptr;
 class Input_Hainich: public Input{
 
 public:
-    Input_Hainich(const Parameters& parameters);
+    Input_Hainich();
 
     void Read_N_Parse() override;
 

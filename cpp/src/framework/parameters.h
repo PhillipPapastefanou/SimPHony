@@ -147,7 +147,7 @@ public:
     double input_steplen = 1800.0;
 
     // According to the forcing input [W m-2]
-    double swdown_max = 1040;
+    double sw_rad_max = 1040;
 
     // Todo fix unit
     // Maximum net photosythesis rate [micro mol CO2 m-2 s-1]

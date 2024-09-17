@@ -25,8 +25,7 @@ void Simulation_Multi_Hainich::Init_input(std::string forcing_file,
         exit(99);
     }
 
-    const Parameters& params = std::get<0>(parameter_list.front());
-    input = std::make_unique<Input_Hainich>(params);
+    input = std::make_unique<Input_Hainich>();
     input->Add_Forcing_File(forcing_file);
     input->Read_N_Parse();
 
@@ -64,6 +63,8 @@ void Simulation_Multi_Hainich::Set_water_pot_initials(double psi_leaf, double ps
 void Simulation_Multi_Hainich::Run(DateTime timestart, DateTime timeend) {
 
     std::cout << "Rank " << rank << ": Performing " << parameter_list.size() << " simulations." << std:: endl;
+    timestart.print();
+    timeend.print();
 
     auto start_simulation = std::chrono::high_resolution_clock::now();
     auto start_timer = std::chrono::high_resolution_clock::now();
@@ -72,7 +73,8 @@ void Simulation_Multi_Hainich::Run(DateTime timestart, DateTime timeend) {
         std::cout << "No Parameter list specified. Skipping!" << std:: endl;
     }
 
-    sap_series->GenerateModelObsIndexesSameRes(timestart, timeend, std::get<0>(parameter_list[0]).dts);
+    sap_series->GenerateModelObsIndexes(timestart, timeend, std::get<0>(parameter_list[0]).dts);
+    psi_stem_series->GenerateModelObsIndexes(timestart, timeend, std::get<0>(parameter_list[0]).dts);
 
     for (int r = 0; r < parameter_list.size(); ++r) {
 
@@ -100,9 +102,7 @@ void Simulation_Multi_Hainich::Run(DateTime timestart, DateTime timeend) {
             start_timer = std::chrono::high_resolution_clock::now();
         }
     }
-
     std::cout << "Simulation finished! "<< std::endl;
-
 }
 
 std::vector<AnalysisHainich> Simulation_Multi_Hainich::Get_analysis_list() {

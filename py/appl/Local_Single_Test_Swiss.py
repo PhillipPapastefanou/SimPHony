@@ -53,7 +53,7 @@ params = Parameters()
 # params.camp_psi_soil_ref = -4.5 * 1000 * 1E-6
 # params.camp_b = 3.2
 #
-# params.soil_depths = np.array([0.1, 0.3, 0.4])
+# params.soil_depths = np.array([0.4, 0.3, 0.4])
 # params.soil_depths = np.array2string(params.soil_depths, separator=';')
 # params.soil_depths = params.soil_depths[1:-1]
 #
@@ -78,8 +78,6 @@ params.camp_b = np.array([5,5, 5])
 params.camp_b = np.array2string(params.camp_b, separator=';')
 params.camp_b = params.camp_b[1:-1]
 
-params.camp_psi_soil_ref = -123123123
-
 
 #params.soil_water_model_type = Soil_Water_Model_Type.Campbell.name
 params.soil_water_model_type = Soil_Water_Model_Type.VanGenuchten.name
@@ -94,7 +92,7 @@ params.stem_hydraulic_capacitance = 50 * 1000/18
 
 params.leaf_hydraulic_capacitance = 10
 
-params.g0 = 0.015  * 1.0
+params.g0 = 0.005  * 1.0
 
 params.leaf_area_index = 5
 
@@ -147,7 +145,6 @@ format = "%Y-%m-%d %H:%M:%S"
 timestart = DateTime("2018-4-01 00:00:00", format)
 timeend   = DateTime("2018-11-01 00:00:00", format)
 
-
 sim.Run(timestart, timeend)
 output = sim.Get_output()
 an = sim.Get_analysis()
@@ -158,11 +155,8 @@ x = an.Get_rmse()
 print(f"RMSE psiL: {x}")
 
 times = output.Get_times()
-
 formatter = mdates.DateFormatter('%m-%d %H');
-
 fig = plt.figure(figsize=(10, 10))
-
 df = pd.DataFrame(times, columns= ['DeltaT'])
 
 

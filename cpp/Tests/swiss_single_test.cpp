@@ -111,7 +111,6 @@ Swiss_Single_Test::Swiss_Single_Test() {
     params.sustain_xylem_damage = false ;
     params.stem_hydraulic_capacitance_max =  0.1* 1000/18.01 ;
     params.huber_value = 1/5000.0;
-    params.verbose= true;
     params.d_50_close = 1.0;
 
 //    for (int i = 0; i < params.soil_layers.size(); ++i) {
@@ -146,9 +145,9 @@ Swiss_Single_Test::Swiss_Single_Test() {
     //params.g_bark = params.g0 * 2;
 
     double psi_leaf_init = -1.0;
-    double psi_stem_init = -0.3;
+    double psi_stem_init = -0.2;
 
-    Input_Swiss_Multi_Soils input(    params);
+    Input_Swiss_Multi_Soils input;
     input.Add_Forcing_File(forcing_file);
     input.Add_Soilwater_File(theta_file);
     input.Read_N_Parse();

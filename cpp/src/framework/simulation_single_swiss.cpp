@@ -13,7 +13,7 @@ Simulation_Single_Swiss::Simulation_Single_Swiss(){
 
 void Simulation_Single_Swiss::Init_input(std::string theta_file, std::string forcing_file, std::string swiss_trees_folder) {
 
-    input = std::make_unique<Input_Swiss_Multi_Soils>(*parameters);
+    input = std::make_unique<Input_Swiss_Multi_Soils>();
     input->Add_Soilwater_File(theta_file);
     input->Add_Forcing_File(forcing_file);
     input->Read_N_Parse();

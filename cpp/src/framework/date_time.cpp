@@ -3,6 +3,7 @@
 //
 
 #include "date_time.h"
+#include <iostream>
 
 DateTime::DateTime(std::string date_string, std::string format){
     strptime(date_string.c_str(), format.c_str(), &tmt);
@@ -50,6 +51,11 @@ DateTime::DateTime() {
     tm tm_new;
     tmt = tm_new;
     create_time();
+}
+
+void DateTime::print() {
+    std::cout << year << "-" << month <<"-"<<day << " ";
+    std::cout << hour << ":" << min << ":" << sec << std::endl;
 }
 
 long operator -(DateTime t1, DateTime t2) {

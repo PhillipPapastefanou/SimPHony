@@ -6,7 +6,7 @@
 #include <numeric>
 #include <iostream>
 
-Input_Swiss_Multi_Soils::Input_Swiss_Multi_Soils(const Parameters& parameters): Input(parameters){
+Input_Swiss_Multi_Soils::Input_Swiss_Multi_Soils(): Input(){
 
 }
 
@@ -93,38 +93,39 @@ void Input_Swiss_Multi_Soils::Read_N_Parse() {
         }
     }
 
-    // Each soil location has three soil layer depths
-    vector<vector<float>> input_theta_per_layer(all_theta_data.size());
-    for (int i = 0; i < all_theta_data.size(); ++i) {
-        vector<float> sl(3);
-        for (int s = 0; s < 3; ++s) {
-            sl[s] = all_theta_data[i][3 * parameters.soil_profile_index + s];
-            // Convert from % to relative
-            sl[s] /= 100.0;
-        }
-        input_theta_per_layer[i] = sl;
-    }
-
-    for (int i = imin_theta; i < imax_theta + 1; ++i) {
-        this->theta_per_layer.push_back(input_theta_per_layer[i]);
-    }
-
-    // Slice forcing input according to indexes as we might have different dates
-    // for swc and other
-    for (int i = imin_forcing; i < imax_forcing + 1; ++i) {
-        dates.push_back(forcing_parser->dates[i]);
-        this->vpd.push_back(forcing_input[i][1] * 1000.0);
-        double rad_d = forcing_input[i][0];
-        this->rad.push_back(rad_d);
-        double anet = rad_d /  parameters.swdown_max * parameters.anet_max;
-        this->anet.push_back(anet);
-    }
-
-    if(rad.size() != theta_per_layer.size()){
-        std::cout << "Thetas and forcing size does not match";
-        double x = theta_per_layer.size();
-        throw;
-    }
+    // Todo Fix
+//    // Each soil location has three soil layer depths
+//    vector<vector<float>> input_theta_per_layer(all_theta_data.size());
+//    for (int i = 0; i < all_theta_data.size(); ++i) {
+//        vector<float> sl(3);
+//        for (int s = 0; s < 3; ++s) {
+//            sl[s] = all_theta_data[i][3 * parameters.soil_profile_index + s];
+//            // Convert from % to relative
+//            sl[s] /= 100.0;
+//        }
+//        input_theta_per_layer[i] = sl;
+//    }
+//
+//    for (int i = imin_theta; i < imax_theta + 1; ++i) {
+//        this->theta_per_layer.push_back(input_theta_per_layer[i]);
+//    }
+//
+//    // Slice forcing input according to indexes as we might have different dates
+//    // for swc and other
+//    for (int i = imin_forcing; i < imax_forcing + 1; ++i) {
+//        dates.push_back(forcing_parser->dates[i]);
+//        this->vpd.push_back(forcing_input[i][1] * 1000.0);
+//        double rad_d = forcing_input[i][0];
+//        this->rad.push_back(rad_d);
+//        double anet = rad_d /  parameters.sw_rad_max * parameters.anet_max;
+//        this->sw_rad.push_back(anet);
+//    }
+//
+//    if(rad.size() != theta_per_layer.size()){
+//        std::cout << "Thetas and forcing size does not match";
+//        double x = theta_per_layer.size();
+//        throw;
+//    }
 
 }
 

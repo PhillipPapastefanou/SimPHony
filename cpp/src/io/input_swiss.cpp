@@ -6,7 +6,7 @@
 #include <numeric>
 #include <iostream>
 
-Input_Swiss::Input_Swiss(const Parameters& parameters): Input(parameters){
+Input_Swiss::Input_Swiss(): Input(){
 
 }
 
@@ -97,8 +97,7 @@ void Input_Swiss::Read_N_Parse() {
         this->vpd.push_back(forcing_input[i][1] * 1000.0);
         double rad_d = forcing_input[i][0];
         this->rad.push_back(rad_d);
-        double anet = rad_d /  parameters.swdown_max * parameters.anet_max;
-        this->anet.push_back(anet);
+        this->sw_rad.push_back(rad_d);
     }
 
     for (int i = imin_theta; i < imax_theta + 1; ++i) {

@@ -28,7 +28,7 @@ void ASSERT(double obs, double mod, double max_rel_error){
 Soil_Models_Test::Soil_Models_Test() {
 
     Parameters parameters;
-    Input_Hainich input = Input_Hainich(parameters);
+    Input_Hainich input = Input_Hainich();
 
     parameters.soil_layers.resize(1);
     parameters.soil_layers[0].k_soil_sat = 9.8084e-06;
@@ -66,7 +66,7 @@ Soil_Models_Test::Soil_Models_Test() {
     camp.CalculatePsiAndKs();
 
     vector<vector<double>> ks = camp.Get_ks();
-    vector<vector<double>> phead = camp.Get_psi_head();
+    vector<vector<double>> phead = camp.Get_psi_soil_head();
 
     vector<double> ks_c  = {9.941870e-19, 6.148696e-07 };
     std::cout << "Campell ks 1 ";
@@ -90,7 +90,7 @@ Soil_Models_Test::Soil_Models_Test() {
     vng.CalculatePsiAndKs();
 
     ks = vng.Get_ks();
-    phead = vng.Get_psi_head();
+    phead = vng.Get_psi_soil_head();
 
     ks_c  = {1.197875e-21, 5.469397e-08
     };
@@ -134,13 +134,13 @@ Soil_Models_Test::Soil_Models_Test() {
     std::cout << "---------" << std::endl;
 
     for (auto& model: models){
-        auto head = model->Get_psi_head();
+        auto head = model->Get_psi_soil_head();
         std::cout << head[0][0] << std::endl;
     }
     std::cout << "---------" << std::endl;
 
     for (auto& model: models){
-        auto head = model->Get_psi_head();
+        auto head = model->Get_psi_soil_head();
         std::cout << head[1][0] << std::endl;
     }
     std::cout << "---------" << std::endl;

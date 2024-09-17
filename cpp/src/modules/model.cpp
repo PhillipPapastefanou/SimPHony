@@ -55,11 +55,14 @@ void Model::Set_derived_parameters() {
 
     soil_water_module->CalculatePsiAndKs();
     input_k_soil = soil_water_module->Get_ks();
-    input_psi_soil = soil_water_module->Get_psi_head();
-    input_anet = input_module.anet;
+    input_psi_soil = soil_water_module->Get_psi_soil_head();
+
+    input_anet.resize(input_module.sw_rad.size());
+    for (int i = 0; i < input_anet.size(); ++i) {
+        input_anet[i] = input_module.sw_rad[i] / params.sw_rad_max * params.anet_max;
+    }
     input_vpd = input_module.vpd;
 
-    //water_potential_solver= std::make_unique<Solver_RKF>(params);
     water_potential_solver = std::make_unique<Solver_Indiv_Euler_Imp>(params);
     water_potential_solver->Init_solver();
 }

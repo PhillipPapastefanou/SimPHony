@@ -88,6 +88,8 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
         parse_value(params.d_50_close,  "d_50_close");
         parse_value(params.g0,  "g0");
         parse_value(params.g1,  "g1");
+        parse_value(params.anet_max,  "anet_max");
+        parse_value(params.sw_rad_max, "sw_rad_max");
 
         val = "soil_depths";
         pos = get_position(val);
@@ -218,7 +220,7 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
             }
         }
 
-        val = "psi_soil_sat";
+        val = "psi_soil_sats";
         pos = get_position(val);
         if(pos <  row.size()){
             std::string input = row[pos];

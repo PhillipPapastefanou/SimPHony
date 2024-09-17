@@ -18,8 +18,8 @@ void Van_Genuchten::CalculatePsiAndKs() {
 
     vector<vector<float> > theta_array = input_module.theta_per_layer;
 
-    this->psi_s_array.resize(theta_array.size());
-    this->ks_array.resize(theta_array.size());
+    this->psi_soil_2D.resize(theta_array.size());
+    this->ks_2D.resize(theta_array.size());
 
     int number_of_layers_in_input = theta_array[0].size();
     int nsoil = parameters.soil_layers.size();
@@ -75,8 +75,8 @@ void Van_Genuchten::CalculatePsiAndKs() {
             k_row[s] = Ks * std::sqrt(base) * std::pow(1.0 - std::pow(1.0 - std::pow(base, (1.0 / m_vgn)), m_vgn), 2.0);
         }
 
-        psi_s_array[i] = psi_row;
-        ks_array[i] = k_row;
+        psi_soil_2D[i] = psi_row;
+        ks_2D[i] = k_row;
 
     }
 

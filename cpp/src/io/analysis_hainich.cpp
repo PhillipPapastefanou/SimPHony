@@ -27,6 +27,7 @@ void AnalysisHainich::CompareSapwood(const TimeSeries &time_series) {
     std::vector<double> G_mod_arr;
     std::vector<double> J_obs_arr;
 
+
     int i = 0;
     for (auto index : time_series.model_datetime_indexes) {
         double J_obs = time_series.data[i][0];
@@ -34,10 +35,9 @@ void AnalysisHainich::CompareSapwood(const TimeSeries &time_series) {
         J_mod_arr.push_back(J_raw[index]);
         G_mod_arr.push_back(G_raw[index]);
 
-        //Convert from kg to g
-        J_obs *= parameters.constants.KG_to_G;
-        //Conver from g to molH2o
-        J_obs *= parameters.constants.G_H2O_To_Mol;
+        J_obs *= 1.0/1000.0;
+        J_obs *= parameters.leaf_area_index;
+        J_obs *= 1.0/parameters.huber_value;
         // Multiply from flux m_sapwood^2 to flux m_total_area^2
         J_obs *= parameters.tree_density;
         J_obs_arr.push_back(J_obs);
@@ -116,9 +116,10 @@ void AnalysisHainich::ComparePsiStem(const TimeSeries &time_series) {
 
     std::vector<double> psi_stem_mod_arr;
     std::vector<double> psi_stem_obs_arr;
-
     int i = 0;
     for (auto index : time_series.model_datetime_indexes) {
+        //std::cout << i << " " <<  psi_stem_raw[i] << " " << output.Get_psi_leaf()[i] << std::endl;
+
         double psi_stem_obs = time_series.data[i][0];
         psi_stem_mod_arr.push_back(psi_stem_raw[index]);
         psi_stem_obs_arr.push_back(psi_stem_obs);

@@ -19,7 +19,7 @@ class Input_Swiss_Multi_Soils: public Input{
 
 
 public:
-    Input_Swiss_Multi_Soils(const Parameters& parameters);
+    Input_Swiss_Multi_Soils();
 
     void Read_N_Parse() override;
     void Add_Forcing_File(std::string file) override;

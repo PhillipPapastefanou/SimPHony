@@ -20,7 +20,7 @@ public:
 
     virtual void CalculatePsiAndKs() = 0;
     /// Matric potential of each soil layer expressed as hydraulic head [m]
-    vector<vector<double> > Get_psi_head();
+    vector<vector<double> > Get_psi_soil_head();
     /// Hydraulic conductivity per soil layer [m s-1]
     vector<vector<double> > Get_ks();
 
@@ -29,9 +29,9 @@ protected:
     const Input& input_module;
 
     /// Hydraulic conductivity per soil layer [m s-1]
-    vector<vector<double> > ks_array;
+    vector<vector<double> > ks_2D;
     /// Matric potential of each soil layer [m]
-    vector<vector<double> > psi_s_array;
+    vector<vector<double> > psi_soil_2D;
 
 };
 

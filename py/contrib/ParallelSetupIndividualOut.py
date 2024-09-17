@@ -151,6 +151,11 @@ class ParallelSetupIndividual:
             data_to_send[i] = analysis[i].Get_Rmse_G()
         gathered_data_rmse_G = data_to_send
 
+        data_to_send = np.zeros((nx, 1), dtype='d')
+        for i in range(0, nx):
+            data_to_send[i] = analysis[i].Get_rmse_psi_stem()
+        gathered_data_rmse_psi_stem = data_to_send
+
         t2 = perf_counter()
         print(f"Done ({np.round(t2 - t1, 1)}) sec.")
 
@@ -159,7 +164,8 @@ class ParallelSetupIndividual:
         t1 = perf_counter()
         ds = xr.Dataset(
             {"RMSE_J": (("run_id"), np.squeeze(gathered_data_rmse_J)),
-             "RMSE_G": (("run_id"), np.squeeze(gathered_data_rmse_G))
+             "RMSE_G": (("run_id"), np.squeeze(gathered_data_rmse_G)),
+             "RMSE_psi_stem": (("run_id"), np.squeeze(gathered_data_rmse_psi_stem))
              # ,"Minimum": (("run_id", "slices_id"), gathered_data_slices)
              },
             coords={
@@ -169,7 +175,8 @@ class ParallelSetupIndividual:
             },
         )
         ds.to_netcdf(f'Sens_Output{self.rank}.nc', encoding={"RMSE_J": {"dtype": "single"},
-                                                 "RMSE_G": {"dtype": "single"}})
+                                                 "RMSE_G": {"dtype": "single"},
+                                                             "RMSE_psi_stem": {"dtype": "single"}})
         t2 = perf_counter()
         print(f"Done ({np.round(t2 - t1, 1)}) sec.")
 

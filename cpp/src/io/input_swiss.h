@@ -19,7 +19,7 @@ class Input_Swiss: public Input{
 
 
 public:
-    Input_Swiss(const Parameters& parameters);
+    Input_Swiss();
 
     void Read_N_Parse() override;
     void Add_Forcing_File(std::string file) override;

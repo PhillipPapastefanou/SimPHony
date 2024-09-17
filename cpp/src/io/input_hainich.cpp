@@ -7,7 +7,7 @@
 #include <algorithm>
 
 
-Input_Hainich::Input_Hainich(const Parameters& parameters) : Input(parameters) {
+Input_Hainich::Input_Hainich() : Input() {
 
 }
 
@@ -27,15 +27,13 @@ void Input_Hainich::Read_N_Parse() {
         double rad_d = forcing_input[i][1];
         this->rad.push_back(rad_d);
     }
-    float max_rad =  *std::max_element(std::begin(rad), std::end(rad));
 
     // Slice forcing input according to indexes as we might have different dates
     // for swc and other
     for (int i =0; i < forcing_parser->dates.size(); ++i) {
         dates.push_back(forcing_parser->dates[i]);
         this->vpd.push_back(forcing_input[i][0] * 1000.0);
-        double anet = rad[i] /  max_rad * parameters.anet_max;
-        this->anet.push_back(anet);
+        this->sw_rad.push_back(rad[i]);
 
         vector<float> theta_run(forcing_input[i].begin() + 2, forcing_input[i].end());
 

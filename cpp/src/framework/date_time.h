@@ -15,6 +15,7 @@ public:
     DateTime(const DateTime& dateTime, long seconds);
     DateTime AddSeconds(long seconds);
     ~DateTime();
+    void print();
 
     int year;
     int month;

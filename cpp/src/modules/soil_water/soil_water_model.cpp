@@ -12,10 +12,10 @@ parameters(parameters), input_module(input){
 Soil_water_module::~Soil_water_module() {
 }
 
-vector<vector<double> > Soil_water_module::Get_psi_head() {
-    return psi_s_array;
+vector<vector<double> > Soil_water_module::Get_psi_soil_head() {
+    return psi_soil_2D;
 }
 
 vector<vector<double> > Soil_water_module::Get_ks() {
-    return ks_array;
+    return ks_2D;
 }

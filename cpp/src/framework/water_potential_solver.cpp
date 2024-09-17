@@ -115,8 +115,6 @@ void Water_Potential_Solver::Update_output(Output &output) {
     output.Add_gs(gs);
     output.Add_beta(beta_stom_cond);
 
-//    output.Add_steps_psi_leaf(solver_psi_leaf->Get_nsteps_converged());
-//    output.Add_steps_psi_stem_ground(solver_psi_stem_ground->Get_nsteps_converged());
 }
 
 Water_Potential_Solver::~Water_Potential_Solver() {

@@ -25,7 +25,6 @@ Swiss_Drought_Trees::Swiss_Drought_Trees(std::string path) {
 
         std::vector<int> indexes = {1,2};
 
-
         vector<vector<string> > data = reader.Get<string>(indexes);
 
         Tree tree;
