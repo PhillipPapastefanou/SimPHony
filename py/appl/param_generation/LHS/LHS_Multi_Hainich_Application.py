@@ -35,7 +35,6 @@ path = os.path.join(root_output_directory,scenario_name,'input')
 if not os.path.exists(path):
     os.makedirs(path)
 
-
 KG_TO_MOL = 1000.0/18.0
 
 seed   = 123456789
@@ -50,11 +49,11 @@ slicer = Subslicer(array=sample)
 # Setting up soil layers
 nsoil_layers = 3
 
-k_soil_sats_logs = rescale(slicer.get(), min=-8, max = -5)
+k_soil_sats_logs = rescale(slicer.get(), min=-7, max = -5.5)
 psi_soil_sats= rescale(slicer.get(), min=-1.0, max = -0.001)
-theta_s = rescale(slicer.get(), min=0.46, max = 0.5)
-theta_r = rescale(slicer.get(), min=0.05, max = 0.12)
-pore_size_ind = rescale(slicer.get(), min=0.3, max = 0.55)
+theta_s = rescale(slicer.get(), min=0.47, max = 0.5)
+theta_r = rescale(slicer.get(), min=0.04, max = 0.09)
+pore_size_ind = rescale(slicer.get(), min=0.35, max = 0.45)
 
 soil_collection = []
 for i in range(ncombs):
@@ -86,7 +85,7 @@ k_xylems_sats   = rescale(slicer.get(), min=2, max=30)
 k_xylems_sats *= KG_TO_MOL
 sel_cols.append("k_xylem_sat")
 
-huber_values    =  rescale(slicer.get(), min = 1/5000, max= 1/3000)
+huber_values    =  rescale(slicer.get(), min = 1/4000, max= 1/3000)
 sel_cols.append("huber_value")
 
 cstem_s         = rescale(slicer.get(), min=100, max=200)
@@ -96,7 +95,7 @@ sel_cols.append("kappa_stem")
 lai_s           = rescale(slicer.get(), min= 4.6, max = 5.0)
 sel_cols.append("lai")
 
-cleaf_s_log        = rescale(slicer.get(), min=np.log10(0.001), max=np.log10(1.0))
+cleaf_s_log        = rescale(slicer.get(), min=np.log10(0.001), max=np.log10(0.1))
 sel_cols.append("kappa_leaf")
 
 d_50close_s     = rescale(slicer.get(), min = 1.0, max = 4.0)
@@ -105,7 +104,7 @@ sel_cols.append("d50_close")
 psi_50_close_s  = rescale(slicer.get(), min = -2.4, max = -2.1)
 sel_cols.append("psi50_close")
 
-jackson_s       = rescale(slicer.get(), min = 0.91, max = 0.97)
+jackson_s       = rescale(slicer.get(), min = 0.95, max = 0.97)
 sel_cols.append("root_beta")
 
 psi50_xylems    = rescale(slicer.get(), min = -3.7, max = -3.4)

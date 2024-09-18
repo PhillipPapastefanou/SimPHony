@@ -55,7 +55,7 @@ df_psi_stem_obs['psi_stem_obs'] = df_psi_stem_obs['FAG']
 
 # Selectd a paramter id between 0 and 1000
 
-parameter_id = 0
+parameter_id = 5
 
 # ----------------------------------------------------------------
 # PHS model simulation
@@ -85,6 +85,7 @@ an = sim.Get_analysis()
 df = create_output_df(output, date_start_str)
 
 # Create standard plots
+std_plot(df, '2023-07-01', '2023-09-01', f"{post_path}/std_out_all.png" )
 std_plot(df, '2023-07-09', '2023-07-27', f"{post_path}/std_out.png" )
 eval_plot(df, df_sap=df_sap_obs, df_psi_stem=df_psi_stem_obs, analysis=an , path=f"{post_path}/eval_out.png")
 eval_plot_24(df, df_sap=df_sap_obs, df_psi_stem=df_psi_stem_obs, analysis=an , path=f"{post_path}/eval_out_24.png")

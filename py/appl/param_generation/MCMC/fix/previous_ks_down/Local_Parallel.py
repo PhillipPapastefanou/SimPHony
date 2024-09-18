@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append("/Users/pp/Documents/Repos/plant_hydro_standalone/py/")
+sys.path.append("//")
 
 from contrib.config import Config
 config = Config()

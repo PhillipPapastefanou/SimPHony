@@ -69,7 +69,6 @@ def std_plot(df : pd.DataFrame, timebegin, timeend, path):
 def eval_plot_all(df : pd.DataFrame, df_sap, df_psi_stem, analysis, path):
     formatter = mdates.DateFormatter('%m-%d %H');
 
-
     df_slice = df
     df_slice2 = df
     fig = plt.figure(figsize=(10, 10))
@@ -130,8 +129,13 @@ def eval_plot(df : pd.DataFrame, df_sap, df_psi_stem, analysis, path):
     formatter = mdates.DateFormatter('%m-%d %H');
 
 
-    df_slice = df.loc['2023-07-09': '2023-08-27']
+    df_slice = df.loc['2023-07-01': '2023-08-01']
     df_slice2 = df.loc['2023-05-01': '2023-11-01']
+    df_slice2 = df_slice
+
+    df_sap.set_index(df_sap['datetime'], inplace=True)
+    df_sap = df_sap.loc['2023-07-01': '2023-08-01']
+
     fig = plt.figure(figsize=(10, 10))
 
     ax = fig.add_subplot(2, 2, 1)
@@ -142,11 +146,14 @@ def eval_plot(df : pd.DataFrame, df_sap, df_psi_stem, analysis, path):
     ax.xaxis.set_major_formatter(formatter)
 
     ax = fig.add_subplot(2, 2, 2)
-    ax.plot(df_slice['anet'], label='Anet')
+    ax.semilogy(df_slice['ksSoilUp'], label='ksoil1')
+    ax.semilogy(df_slice['ksSoil2'], label='ksoil2')
+    ax.semilogy(df_slice['ksSoil3'], label='ksoil3')
     ax.legend()
     ax.set_xlabel("Time")
     ax.tick_params(axis='x', labelrotation=45)
     ax.xaxis.set_major_formatter(formatter)
+
 
     ax = fig.add_subplot(2, 2, 3)
     ax.plot(df_slice['psiStem'], label='stem_mod', c='tab:red')

@@ -33,7 +33,7 @@ class Subslicer:
 
 ncombs = 1000
 #path = '/Net/Groups/BSI/work_scratch/ppapastefanou/simulations/plant_hydraulics_standalone/2024/swiss/2024_soil_water_updates/'
-path = '/Users/pp/Documents/Repos/plant_hydro_standalone/py/appl/LHS/generator_files/'
+path = '/appl/param_generation/LHS/generator_files/'
 seed   = 123456789
 sampler = qmc.LatinHypercube(d = 21, seed= seed)
 sample = sampler.random(n = ncombs)
