@@ -6,6 +6,7 @@ root_library_path = '/Users/pp/Documents/Repos/plant_hydro_standalone'
 root_data_path = os.path.join(root_library_path, 'data')
 cpp_lib_path = os.path.join(root_library_path, 'cpp', 'cmake-build-release')
 sys.path.append(cpp_lib_path)
+sys.path.append(os.path.join(root_library_path, 'py'))
 
 from contrib.config import Config
 config = Config()
@@ -14,12 +15,16 @@ config.lib_path = root_library_path
 config.forcing_file = os.path.join(root_data_path, 'hainich', 'input', 'Meteo_Hainich_dT30min_forcing_PHS.csv')
 config.sap_file = os.path.join(root_data_path, 'hainich', 'eval', 'SAP_Hainich_Fagus-mean_dT30min_prog.csv')
 config.psi_stem_file = os.path.join(root_data_path, 'hainich', 'eval', 'stem_water_pot.csv')
-config.parameter_input_file_list = os.path.join(root_library_path, 'py', 'appl',
-                               'LHS', 'generator_files', 'Hainich_parameters_1000.csv')
+
+root_output_directory = "/Users/pp/data/Simulations/A08_Hydraulics_standalone/hainich"
+scenario_name = "broad_local_anet_fix"
+config.parameter_input_file_list = os.path.join(root_output_directory, scenario_name, 'input', 'Hainich_parameters.csv')
+config.output_path =  os.path.join(root_output_directory, scenario_name, 'output')
+
+
 
 sys.path.append(config.build_path)
 from contrib.ParallelSetupIndividual import ParallelSetupIndividual
-
 from mpi4py import MPI
 
 # Initialize MPI
@@ -27,9 +32,13 @@ comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
 
-
+# Create the MPI binding object
 binder = ParallelSetupIndividual(comm, rank, size)
+# 
 binder.init(config=config)
+#
 binder.send_parameter_indexes()
+#
 binder.start_simulations()
+#
 binder.receive_analysis_data()

@@ -22,6 +22,8 @@ public:
     void Add_J(double J);
     void Add_G(double G);
 
+    void Add_J_adapted_density(double J);
+
     void Add_G_indiv(vector<float> G_indiv);
 
     void Add_psi_leaf(float psi_leaf);
@@ -46,6 +48,8 @@ public:
 
     vector<float> Get_J_per_sap() const;
     vector<float> Get_G_per_sap() const;
+
+    vector<float> Get_J_per_area() const;
 
     const vector<vector<float> > &Get_G_indiv() const;
 
@@ -81,6 +85,7 @@ private:
 
     vector<float> Ta;
     vector<float> Ja;
+    vector<float> Ja_adapted;
     vector<float> Ga;
 
     vector<vector<float> > Gaa;

@@ -83,20 +83,20 @@ Hainich_Single_Test::Hainich_Single_Test() {
     double psi_leaf_init = -1.0;
     double psi_stem_init = -0.2;
 
-
     Parameter_CSV_Reader reader2("/Users/pp/Documents/Repos/plant_hydro_standalone/py/appl/LHS/generator_files/Hainich_parameters_1000.csv");
     reader2.Parse_Full_Files();
 
     Parameters params2 = reader2.Get_parameter_list()[29];
 
+
+    params2.soil_layers;
+
     Input_Hainich input;
     input.Add_Forcing_File(forcing_file);
     input.Read_N_Parse();
 
-
     TimeSeries sap_data(sap_file, true, ',');
     sap_data.Load("datetime", "%Y-%m-%d %H:%M:%S", {1});
-
 
     TimeSeries psi_stem_data(psi_stem_file, true  , ',');
     psi_stem_data.Load("time", "%Y-%m-%d %H:%M:%S", {1});

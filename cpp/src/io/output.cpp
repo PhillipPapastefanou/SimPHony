@@ -33,6 +33,16 @@ void Output::Add_psi_leaf(float psi_leaf) {
     psi_leaf_a.push_back(psi_leaf);
 }
 
+void Output::Add_J_adapted_density(double J) {
+
+    double J_adapted = J;
+    J_adapted *= 1000.0;
+    J_adapted /= parameters.leaf_area_index;
+    J_adapted *= parameters.huber_value;
+    J_adapted /= parameters.tree_density;
+    Ja_adapted.push_back(J_adapted);
+}
+
 void Output::Add_psi_stem_ground(float psi_root) {
     psi_stem_ground_a.push_back(psi_root);
 }
@@ -40,6 +50,7 @@ void Output::Add_psi_stem_ground(float psi_root) {
 void Output::Add_psi_stems_seg(vector<float> psi_stem_seg) {
     psi_stem_a.push_back(psi_stem_seg);
 }
+
 
 
 void Output::Add_psi_soil_indiv(vector<float> psi_soil_indiv) {
@@ -87,6 +98,8 @@ const vector<long> &Output::Get_times() const {
 const vector<float> &Output::Get_J() const {
     return Ja;
 }
+
+
 
 const vector<float> &Output::Get_G() const {
     return Ga;
@@ -172,6 +185,12 @@ vector<float> Output::Get_G_per_sap() const {
 const vector<DateTime> &Output::Get_dates() const {
     return dates;
 }
+
+vector<float> Output::Get_J_per_area() const {
+    return Ja_adapted;
+}
+
+
 
 
 

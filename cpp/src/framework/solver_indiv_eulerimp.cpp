@@ -333,10 +333,14 @@ void Solver_Indiv_Euler_Imp::update_psi_leaf() {
     bool converged = solver_psi_leaf->Solve(psi_leaf_lower, psi_leaf_upper);
 
 
+    //std::cout <<  "conv  ";
+
     // We have a solution within the standard boundaries...
     if (converged) {
         psi_leaf = solver_psi_leaf->Get_solution();
     }
+
+
 
     // ... we have NO solution within the standard boundaries...
     // The solution (if there is one) shows a bigger drop then the maximum anticipated by the standard routine

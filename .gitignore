@@ -7,3 +7,5 @@ cmake-build-debug
 cpp/build/*
 .DS_Store
 */*/__pycache__
+py/appl/LHS/generator_files
+py/analysis/Hainich/out

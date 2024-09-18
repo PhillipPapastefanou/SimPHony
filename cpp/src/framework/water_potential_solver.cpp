@@ -99,6 +99,7 @@ void Water_Potential_Solver::Update_output(Output &output) {
 
     output.Add_T(T);
     output.Add_J(J);
+    output.Add_J_adapted_density(J);
     output.Add_G(G);
 
     vector<float> Gi_f(Gi.begin(), Gi.end());

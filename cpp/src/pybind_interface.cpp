@@ -67,6 +67,8 @@ PYBIND11_MODULE(hydro_standalone, handle){
             def("Get_G_per_sap", &Output::Get_G_per_sap).
             def("Get_J_per_sap", &Output::Get_J_per_sap).
 
+            def("Get_J_per_area", &Output::Get_J_per_area).
+
             def("Get_psi_leaf", &Output::Get_psi_leaf).
             def("Get_psi_stem", &Output::Get_psi_stem).
             def("Get_psi_soil_indiv", &Output::Get_psi_soil_indiv).

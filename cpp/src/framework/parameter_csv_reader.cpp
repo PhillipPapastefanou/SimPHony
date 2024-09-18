@@ -58,7 +58,6 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
 
     vector<vector<string>> values = reader.Get<string>();
     size_t nfiles = values.size();
-
     //Parameter conversions
     for (int i = 0; i < nfiles; ++i) {
 

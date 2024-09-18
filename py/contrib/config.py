@@ -10,6 +10,7 @@ class Config:
         self.lib_path  = '/Users/pp/Documents/Repos/plant_hydro_standalone/'
         self.theta_file  = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Water_Input_type2.csv"
         self.forcing_file  = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Forcing_Inter.csv"
+        self.psi_stem_file  = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Forcing_Inter.csv"
         self.tree_folder_path  = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Trees"
         self.sap_file = ""
         self.output_path = ""

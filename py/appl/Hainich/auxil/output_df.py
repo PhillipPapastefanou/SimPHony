@@ -26,6 +26,7 @@ def create_output_df(output, date_start_str):
     df['T'] = output.Get_T()
     df['G'] = output.Get_G()
     df['J'] = output.Get_J()
+    df['J_apdated'] = output.Get_J_per_area()
 
     df['Gs'] = output.Get_G_per_sap()
     df['Js'] = output.Get_J_per_sap()
