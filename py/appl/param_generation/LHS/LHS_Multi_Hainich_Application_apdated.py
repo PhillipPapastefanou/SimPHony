@@ -28,8 +28,9 @@ class Subslicer:
         return self.array[self.i]
 
 ncombs = 100000
-#path = '/Net/Groups/BSI/work_scratch/ppapastefanou/simulations/plant_hydraulics_standalone/2024/swiss/2024_soil_water_updates/'
+root_output_directory = "/Net/Groups/BSI/work_scratch/ppapastefanou/simulations/plant_hydraulics_standalone/2024/hainich"
 root_output_directory = "/Users/pp/data/Simulations/A08_Hydraulics_standalone/hainich"
+scenario_name = "broad_cluster_big"
 scenario_name = "broad_local_anet_fix"
 path = os.path.join(root_output_directory,scenario_name,'input')
 if not os.path.exists(path):
