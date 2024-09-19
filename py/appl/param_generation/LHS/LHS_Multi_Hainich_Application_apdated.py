@@ -82,7 +82,7 @@ sel_cols.append("g1")
 anet_max    = rescale(slicer.get(), min = 1.0, max = 4.0)
 sel_cols.append("anet_max")
 
-k_xylems_sats   = rescale(slicer.get(), min=1, max=30)
+k_xylems_sats   = rescale(slicer.get(), min=1, max=10)
 k_xylems_sats *= KG_TO_MOL
 sel_cols.append("k_xylem_sat")
 
@@ -117,7 +117,7 @@ sel_cols.append("psi_88_xylem")
 root_area_indexes    = rescale(slicer.get(), min = 2, max = 14)
 sel_cols.append("root_area_indexes")
 
-tree_densities    = rescale(slicer.get(), min = (64-5)/10000, max = (64+5)/10000)
+tree_densities    = rescale(slicer.get(), min = (64-20)/10000, max = (64+20)/10000)
 sel_cols.append("tree_densities")
 
 plist = ParametersList()

@@ -1,13 +1,15 @@
 import numpy as np
 import pandas as pd
+import os
 import mpi4py.MPI as MPI
 import xarray as xr
 from time import perf_counter
 from hydro_standalone import Simulation_Multi_Hainich
 from hydro_standalone import DateTime
 from contrib.config import Config
+from appl.param_generation.LHS.LHS_Multi_Hainich_Application_automation import Calculate_LHS_per_process
 
-class ParallelSetupIndividual:
+class ParallelSetupHainichWithLHS:
     def __init__(self, comm, rank, size):
 
         self.comm = comm
@@ -24,9 +26,7 @@ class ParallelSetupIndividual:
 
     def _calculate_gridpoints(self):
 
-        # Get the length of the paramter input files
-        df = pd.read_csv(self.config.parameter_input_file_list)
-        n = df.shape[0]
+        n = self.config.nsims
 
         min_np = int(n / self.size)
         remaining = n - min_np * self.size
@@ -46,11 +46,11 @@ class ParallelSetupIndividual:
         ri = 0
         self.displ = np.zeros(self.size)
 
-        for i in range(0, self.size):
-            df_i = df.iloc[ri: ri + self.n_array_per_process[i]]
-            df_i.to_csv(f"{self.config.parameter_input_file_list}{i}")
-            self.displ[i] = ri
-            ri += self.n_array_per_process[i]
+        # for i in range(0, self.size):
+        #     df_i = df.iloc[ri: ri + self.n_array_per_process[i]]
+        #     df_i.to_csv(f"{self.config.parameter_input_file_list}{i}")
+        #     self.displ[i] = ri
+        #     ri += self.n_array_per_process[i]
 
     def _initialise_counts(self):
         self.sendbuf = None
@@ -74,8 +74,18 @@ class ParallelSetupIndividual:
         print("Process {} received chunk {}".format(self.rank, self.n_sims_per_process))
         print(self.n_sims_total)
 
+        # Create directory
+        if self.rank == 0:
+            if not os.path.exists(self.config.input_path):
+                os.makedirs(self.config.input_path)
+            if not os.path.exists(self.config.output_path):
+                os.makedirs(self.config.output_path)
+            if not os.path.exists(self.config.post_path):
+                os.makedirs(self.config.post_path)
         self.comm.Barrier()
 
+        # Create LHS parameter setup
+        Calculate_LHS_per_process(self.rank, self.n_sims_per_process, self.config.input_path)
 
     def start_simulations(self):
 
@@ -84,7 +94,8 @@ class ParallelSetupIndividual:
             t1 = perf_counter()
 
         self.sim = Simulation_Multi_Hainich()
-        self.sim.Init_Full_Parameter_Setups(f"{self.config.parameter_input_file_list}{self.rank}", np.arange(0,self.n_sims_per_process))
+        self.sim.Init_Full_Parameter_Setups(f"{self.config.input_path}/Hainich_parameters.csv{self.rank}",
+                                            np.arange(0,self.n_sims_per_process))
         self.sim.Init_input(self.config.forcing_file,
                             self.config.sap_file,
                             self.config.psi_stem_file,
@@ -108,68 +119,54 @@ class ParallelSetupIndividual:
 
         analysis = self.sim.Get_analysis_list()
 
-        if self.is_root:
-            print("Sending data to root...", end = '')
-            t1 = perf_counter()
-
-        # Send the RMSE datasets
         nx = self.n_sims_per_process
 
-        data_to_send = np.zeros((nx, 1), dtype='d')
-        for i in range(0, nx):
-            data_to_send[i] = analysis[i].Get_Rmse_J()
-        gathered_data_rmse_J = self._receive_2D_data(nx, 1, data_to_send)
-        self.comm.Barrier()
+        rmse_J = np.zeros(nx)
+        rmse_G = np.zeros(nx)
+        rmse_psi_stem = np.zeros(nx)
 
-        data_to_send = np.zeros((nx, 1), dtype='d')
         for i in range(0, nx):
-            data_to_send[i] = analysis[i].Get_Rmse_G()
-        gathered_data_rmse_G = self._receive_2D_data(nx, 1, data_to_send)
-        self.comm.Barrier()
+            rmse_J[i] = analysis[i].Get_Rmse_J()
+            rmse_G[i] = analysis[i].Get_Rmse_G()
+            rmse_psi_stem[i] = analysis[i].Get_Rmse_psi_stem()
 
-        data_to_send = np.zeros((nx, 1), dtype='d')
-        for i in range(0, nx):
-            data_to_send[i] = analysis[i].Get_Rmse_psi_stem()
-        gathered_data_rmse_psi_stem = self._receive_2D_data(nx, 1, data_to_send)
-        self.comm.Barrier()
+        df_rmse = pd.DataFrame()
+        df_rmse['rmse_J'] = rmse_J
+        df_rmse['rmse_G'] = rmse_G
+        df_rmse['rmse_psi_stem'] = rmse_psi_stem
 
-        # # Send the minimum values
-        # ny_slices = len(time_slices)
-        # data_to_send = np.zeros((nx, ny_slices), dtype='d')
-        # for i in range(0, nx):
-        #     slices = analysis[i].Get_time_slices()
-        #     for j in range (0, ny_slices):
-        #         data_to_send[i][j] = slices[j].Min
-        # gathered_data_slices = self._receive_2D_data(nx, ny_slices, data_to_send)
-        #self.comm.Barrier()
+        df_input = pd.read_csv(f"{self.config.input_path}/Hainich_parameters.csv{self.rank}")
+
+        df_input['psi_soil_sat0'] = df_input['psi_soil_sats'].str.split(';', expand=True).values[:, 0].astype(float)
+        df_input['k_soil_sat0'] = df_input['k_soil_sats'].str.split(';', expand=True).values[:, 0].astype(float)
+        df_input['theta_s0'] = df_input['theta_s'].str.split(';', expand=True).values[:, 0].astype(float)
+        df_input['theta_r0'] = df_input['theta_r'].str.split(';', expand=True).values[:, 0].astype(float)
+        df_input['pore_0'] = df_input['pore_size_ind'].str.split(';', expand=True).values[:, 0].astype(float)
+
+        df_c = pd.concat([df_input, df_rmse], axis=1)
+
+        max_rmse_J = 0.000347
+        max_rmse_psi_stem = 0.0668
+        df_c['rmse_com_avg'] = (df_c['rmse_psi_stem'] / max_rmse_psi_stem + df_c['rmse_J'] / max_rmse_J) / 2.0;
+
+        output_path = self.config.output_path
+        nbest = self.config.nbest
+        df_best_psi_stem = df_c.sort_values(by='rmse_psi_stem').iloc[0:nbest]
+        df_best_psi_stem.to_csv(f"{output_path}/parameters_best_psi_stem.csv{self.rank}")
+        df_best_J = df_c.sort_values(by='rmse_J').iloc[0:nbest]
+        df_best_J.to_csv(f"{output_path}/parameters_best_J.csv{self.rank}")
+        df_best_both = df_c.sort_values(by='rmse_com_avg').iloc[0:nbest]
+        df_best_both.to_csv(f"{output_path}/parameters_best_both.csv{self.rank}")
+
+        self.comm.Barrier()
 
         if self.is_root:
-            t2 = perf_counter()
-            print(f"Done ({np.round(t2-t1, 1)}) sec.")
-
-        if self.is_root:
-            # ds = xr.DataArray(recvbuf2, coords=[('run_id', np.arange(0, sum(count))), ('tree_rmse_id', np.arange(0, ndata_pts_y))])
-            print("Writing netcdf file...", end='')
-            t1 = perf_counter()
-            ds = xr.Dataset(
-                {"RMSE_J": (("run_id"), np.squeeze(gathered_data_rmse_J)),
-                 "RMSE_G": (("run_id"), np.squeeze(gathered_data_rmse_G)),
-                 "RMSE_psi_stem": (("run_id"), np.squeeze(gathered_data_rmse_psi_stem))
-                    #,"Minimum": (("run_id", "slices_id"), gathered_data_slices)
-                 },
-                coords={
-                    "run_id": np.arange(0, sum(self.n_array_per_process)),
-                    #"rmse": np.arange(0, ny_rmse),
-                    #"slices_id": np.arange(0, ny_slices),
-                },
-            )
-            ds.to_netcdf(f'{self.config.output_path}/Sens_Output{self.rank}.nc',
-                         encoding={"RMSE_J": {"dtype": "single"},
-                                   "RMSE_G": {"dtype": "single"},
-                                   "RMSE_psi_stem": {"dtype": "single"}})
-            t2 = perf_counter()
-            print(f"Done ({np.round(t2 - t1, 1)}) sec.")
-
+            for str in ['psi_stem','J', 'both']:
+                df_0 = pd.read_csv(f"{output_path}/parameters_best_{str}.csv{0}")
+                for i in range(1, self.size):
+                    df = pd.read_csv(f"{output_path}/parameters_best_{str}.csv{i}")
+                    df_0 = pd.concat([df_0, df], axis = 0)
+                df_0.to_csv(f"{self.config.post_path}/parameters_best_{str}.csv")
 
     def _receive_2D_data(self, nx, ny, data_to_send):
 

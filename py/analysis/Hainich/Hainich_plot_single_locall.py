@@ -55,7 +55,7 @@ df_psi_stem_obs['psi_stem_obs'] = df_psi_stem_obs['FAG']
 
 # Selectd a paramter id between 0 and 1000
 
-parameter_id = 5
+parameter_id = 4
 
 # ----------------------------------------------------------------
 # PHS model simulation

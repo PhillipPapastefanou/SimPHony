@@ -20,11 +20,13 @@ root_output_directory = "/Users/pp/data/Simulations/A08_Hydraulics_standalone/ha
 scenario_name = "broad_local_anet_fix"
 config.parameter_input_file_list = os.path.join(root_output_directory, scenario_name, 'input', 'Hainich_parameters.csv')
 config.output_path =  os.path.join(root_output_directory, scenario_name, 'output')
+config.scenario_path =  os.path.join(root_output_directory, scenario_name)
+config.input_path =   os.path.join(root_output_directory, scenario_name, 'input')
 
 
 
 sys.path.append(config.build_path)
-from contrib.ParallelSetupIndividual import ParallelSetupIndividual
+from contrib.parallel_setup_hainich import ParallelSetupHainich
 from mpi4py import MPI
 
 # Initialize MPI
@@ -33,7 +35,7 @@ rank = comm.Get_rank()
 size = comm.Get_size()
 
 # Create the MPI binding object
-binder = ParallelSetupIndividual(comm, rank, size)
+binder = ParallelSetupHainich(comm, rank, size)
 # 
 binder.init(config=config)
 #

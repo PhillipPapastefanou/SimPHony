@@ -14,6 +14,11 @@ class Config:
         self.tree_folder_path  = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Trees"
         self.sap_file = ""
         self.output_path = ""
+        self.post_path = ""
+        self.input_path = ""
+        self.scenario_path = ""
+        self.nsims = -1
+        self.nbest = 30
         self.location = Location.Invalid
         self.parameter_input_file_list  = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/Model/ParameterSampling/HypercubeSampling/Full_Parameter_setup.csv"
         self.parameter_input_file_list_partial  = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/Model/ParameterSampling/HypercubeSampling/Parial_Parameter_setup.csv"
