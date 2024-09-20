@@ -7,8 +7,8 @@ from time import perf_counter
 from hydro_standalone import Simulation_Multi_Hainich
 from hydro_standalone import DateTime
 from contrib.config import Config
-from appl.param_generation.LHS.LHS_Multi_Hainich_Application_automation import Calculate_LHS_per_process
-
+#from appl.param_generation.LHS.LHS_Multi_Hainich_Application_automation_campbell import Calculate_LHS_per_process
+from appl.param_generation.LHS.LHS_Multi_Hainich_Application_automation_vangenuchten import Calculate_LHS_per_process
 class ParallelSetupHainichWithLHS:
     def __init__(self, comm, rank, size):
 

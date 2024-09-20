@@ -2,7 +2,7 @@ import sys
 import os
 
 # Specify paths so that the PHS model can be imported
-root_library_path = '/Users/pp/Documents/Repos/plant_hydro_standalone'
+root_library_path = '/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicStandalone'
 root_data_path = os.path.join(root_library_path, 'data')
 cpp_lib_path = os.path.join(root_library_path, 'cpp', 'build')
 sys.path.append(cpp_lib_path)
@@ -17,13 +17,13 @@ config.sap_file = os.path.join(root_data_path, 'hainich', 'eval', 'SAP_Hainich_F
 config.psi_stem_file = os.path.join(root_data_path, 'hainich', 'eval', 'stem_water_pot.csv')
 
 root_output_directory = "/Net/Groups/BSI/work_scratch/ppapastefanou/simulations/plant_hydraulics_standalone/2024/hainich"
-scenario_name = "broad_cluster_lhs_auto"
+scenario_name = "fine_vanGenuchten"
 config.scenario_path =  os.path.join(root_output_directory, scenario_name)
 config.output_path =  os.path.join(root_output_directory, scenario_name, 'output')
 config.post_path =   os.path.join(root_output_directory, scenario_name, 'post')
 config.input_path =   os.path.join(root_output_directory, scenario_name, 'input')
-config.nsims = 1000
-config.nbest = 30
+config.nsims = 50000*128
+config.nbest = 200
 
 
 sys.path.append(config.build_path)

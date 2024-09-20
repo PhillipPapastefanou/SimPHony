@@ -30,10 +30,6 @@ class Subslicer:
 
 def Calculate_LHS_per_process(rank, ncombs, path):
 
-    # root_output_directory = "/Net/Groups/BSI/work_scratch/ppapastefanou/simulations/plant_hydraulics_standalone/2024/hainich"
-    # root_output_directory = "/Users/pp/data/Simulations/A08_Hydraulics_standalone/hainich"
-    # scenario_name = "broad_cluster_big"
-    # scenario_name = "broad_local_anet_fix"
 
     KG_TO_MOL = 1000.0/18.0
 
@@ -52,8 +48,8 @@ def Calculate_LHS_per_process(rank, ncombs, path):
     k_soil_sats_logs = rescale(slicer.get(), min=-7, max = -6)
     psi_soil_sats= rescale(slicer.get(), min=-0.0005, max = -0.002)
     theta_s = rescale(slicer.get(), min=0.47, max = 0.5)
-    theta_r = rescale(slicer.get(), min=0.08, max = 0.10)
-    pore_size_ind = rescale(slicer.get(), min=0.46, max = 0.49)
+    theta_r = rescale(slicer.get(), min=0.07, max = 0.11)
+    pore_size_ind = rescale(slicer.get(), min=0.43, max = 0.52)
 
     soil_collection = []
     for i in range(ncombs):
@@ -78,24 +74,24 @@ def Calculate_LHS_per_process(rank, ncombs, path):
     g1_s            = rescale(slicer.get(), min = 1.25, max = 5.0)
     sel_cols.append("g1")
 
-    anet_max    = rescale(slicer.get(), min = 1.0, max = 4.0)
+    anet_max    = rescale(slicer.get(), min = 0.5, max = 4.0)
     sel_cols.append("anet_max")
 
-    k_xylems_sats   = rescale(slicer.get(), min=1, max=10)
-    k_xylems_sats *= KG_TO_MOL
+    k_xylems_sats   = rescale(slicer.get(), min=35, max=65)
+    #k_xylems_sats *= KG_TO_MOL
     sel_cols.append("k_xylem_sat")
 
-    huber_values    =  rescale(slicer.get(), min = 1/4000, max= 1/3000)
+    huber_values    =  rescale(slicer.get(), min = 0.0003, max= 0.0004)
     sel_cols.append("huber_value")
 
-    cstem_s         = rescale(slicer.get(), min=50, max=200)
+    cstem_s         = rescale(slicer.get(), min=50, max=300)
     cstem_s *= KG_TO_MOL
     sel_cols.append("kappa_stem")
 
     lai_s           = rescale(slicer.get(), min= 4.6, max = 5.0)
     sel_cols.append("lai")
 
-    cleaf_s_log        = rescale(slicer.get(), min=np.log10(0.001), max=np.log10(0.1))
+    cleaf_s_log        = rescale(slicer.get(), min=np.log10(0.001), max=np.log10(0.02))
     sel_cols.append("kappa_leaf")
 
     d_50close_s     = rescale(slicer.get(), min = 1.0, max = 4.0)
@@ -116,7 +112,7 @@ def Calculate_LHS_per_process(rank, ncombs, path):
     root_area_indexes    = rescale(slicer.get(), min = 2, max = 14)
     sel_cols.append("root_area_indexes")
 
-    tree_densities    = rescale(slicer.get(), min = (64-20)/10000, max = (64+20)/10000)
+    tree_densities    = rescale(slicer.get(), min = (64-32)/10000, max = (64)/10000)
     sel_cols.append("tree_densities")
 
     plist = ParametersList()
