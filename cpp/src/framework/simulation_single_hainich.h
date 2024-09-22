@@ -22,8 +22,8 @@ public:
                     std::string psi_stem_file);
 
     void Init_parameters_default();
+    void Init_parameters(Parameters params);
     void Init_parameters_filename(string filename, int index);
-
     void Set_water_pot_initials(double psi_leaf, double psi_stem);
     void Run(DateTime timestart, DateTime timeend);
 

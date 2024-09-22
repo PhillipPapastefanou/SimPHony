@@ -226,8 +226,6 @@ def eval_plot_24(df : pd.DataFrame, df_sap, df_psi_stem, analysis, path):
     df_x = pd.merge(df_u, df_psi_stem, on='time')
     df_x.set_index('time', inplace=True)
 
-
-
     df_x_group = df_x.groupby([df_x.index.hour]).mean()
 
     ax = fig.add_subplot(2, 2, 2)

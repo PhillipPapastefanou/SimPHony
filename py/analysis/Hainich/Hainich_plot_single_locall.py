@@ -18,8 +18,8 @@ from hydro_standalone import DateTime
 from src.Parameters import Parameters
 from src.Parameters import SoilLayer
 from src.Parameters import Soil_Water_Model_Type
-from src.Parameters import CreateSoilParameters
-from contrib.ParametersList import ParametersList
+from src.Parameters import Convert_Soil_Parameters
+from contrib.parameter_parser import Parameter_Parser
 
 from appl.Hainich.auxil.output_df import create_output_df
 from appl.Hainich.auxil.output_plotter import std_plot

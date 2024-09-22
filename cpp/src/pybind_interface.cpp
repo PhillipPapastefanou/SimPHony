@@ -13,6 +13,8 @@
 #include "io/analysis_hainich.h"
 #include "framework/parameters.h"
 #include "io/swiss_drought_trees.h"
+#include "framework/parameters.h"
+#include "modules/soil_layer.h"
 
 
 
@@ -23,6 +25,7 @@ PYBIND11_MODULE(hydro_standalone, handle){
     py::class_<Simulation_Single_Hainich>(handle, "Simulation_Single_Hainich").
             def("Init_parameters_def", &Simulation_Single_Hainich::Init_parameters_default).
             def("Init_parameters_fn_single", &Simulation_Single_Hainich::Init_parameters_filename).
+            def("Init_parameters", &Simulation_Single_Hainich::Init_parameters).
             def("Init_input", &Simulation_Single_Hainich::Init_input).
             def("Set_water_pot_initials", &Simulation_Single_Hainich::Set_water_pot_initials).
             def("Run", &Simulation_Single_Hainich::Run).
@@ -111,6 +114,73 @@ PYBIND11_MODULE(hydro_standalone, handle){
 
     py::class_<DateTime>(handle, "DateTime").
             def(py::init<string, string>());
+
+    py::enum_<Stem_flow_module_type>(handle, "Stem_flow_module_type").
+            value("Linear", Stem_flow_module_type::Linear).
+            value("KirchhoffPiecewiseErf", Stem_flow_module_type::KirchhoffPiecewiseErf).
+            value("KirchhoffWeibull", Stem_flow_module_type::KirchhoffWeibull);
+
+    py::enum_<Soil_water_module_type>(handle, "Soil_water_module_type").
+            value("Campbell", Soil_water_module_type::Campbell).
+            value("VanGenuchten", Soil_water_module_type::VanGenuchten).
+            value("Saxton06", Soil_water_module_type::Saxton06);
+
+    py::enum_<Conductivity_fraction_module_type>(handle, "Conductivity_fraction_module_type").
+            value("Weibull", Conductivity_fraction_module_type::Weibull).
+            value("Logit", Conductivity_fraction_module_type::Logit);
+
+    py::class_<Soil_layer>(handle, "CSoil_layer").
+            def_readwrite("organic_matter_fraction", &Soil_layer::organic_matter_fraction).
+            def_readwrite("sand_fraction", &Soil_layer::sand_fraction).
+            def_readwrite("clay_fraction", &Soil_layer::clay_fraction).
+
+            def_readwrite("depth", &Soil_layer::depth).
+            def_readwrite("k_soil_sat", &Soil_layer::k_soil_sat).
+            def_readwrite("psi_soil_sat", &Soil_layer::psi_soil_sat).
+            def_readwrite("theta_s", &Soil_layer::theta_s).
+            def_readwrite("theta_r", &Soil_layer::theta_r).
+            def_readwrite("pore_size_ind", &Soil_layer::pore_size_ind).
+            def_readwrite("camp_b", &Soil_layer::camp_b).
+            def(py::init<>());
+
+    py::class_<Parameters>(handle, "CParameters").
+            def_readwrite("id", &Parameters::id).
+
+            def_readwrite("stem_flow_type", &Parameters::stem_flow_type).
+            def_readwrite("soil_water_type", &Parameters::soil_water_type).
+            def_readwrite("conductivity_fraction_type", &Parameters::conductivity_fraction_type).
+
+            def_readwrite("root_area_index", &Parameters::root_area_index).
+            def_readwrite("canopy_height", &Parameters::canopy_height).
+            def_readwrite("soil_layers", &Parameters::soil_layers).
+            def_readwrite("stem_hydraulic_capacitance", &Parameters::stem_hydraulic_capacitance_max).
+            def_readwrite("k_xylem_sat", &Parameters::k_xylem_sat).
+            def_readwrite("huber_value", &Parameters::huber_value).
+            def_readwrite("psi50_xylem", &Parameters::psi50_xylem).
+            def_readwrite("psi88_xylem", &Parameters::psi88_xylem).
+            def_readwrite("leaf_hydraulic_capacitance", &Parameters::leaf_hydraulic_capacitance).
+            def_readwrite("leaf_area_index", &Parameters::leaf_area_index).
+            def_readwrite("psi_leaf_50_close", &Parameters::psi_leaf_50_close).
+            def_readwrite("d_50_close", &Parameters::d_50_close).
+            def_readwrite("g0", &Parameters::g0).
+            def_readwrite("g1", &Parameters::g1).
+            def_readwrite("g_bark", &Parameters::g_bark).
+            def_readwrite("jackson_root_beta", &Parameters::jackson_root_beta).
+            def_readwrite("theta_emp_multiplier", &Parameters::theta_emp_multiplier).
+            def_readwrite("dts_input", &Parameters::dts_input).
+            def_readwrite("sw_rad_max", &Parameters::sw_rad_max).
+            def_readwrite("anet_max", &Parameters::anet_max).
+            def_readwrite("tree_density", &Parameters::tree_density).
+            def_readwrite("n_stem_segments", &Parameters::n_stem_segments).
+            def_readwrite("sustain_xylem_damage", &Parameters::sustain_xylem_damage).
+            def_readwrite("permanent_xylem_fraction_threshold", &Parameters::permanent_xylem_fraction_threshold).
+            def_readwrite("sigma_log_likelyhood", &Parameters::sigma_log_likelyhood).
+            def_readwrite("max_psi_leaf_change_per_hour", &Parameters::max_psi_leaf_change_per_hour).
+            def_readwrite("minimum_psi_leaf_multiplier", &Parameters::minimum_psi_leaf_multiplier).
+            def_readwrite("solver_precision", &Parameters::solver_precision).
+            def_readwrite("verbose", &Parameters::verbose).
+            def_readwrite("dts", &Parameters::dts).
+            def(py::init<>());
 
     handle.doc() = "PHS setup and running via python";
 }

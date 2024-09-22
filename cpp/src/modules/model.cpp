@@ -13,7 +13,7 @@ void Model::Set_initial_conditions(double psi_leaf_zero, double psi_stem_zero) {
 }
 
 int Model::time_index(double elapsed_seconds) {
-    return static_cast<int>(elapsed_seconds / params.input_steplen);
+    return static_cast<int>(elapsed_seconds / params.dts_input);
 }
 
 Model::Model
@@ -29,7 +29,6 @@ void Model::Set_derived_parameters() {
 
     std::string water_model_str;
     switch (params.soil_water_type) {
-
         case Soil_water_module_type::Saxton06:{
             soil_water_module = std::make_unique<Saxton06>(params, input_module);
             water_model_str = "Saxton06";
@@ -50,6 +49,7 @@ void Model::Set_derived_parameters() {
             exit(99);
         }
     }
+
     // Todo Reenable with logging
     // std::cout << "Using " << water_model_str << " soil water model." << std::endl;
 

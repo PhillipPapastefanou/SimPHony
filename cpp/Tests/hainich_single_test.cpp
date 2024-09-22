@@ -89,8 +89,6 @@ Hainich_Single_Test::Hainich_Single_Test() {
     Parameters params2 = reader2.Get_parameter_list()[29];
 
 
-    params2.soil_layers;
-
     Input_Hainich input;
     input.Add_Forcing_File(forcing_file);
     input.Read_N_Parse();

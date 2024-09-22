@@ -16,7 +16,6 @@ config.forcing_file = os.path.join(root_data_path, 'hainich', 'input', 'Meteo_Ha
 config.sap_file = os.path.join(root_data_path, 'hainich', 'eval', 'SAP_Hainich_Fagus-mean_dT30min_prog.csv')
 config.psi_stem_file = os.path.join(root_data_path, 'hainich', 'eval', 'stem_water_pot.csv')
 
-
 root_output_directory = "/Net/Groups/BSI/work_scratch/ppapastefanou/simulations/plant_hydraulics_standalone/2024/hainich"
 scenario_name = "broad_cluster_big"
 config.parameter_input_file_list = os.path.join(root_output_directory, scenario_name, 'input', 'Hainich_parameters.csv')

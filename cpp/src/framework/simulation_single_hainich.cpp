@@ -27,6 +27,11 @@ void Simulation_Single_Hainich::Init_input(std::string forcing_file,
 }
 
 
+void Simulation_Single_Hainich::Init_parameters(Parameters params) {
+    parameters = std::make_unique<Parameters>(std::move(params));
+}
+
+
 void Simulation_Single_Hainich::Set_water_pot_initials(double psi_leaf, double psi_stem) {
 
     model = std::make_unique<Model>(*parameters, *input);
@@ -40,8 +45,6 @@ void Simulation_Single_Hainich::Run(DateTime timestart, DateTime timeend) {
     sap_series->GenerateModelObsIndexes(timestart, timeend, parameters->dts);
     psi_stem_series->GenerateModelObsIndexes(timestart, timeend, parameters->dts);
 
-    timestart.print();
-    timeend.print();
 
     model->Run(timestart,timeend);
     analysis = std::make_unique<AnalysisHainich>(model.get(), *parameters);
@@ -71,4 +74,6 @@ AnalysisHainich Simulation_Single_Hainich::Get_analysis() {
 void Simulation_Single_Hainich::Init_parameters_default() {
     parameters = std::make_unique<Parameters>();
 }
+
+
 

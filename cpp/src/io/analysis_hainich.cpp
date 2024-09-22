@@ -27,7 +27,6 @@ void AnalysisHainich::CompareSapwood(const TimeSeries &time_series) {
     std::vector<double> G_mod_arr;
     std::vector<double> J_obs_arr;
 
-
     int i = 0;
     for (auto index : time_series.model_datetime_indexes) {
         double J_obs = time_series.data[i][0];

@@ -144,7 +144,7 @@ public:
 
     /// Input parameters
     /// Length of one timestep in [s]
-    double input_steplen = 1800.0;
+    double dts_input = 1800.0;
 
     // According to the forcing input [W m-2]
     double sw_rad_max = 1040;
@@ -169,7 +169,7 @@ public:
     // Parameter describing at which levels xylem damage is permanent
     double permanent_xylem_fraction_threshold = 0.88;
 
-    // Analysis_Swiss paramters [-]
+    // Analysis_Swiss parameter [-]
     double sigma_log_likelyhood = 1.0;
 
 
@@ -190,7 +190,7 @@ public:
 
     Conductivity_fraction_module_type  conductivity_fraction_type = Conductivity_fraction_module_type::Weibull;
 
-    // Data stored in each soil layer
+    // Soil layers containing soil properties
     std::vector<Soil_layer> soil_layers;
 
 private:

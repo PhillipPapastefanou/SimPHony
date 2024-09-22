@@ -25,7 +25,6 @@ config.input_path =   os.path.join(root_output_directory, scenario_name, 'input'
 config.nsims = 50000*128
 config.nbest = 200
 
-
 sys.path.append(config.build_path)
 from contrib.parallel_setup_hainich_with_LHS import ParallelSetupHainichWithLHS
 from mpi4py import MPI

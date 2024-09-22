@@ -14,7 +14,7 @@ sys.path.append(cpp_lib_path)
 
 from hydro_standalone import Simulation_Multi_Hainich
 from hydro_standalone import DateTime
-from contrib.ParametersList import ParametersList
+from contrib.parameter_parser import Parameter_Parser
 
 # Specifying forcing and evalution data paths
 forcing_file = os.path.join(root_data_path, 'hainich', 'input', 'Meteo_Hainich_dT30min_forcing_PHS.csv')

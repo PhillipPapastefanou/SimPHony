@@ -48,7 +48,6 @@ void Parameters::Set_derived() {
 //    for (int i = 0; i < n_soil_layers; ++i) {
 //        soil_layers[i].k_soil_sat = k_soil_sats[i];
 //    }
-
     Root_distribution_model root_model(*this);
     // Rooting fraction per laye [-]
     std::vector<double> root_fraction_player = root_model.Get_root_fractions();

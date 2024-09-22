@@ -7,8 +7,8 @@ import subprocess
 
 
 import sys
-sys.path.append('../../cpp/cmake-build-release')
-sys.path.append('../../py')
+sys.path.append('../../../cpp/cmake-build-release')
+sys.path.append('../..')
 
 from src.Parameters import Parameters
 

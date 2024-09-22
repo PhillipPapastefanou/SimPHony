@@ -20,8 +20,7 @@ int main(int argc, char* argv[]) {
     // Swiss_Single_Test single_test;
 
     Hainich_Single_Test test;
-    std::cout << " aaaa  ";
 
-//    Multi_Test multi_test;
-//    std::cout << " bbbb  ";
+    //Multi_Test multi_test;
+
 }

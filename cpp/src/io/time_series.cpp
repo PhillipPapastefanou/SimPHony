@@ -43,6 +43,8 @@ void TimeSeries::GenerateModelObsIndexes(DateTime begin, DateTime end, long time
     int i = 0;
     DateTime running_dt_index = begin;
     std::vector<std::vector<float>> slice;
+    // Clear the stored datetimes
+    model_datetime_indexes.resize(0);
 
     for (DateTime dt: input.dates) {
 

@@ -18,8 +18,8 @@ from hydro_standalone import DateTime
 from src.Parameters import Parameters
 from src.Parameters import SoilLayer
 from src.Parameters import Soil_Water_Model_Type
-from src.Parameters import CreateSoilParameters
-from contrib.ParametersList import ParametersList
+from src.Parameters import Convert_Soil_Parameters
+from contrib.parameter_parser import Parameter_Parser
 
 from appl.Hainich.auxil.output_df import create_output_df
 from appl.Hainich.auxil.output_plotter import std_plot
@@ -55,7 +55,7 @@ layer.k_soil_sat = 1.0 / 100.0 / 86400.0
 layer.psi_soil_sat = -0.5  * 1
 #layer.camp_b  = 10.4
 layer.theta_s = 0.48
-layer.theta_r = 0.10
+layer.theta_r = 0.05
 layer.pore_size_ind = 0.6
 
 
@@ -69,20 +69,20 @@ soil_layers[0].depth = 0.08
 soil_layers[1].depth = 0.16
 soil_layers[2].depth = 0.32
 
-CreateSoilParameters(soil_layers=soil_layers, parameters=params)
+Convert_Soil_Parameters(soil_layers=soil_layers, parameters=params)
 
 params.canopy_height = 31
-params.k_xylem_sat = 15 * 1000/18
+params.k_xylem_sat = 5 * 1000/18
 params.stem_hydraulic_capacitance = 150 * 1000/18
-params.leaf_hydraulic_capacitance = 0.4 * 1000/18
+params.leaf_hydraulic_capacitance = 0.01 * 1000/18
 params.g0 = 0.03
 params.g1 = 1.5
-params.leaf_area_index = 5
+params.leaf_area_index = 5.0
 params.huber_value = 1.0/3000.0
-params.tree_density = 150 / 10000
-params.anet_max = 3.5
+params.tree_density = 64 / 10000
+params.anet_max = 2.5
 params.leaf_area_index = 4.8
-params.psi_leaf_50_close = -2.1
+params.psi_leaf_50_close = -2.2
 
 # # Convert from micromole H2O m-2 s-1 to mol H2O m-2 s-1
 # df_sap_obs['J'] = df_sap_obs['J']/1E3
@@ -92,7 +92,7 @@ params.psi_leaf_50_close = -2.1
 # df_sap_obs['J'] *= 1.0/params.huber_value
 
 # Generate a parameterlist...
-plist = ParametersList()
+plist = Parameter_Parser()
 plist.Add(params)
 parameters_list = "HainichParameterList1.csv"
 # ... and write the one parameter setting.
@@ -132,3 +132,5 @@ eval_plot_24(df, df_sap=df_sap_obs, df_psi_stem=df_psi_stem_obs, analysis=an , p
 
 print("Average Transpiration per day per tree with 80 m^2 crownwater: " +
       str(df['T'].mean() * 18/1000.0 * 3600.0 *24.0  * params.leaf_area_index * 80) + " liters of water.")
+
+print(an.Get_Rmse_psi_stem())

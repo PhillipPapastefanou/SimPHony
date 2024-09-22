@@ -7,8 +7,8 @@ from src.Parameters import Parameters
 from src.Parameters import SoilLayer
 from src.Parameters import Soil_Water_Model_Type
 from src.Parameters import Stem_Flow_Model_Type
-from contrib.ParametersList import ParametersList
-from src.Parameters import CreateSoilParameters
+from contrib.parameter_parser import Parameter_Parser
+from src.Parameters import Convert_Soil_Parameters
 from scipy.stats import qmc
 
 def rescale(x, min, max):
@@ -115,7 +115,7 @@ def Calculate_LHS_per_process(rank, ncombs, path):
     tree_densities    = rescale(slicer.get(), min = (64-32)/10000, max = (64)/10000)
     sel_cols.append("tree_densities")
 
-    plist = ParametersList()
+    plist = Parameter_Parser()
     for i in range(ncombs):
         params = Parameters()
 
@@ -133,7 +133,7 @@ def Calculate_LHS_per_process(rank, ncombs, path):
         soil_layers[1].depth = 0.16
         soil_layers[2].depth = 0.32
 
-        CreateSoilParameters(soil_layers=soil_layers, parameters=params)
+        Convert_Soil_Parameters(soil_layers=soil_layers, parameters=params)
 
         params.stem_hydraulic_capacitance = cstem_s[i]
         params.leaf_area_index = lai_s[i]

@@ -12,7 +12,7 @@ sys.path.append('/Net/Groups/BSI/work_scratch/ppapastefanou/src/PlantHydraulicSt
 from src.Parameters import Parameters
 from src.Parameters import Soil_Water_Model_Type
 from src.Parameters import Stem_Flow_Model_Type
-from contrib.ParametersList import ParametersList
+from contrib.parameter_parser import Parameter_Parser
 from scipy.stats import qmc
 
 def rescale(x, min, max):
@@ -133,7 +133,7 @@ sel_cols.append("psi_88_xylem")
 root_area_indexes    = rescale(slicer.get(), min = 1, max = 15)
 sel_cols.append("root_area_indexes")
 
-plist = ParametersList()
+plist = Parameter_Parser()
 for i in range(ncombs):
     params = Parameters()
 

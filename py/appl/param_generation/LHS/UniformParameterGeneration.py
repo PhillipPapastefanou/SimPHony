@@ -14,7 +14,7 @@ sys.path.append(rtpath)
 from src.Parameters import Parameters
 from src.Parameters import Soil_Water_Model_Type
 from src.Parameters import Stem_Flow_Model_Type
-from contrib.ParametersList import ParametersList
+from contrib.parameter_parser import Parameter_Parser
 
 def rescale(x, min, max):
     return min + x * (max - min)
@@ -75,7 +75,7 @@ sel_cols.append("k_soil_sat")
 tree_dens_s    = rescale(sample[9], min = 100, max = 200)
 sel_cols.append("tree_density")
 
-plist = ParametersList()
+plist = Parameter_Parser()
 for i in range(ncombs):
     params = Parameters()
     params.huber_value = 1.0 / 1500.0

@@ -15,11 +15,11 @@ sys.path.append(cpp_lib_path)
 # Importing local libraries and paths
 from hydro_standalone import Simulation_Single_Hainich
 from hydro_standalone import DateTime
+
 from src.Parameters import Parameters
 from src.Parameters import SoilLayer
 from src.Parameters import Soil_Water_Model_Type
 from src.Parameters import Convert_Soil_Parameters
-from contrib.parameter_parser import Parameter_Parser
 
 from appl.Hainich.auxil.output_df import create_output_df
 from appl.Hainich.auxil.output_plotter import std_plot
@@ -42,39 +42,21 @@ df_psi_stem_obs['psi_stem_obs'] = df_psi_stem_obs['FAG']
 # ------------------------------------------------------
 # Parameter setup
 # ------------------------------------------------------
+
 # Create parameter setup
 params = Parameters()
 
 # Define water retention curve model
 params.soil_water_model_type = Soil_Water_Model_Type.VanGenuchten.name
 
-params.anet_max = 2.78 * 0.7
-params.sw_rad_max = 972.935
-params.root_area_index = 11.150282
-params.canopy_height = 31
-#params.stem_flow_type =
-params.stem_hydraulic_capacitance = 8531.092132 * 1
-params.k_xylem_sat = 834.700738 * 0.1
-params.huber_value = 0.000325 * 0.8
-params.psi50_xylem = -3.579055
-params.psi88_xylem = -4.498665
-params.leaf_hydraulic_capacitance = 0.129361  *5.0
-params.leaf_area_index = 5.812166
-params.psi_leaf_50_close = -2.40
-params.d_50_close = 3.5030428
-params.g0 = 0.015116*1 * 1.5
-params.g1 = 1.303983*4
-params.jackson_root_beta = 0.935248
-params.tree_density = 0.005412*1.5
-
 nsoil_layers = 3
 layer = SoilLayer()
-layer.k_soil_sat = 3.267113e-07 * 1.0 * 10
-layer.psi_soil_sat = -0.02828579 * 12
+layer.k_soil_sat = 1.0 / 100.0 / 86400.0
+layer.psi_soil_sat = -0.5  * 1
 #layer.camp_b  = 10.4
-layer.theta_s = 0.49257
-layer.theta_r = 0.059184 * 1.8
-layer.pore_size_ind = 0.558836 * 0.6
+layer.theta_s = 0.48
+layer.theta_r = 0.05
+layer.pore_size_ind = 0.6
 
 
 # Copy the soil layer and assume all layers have the same properties...
@@ -89,20 +71,20 @@ soil_layers[2].depth = 0.32
 
 Convert_Soil_Parameters(soil_layers=soil_layers, parameters=params)
 
+params.canopy_height = 31
+params.k_xylem_sat = 5 * 1000/18
+params.stem_hydraulic_capacitance = 150 * 1000/18
+params.leaf_hydraulic_capacitance = 0.01 * 1000/18
+params.g0 = 0.03
+params.g1 = 1.5
+params.leaf_area_index = 5.0
+params.huber_value = 1.0/3000.0
+params.tree_density = 64 / 10000
+params.anet_max = 2.5
+params.leaf_area_index = 4.8
+params.psi_leaf_50_close = -2.2
 
-
-# # Convert from micromole H2O m-2 s-1 to mol H2O m-2 s-1
-# df_sap_obs['J'] = df_sap_obs['J']/1E3
-# # Convert the observed sapflow to math the modelled
-# df_sap_obs['J'] *= params.leaf_area_index
-# df_sap_obs['J'] *= params.tree_density
-# df_sap_obs['J'] *= 1.0/params.huber_value
-# Generate a parameterlist...
-plist = Parameter_Parser()
-plist.Add(params)
-parameters_list = "HainichParameterList1.csv"
-# ... and write the one parameter setting.
-plist.Write_Full_Parameter_File(parameters_list)
+cparameters = params.Create_CParameters(soil_layers=soil_layers)
 
 # ----------------------------------------------------------------
 # PHS model simulation
@@ -110,9 +92,9 @@ plist.Write_Full_Parameter_File(parameters_list)
 # Set up the PHS simulation
 # read in the parameter file that we just created
 sim = Simulation_Single_Hainich()
-sim.Init_parameters_fn_single(parameters_list, 0)
+sim.Init_parameters(cparameters)
 sim.Init_input(forcing_file, sapflux_file, psi_stem_file)
-sim.Set_water_pot_initials(-1.0, -0.2)
+sim.Set_water_pot_initials(-1.0, -0.1)
 
 # Specify Start and End of the Simulation
 format = "%Y-%m-%d %H:%M:%S"
@@ -132,10 +114,10 @@ an = sim.Get_analysis()
 df = create_output_df(output, date_start_str)
 
 # Create standard plots
-std_plot(df, '2023-07-09', '2023-07-27', "out/std_out.png" )
-std_plot(df, '2023-07-01', '2023-09-01', "out/std_out_all.png" )
-eval_plot(df, df_sap=df_sap_obs, df_psi_stem=df_psi_stem_obs, analysis=an , path="out/eval_out.png")
-eval_plot_24(df, df_sap=df_sap_obs, df_psi_stem=df_psi_stem_obs, analysis=an , path="out/eval_out_24.png")
+std_plot(df, '2023-07-09', '2023-07-27', "plt/std_out.png" )
+eval_plot(df, df_sap=df_sap_obs, df_psi_stem=df_psi_stem_obs, analysis=an , path="plt/eval_out.png")
+eval_plot_24(df, df_sap=df_sap_obs, df_psi_stem=df_psi_stem_obs, analysis=an , path="plt/eval_out_24.png")
 
 print("Average Transpiration per day per tree with 80 m^2 crownwater: " +
-      str(df['T'].mean() * 18/1000.0 * 3600.0 *24.0  * params.leaf_area_index * 80) + " liters of water.")
+      str(df['T'].mean() * 18/1000.0 * 3600.0 *24.0 * params.leaf_area_index * 80) + " liters of water.")
+print(an.Get_Rmse_psi_stem())
