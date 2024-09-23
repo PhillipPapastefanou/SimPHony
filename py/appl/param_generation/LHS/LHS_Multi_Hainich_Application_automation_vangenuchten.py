@@ -34,7 +34,7 @@ def Calculate_LHS_per_process(rank, ncombs, path):
     KG_TO_MOL = 1000.0/18.0
 
     seed   = 12345 * rank + 1321
-    sampler = qmc.LatinHypercube(d = 24, seed= seed)
+    sampler = qmc.LatinHypercube(d = 25, seed= seed)
     sample = sampler.random(n = ncombs)
     sample = sample.T
 
@@ -45,11 +45,11 @@ def Calculate_LHS_per_process(rank, ncombs, path):
     # Setting up soil layers
     nsoil_layers = 3
 
-    k_soil_sats_logs = rescale(slicer.get(), min=-7, max = -6)
-    psi_soil_sats= rescale(slicer.get(), min=-0.0005, max = -0.002)
-    theta_s = rescale(slicer.get(), min=0.47, max = 0.5)
-    theta_r = rescale(slicer.get(), min=0.07, max = 0.11)
-    pore_size_ind = rescale(slicer.get(), min=0.43, max = 0.52)
+    k_soil_sats_logs = rescale(slicer.get(), min=-8, max = -6.5)
+    psi_soil_sats= rescale(slicer.get(), min=-0.0001, max = -0.002)
+    theta_s = rescale(slicer.get(), min=0.47, max = 0.55)
+    theta_r = rescale(slicer.get(), min=0.02, max = 0.1)
+    pore_size_ind = rescale(slicer.get(), min=0.40, max = 0.60)
 
     soil_collection = []
     for i in range(ncombs):
@@ -69,29 +69,29 @@ def Calculate_LHS_per_process(rank, ncombs, path):
     sel_cols.append("psi_01")
 
 
-    g0_s            = rescale(slicer.get(), min=0.005, max = 0.02)
+    g0_s            = rescale(slicer.get(), min=0.001, max = 0.02)
     sel_cols.append("g0")
-    g1_s            = rescale(slicer.get(), min = 1.25, max = 5.0)
+    g1_s            = rescale(slicer.get(), min = 1.25, max = 5.5)
     sel_cols.append("g1")
 
-    anet_max    = rescale(slicer.get(), min = 0.5, max = 4.0)
+    anet_max    = rescale(slicer.get(), min = 0.5, max = 3.5)
     sel_cols.append("anet_max")
 
-    k_xylems_sats   = rescale(slicer.get(), min=35, max=65)
-    #k_xylems_sats *= KG_TO_MOL
+    k_xylems_sats   = rescale(slicer.get(), min=0.5, max=10.0)
+    k_xylems_sats *= KG_TO_MOL
     sel_cols.append("k_xylem_sat")
 
     huber_values    =  rescale(slicer.get(), min = 0.0003, max= 0.0004)
     sel_cols.append("huber_value")
 
-    cstem_s         = rescale(slicer.get(), min=50, max=300)
+    cstem_s         = rescale(slicer.get(), min=30, max=300)
     cstem_s *= KG_TO_MOL
     sel_cols.append("kappa_stem")
 
     lai_s           = rescale(slicer.get(), min= 4.6, max = 5.0)
     sel_cols.append("lai")
 
-    cleaf_s_log        = rescale(slicer.get(), min=np.log10(0.001), max=np.log10(0.02))
+    cleaf_s_log        = rescale(slicer.get(), min=np.log10(0.001), max=np.log10(0.1))
     sel_cols.append("kappa_leaf")
 
     d_50close_s     = rescale(slicer.get(), min = 1.0, max = 4.0)
@@ -114,6 +114,9 @@ def Calculate_LHS_per_process(rank, ncombs, path):
 
     tree_densities    = rescale(slicer.get(), min = (64-32)/10000, max = (64)/10000)
     sel_cols.append("tree_densities")
+
+    g_barks    = rescale(slicer.get(), min = 0.0, max = 0.02)
+    sel_cols.append("g_barks")
 
     plist = Parameter_Parser()
     for i in range(ncombs):
@@ -138,6 +141,7 @@ def Calculate_LHS_per_process(rank, ncombs, path):
         params.stem_hydraulic_capacitance = cstem_s[i]
         params.leaf_area_index = lai_s[i]
         params.g0 = g0_s[i]
+        params.g_bark = g_barks[i]
         params.g1 = g1_s[i]
         params.anet_max = anet_max[i]
 

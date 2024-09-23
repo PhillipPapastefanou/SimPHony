@@ -145,7 +145,7 @@ class ParallelSetupHainichWithLHS:
 
         df_c = pd.concat([df_input, df_rmse], axis=1)
 
-        max_rmse_J = 0.000347
+        max_rmse_J = 0.000150
         max_rmse_psi_stem = 0.0668
         df_c['rmse_com_avg'] = (df_c['rmse_psi_stem'] / max_rmse_psi_stem + df_c['rmse_J'] / max_rmse_J) / 2.0;
 

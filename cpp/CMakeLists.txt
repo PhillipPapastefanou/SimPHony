@@ -4,11 +4,25 @@ cmake_minimum_required(VERSION 3.4)
 
 set(USE_PYBIND11 ON)
 
-set(CMAKE_PREFIX_PATH "/Net/Groups/BSI/work_scratch/ppapastefanou/envs/forcing_gen/lib/python3.9/site-packages/pybind11")
+cmake_host_system_information(RESULT _host_name QUERY HOSTNAME)
+
+string(FIND ${_host_name} "*.bgc-jena.mpg" res)
+if (res)
+    message("You appear to be on the cluster. Setting cluster env variables.")
+    set(HOSTSPEC "cluster_mpi_bgc")
+else()
+    message("You appear to be on a local machine. Prepare to set the env variables yourself.")
+    set(HOSTSPEC "local")
+endif()
+
+#set(CMAKE_PREFIX_PATH "/Net/Groups/BSI/work_scratch/ppapastefanou/envs/forcing_gen/lib/python3.9/site-packages/pybind11")
 #set(CMAKE_PREFIX_PATH "/Net/Groups/BSI/work_scratch/ppapastefanou/envs/forcing_gen/lib/python3.9/site-packages/mpi4py")
 
-#set(PYTHON_EXECUTABLE /Net/Groups/BSI/work_scratch/ppapastefanou/envs/phs/bin/python)
-set(PYTHON_EXECUTABLE /Users/pp/anaconda3/envs/PHS-post/bin/python)
+if ("${HOSTSPEC}" STREQUAL "cluster_mpi_bgc")
+    set(PYTHON_EXECUTABLE /Net/Groups/BSI/work_scratch/ppapastefanou/envs/phs/bin/python)
+else()
+    set(PYTHON_EXECUTABLE /Users/pp/anaconda3/envs/PHS-post/bin/python)
+endif()
 
 
 find_package(pybind11 CONFIG REQUIRED)

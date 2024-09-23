@@ -133,7 +133,7 @@ class Parameters:
         # From Medlynn 1.6 - 12
         self.g1 = 1.5
 
-        # Bark conductance (not yet implemented)
+        # Minimum bark conductance
         # Todo add unit
         self.g_bark = 0.0
 

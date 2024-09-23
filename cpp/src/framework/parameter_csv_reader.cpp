@@ -89,6 +89,9 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
         parse_value(params.g1,  "g1");
         parse_value(params.anet_max,  "anet_max");
         parse_value(params.sw_rad_max, "sw_rad_max");
+        parse_value(params.g_bark, "g_bark");
+
+    
 
         val = "soil_depths";
         pos = get_position(val);
