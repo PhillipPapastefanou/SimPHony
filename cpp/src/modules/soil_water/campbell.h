@@ -8,7 +8,7 @@
 class Campbell : public Soil_water_module {
 public:
     Campbell(const Parameters &parameters, const Input &input);
-    ~Campbell();
+    ~Campbell() override;
 
     void CalculatePsiAndKs() override;
 

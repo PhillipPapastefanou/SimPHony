@@ -10,9 +10,7 @@ Soil_water_module(parameters, input)  {
 
 }
 
-Campbell::~Campbell() noexcept {
-
-}
+Campbell::~Campbell() noexcept = default;
 
 
 void Campbell::CalculatePsiAndKs() {

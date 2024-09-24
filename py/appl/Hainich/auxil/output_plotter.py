@@ -125,16 +125,15 @@ def eval_plot_all(df : pd.DataFrame, df_sap, df_psi_stem, analysis, path):
     plt.tight_layout()
     plt.savefig(f"{path}", dpi=300)
 
-def eval_plot(df : pd.DataFrame, df_sap, df_psi_stem, analysis, path):
+def eval_plot(df : pd.DataFrame, df_sap, df_psi_stem, analysis, path,
+              timebegin, timeend):
     formatter = mdates.DateFormatter('%m-%d %H');
 
-
-    df_slice = df.loc['2023-07-01': '2023-08-01']
-    df_slice2 = df.loc['2023-05-01': '2023-11-01']
-    df_slice2 = df_slice
+    df_slice = df.loc[timebegin: timeend]
+    df_slice2 = df.loc[timebegin: timeend]
 
     df_sap.set_index(df_sap['datetime'], inplace=True)
-    df_sap = df_sap.loc['2023-07-01': '2023-08-01']
+    df_sap = df_sap.loc[timebegin: timeend]
 
     fig = plt.figure(figsize=(10, 10))
 
@@ -193,14 +192,14 @@ def eval_plot(df : pd.DataFrame, df_sap, df_psi_stem, analysis, path):
     plt.tight_layout()
     plt.savefig(f"{path}", dpi=300)
 
-def eval_plot_24(df : pd.DataFrame, df_sap, df_psi_stem, analysis, path):
+def eval_plot_24(df : pd.DataFrame, df_sap, df_psi_stem, analysis, path, timebegin, timeend):
     formatter = mdates.DateFormatter('%m-%d %H');
 
-    df_slice = df.loc['2023-07-09': '2023-07-27']
-    df_slice2 = df.loc['2023-06-01': '2023-08-01']
+    df_slice = df.loc[timebegin: timeend]
+    df_slice2 = df.loc[timebegin: timeend]
 
     df_sap.set_index(df_sap['datetime'], inplace=True)
-    df_sap = df_sap.loc['2023-06-01': '2023-08-01']
+    df_sap = df_sap.loc[timebegin: timeend]
     fig = plt.figure(figsize=(10, 10))
 
     ax = fig.add_subplot(2, 2, 1)

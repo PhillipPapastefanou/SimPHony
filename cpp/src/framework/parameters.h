@@ -85,6 +85,7 @@ public:
     // Viscosity of the leaf to sap flow [1]
     // Todo: Check if kinematic or dynamic viscosity
      double eta_LS = 1.0; // 1.0 = Water
+
     // Stem hydraulic capacity [mol m-3 MPa-1]
     // From Meinzer et al. 2011 Figure 13.2
     // Range: 10 - 500 kg H2O m-3 MPa-1
@@ -92,23 +93,30 @@ public:
     double stem_hydraulic_capacitance_max = 100 * constants.KG_H2O_To_Mol;
 
     // Xylem saturated hydraulic conductivity [mol m-1 s-1 MPa-1]
-    // 0.5 to 10 kg m-1 s-1 MPa-1
+    // Typical range between 0.5 and 10 kg m-1 s-1 MPa-1 (Xu et al. 2016)
     double k_xylem_sat = 1.0 * constants.KG_H2O_To_Mol;
     // Huber value [m2 m-2] equals 1/klatosa (leaf area to sapwood area)
-    // From sperry et al 2016
+    // Typical ranges cover 1/20000 to 1/2000
     double huber_value = 1.0/3600.0;
 
     // Xylem water potential at loss of 50% conductivity [MPa]
     double psi50_xylem = -3.5;
     // Xylem water potential at loss of 88% conductivity [MPa]
     double psi88_xylem = -6.0;
+    // functional shape of xylem loss of conducitivity function
+    // Weibull is the more accept throughout the literature and is asymmetrical
+    // Logit is symmetrical and can be solved analyyically when evaluated in the Kirchhoff transition
+    Conductivity_fraction_module_type  conductivity_fraction_type = Conductivity_fraction_module_type::Weibull;
 
     // Leaf hydraulic conductance [mol H2O m-2 MPa-1]
     // range 0.2 - 1.2 from Blackmann and Brodribb 2011
+    // about 0.05 (Xu et al. 2016)
     double leaf_hydraulic_capacitance = 1.0;
+
     // Leaf area index [m2 m-2]
     // Data from the swiss site (half hemispherical)
     double leaf_area_index = 4.8;
+
     // Leaf water potential at which plants close stomates to 50 % [MPa]
     double psi_leaf_50_close = -2.1;
     // Slope parameter of stomatal closure
@@ -126,13 +134,14 @@ public:
     double g1 = 1.5;
 
     // Bark condutance [mol m-2 s-1]
+    // We have to check how the diameter and the stem surface area will influence that
     double g_bark = 0.0;
 
     // Soil water module type [enum]
-    // Todo Fix the different types
-    Soil_water_module_type soil_water_type = Soil_water_module_type::Saxton06;
+    Soil_water_module_type soil_water_type = Soil_water_module_type::VanGenuchten;
 
     // Index of current soil profile index if multiple water contents per sites are available
+    // Only relevant for
     int soil_profile_index = 0;
 
     // Jackson rooting parameter [-]
@@ -142,9 +151,8 @@ public:
     // Should be 1.0 for runs where the given wcont is known precisely
     double theta_emp_multiplier = 1.0;
 
-    /// Input parameters
-    /// Length of one timestep in [s]
-    double dts_input = 1800.0;
+
+
 
     // According to the forcing input [W m-2]
     double sw_rad_max = 1040;
@@ -159,7 +167,6 @@ public:
     double tree_density = 1.0;
 
     // Auxiliary parameters
-
 
     // Number of stem segments between psi_L und psi_S
     double n_stem_segments = 10;
@@ -188,7 +195,9 @@ public:
     //Simulation timestep length [s]
     double dts = 1800.0;
 
-    Conductivity_fraction_module_type  conductivity_fraction_type = Conductivity_fraction_module_type::Weibull;
+    /// Input parameters
+    /// Length of one timestep in [s]
+    double dts_input = 1800.0;
 
     // Soil layers containing soil properties
     std::vector<Soil_layer> soil_layers;

@@ -6,8 +6,8 @@ set(USE_PYBIND11 ON)
 
 cmake_host_system_information(RESULT _host_name QUERY HOSTNAME)
 
-string(FIND ${_host_name} "*.bgc-jena.mpg" res)
-if (res)
+string(FIND ${_host_name} "bgc-jena.mpg" res)
+if (res EQUAL 0)
     message("You appear to be on the cluster. Setting cluster env variables.")
     set(HOSTSPEC "cluster_mpi_bgc")
 else()
@@ -15,12 +15,10 @@ else()
     set(HOSTSPEC "local")
 endif()
 
-#set(CMAKE_PREFIX_PATH "/Net/Groups/BSI/work_scratch/ppapastefanou/envs/forcing_gen/lib/python3.9/site-packages/pybind11")
-#set(CMAKE_PREFIX_PATH "/Net/Groups/BSI/work_scratch/ppapastefanou/envs/forcing_gen/lib/python3.9/site-packages/mpi4py")
-
 if ("${HOSTSPEC}" STREQUAL "cluster_mpi_bgc")
     set(PYTHON_EXECUTABLE /Net/Groups/BSI/work_scratch/ppapastefanou/envs/phs/bin/python)
 else()
+    # You prob have to adapt this path to match your environemnt
     set(PYTHON_EXECUTABLE /Users/pp/anaconda3/envs/PHS-post/bin/python)
 endif()
 

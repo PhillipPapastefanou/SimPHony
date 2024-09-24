@@ -31,15 +31,8 @@ forcing_file = os.path.join(root_data_path, 'hainich', 'input', 'Meteo_Hainich_d
 sapflux_file = os.path.join(root_data_path, 'hainich', 'eval', 'SAP_Hainich_Fagus-mean_dT30min_prog.csv')
 psi_stem_file = os.path.join(root_data_path, 'hainich', 'eval', 'stem_water_pot.csv')
 
-root_output_directory = "/Users/pp/data/Simulations/A08_Hydraulics_standalone/hainich"
-scenario_name = "broad_local_anet_fix"
-input_path = os.path.join(root_output_directory,scenario_name,'input')
-output_path = os.path.join(root_output_directory,scenario_name,'output')
-post_path = os.path.join(root_output_directory,scenario_name,'post')
 
-parameters_list = os.path.join(input_path, 'parameters_best_both.csv')
-#parameters_list = os.path.join(input_path, 'parameters_best_psi_stem.csv')
-#parameters_list = os.path.join(input_path, 'parameters_best_J.csv')
+
 
 # Reading sapflow and psi_stem data
 df_sap_obs = pd.read_csv(sapflux_file)
@@ -53,17 +46,42 @@ df_psi_stem_obs['psi_stem_obs'] = df_psi_stem_obs['FAG']
 # Parameter setup
 # ------------------------------------------------------
 
-# Selectd a paramter id between 0 and 1000
-
-parameter_id = 4
+# # Convert from micromole H2O m-2 s-1 to mol H2O m-2 s-1
+# df_sap_obs['J'] = df_sap_obs['J']/1E3
+# # Convert the observed sapflow to math the modelled
+# df_sap_obs['J'] *= params.leaf_area_index
+# df_sap_obs['J'] *= params.tree_density
+# df_sap_obs['J'] *= 1.0/params.huber_value
 
 # ----------------------------------------------------------------
 # PHS model simulation
 # ----------------------------------------------------------------
+file = '/Users/pp/data/Simulations/A08_Hydraulics_standalone/hainich/broad_vanGenuch_jul_diff_err/post/df_both_sel_ordered.csv'
+param_parser = Parameter_Parser()
+param_parser.Read_Parameter_List(file)
+params = param_parser.parameters_list[0]
+soil_layers = param_parser.soil_layers_list[0]
+
+for layer in soil_layers:
+    layer.theta_s = 5.71719793e-01
+    layer.theta_r = 2.02646531e-02
+    layer.pore_size_ind = 6.62215243e-01
+    layer.k_soil_sat =5.76303310e-08
+
+params.k_xylem_sat = 3.71757856e+01 * 2
+params.tree_density = 3.90824426e-03 * 1.5
+params.leaf_hydraulic_capacitance =  1.27758650e-01
+params.g_bark = 1.81045589e-02
+params.g0 = 0.015
+
+cparameters = params.Create_CParameters(soil_layers=soil_layers)
+
+
 # Set up the PHS simulation
 # read in the parameter file that we just created
 sim = Simulation_Single_Hainich()
-sim.Init_parameters_fn_single(parameters_list, parameter_id)
+#sim.Init_parameters_fn_single(parameters_list, parameter_id)
+sim.Init_parameters(cparameters)
 sim.Init_input(forcing_file, sapflux_file, psi_stem_file)
 sim.Set_water_pot_initials(-1.0, -0.2)
 
@@ -85,8 +103,10 @@ an = sim.Get_analysis()
 df = create_output_df(output, date_start_str)
 
 # Create standard plots
-std_plot(df, '2023-07-01', '2023-09-01', f"{post_path}/std_out_all.png" )
-std_plot(df, '2023-07-09', '2023-07-27', f"{post_path}/std_out.png" )
-eval_plot(df, df_sap=df_sap_obs, df_psi_stem=df_psi_stem_obs, analysis=an , path=f"{post_path}/eval_out.png")
-eval_plot_24(df, df_sap=df_sap_obs, df_psi_stem=df_psi_stem_obs, analysis=an , path=f"{post_path}/eval_out_24.png")
+std_plot(df, '2023-07-01', '2023-09-01', f"plt/std_out_all.png" )
+std_plot(df, '2023-07-09', '2023-07-27', f"plt/std_out.png" )
+eval_plot(df, df_sap=df_sap_obs, df_psi_stem=df_psi_stem_obs, analysis=an , path=f"plt/eval_out.png",
+          timebegin= '2023-07-09', timeend = '2023-07-27')
+eval_plot_24(df, df_sap=df_sap_obs, df_psi_stem=df_psi_stem_obs, analysis=an ,
+             path=f"plt/eval_out_24.png", timebegin= '2023-07-09', timeend = '2023-07-27')
 

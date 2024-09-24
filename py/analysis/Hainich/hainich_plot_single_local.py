@@ -1,0 +1,92 @@
+# Importing baseline libraries
+import sys
+import os
+import numpy as np
+import pandas as pd
+import datetime
+import copy
+
+# Specify paths so that the PHS model can be imported
+ROOT_LIBRARY_PATH = '/Users/pp/Documents/Repos/plant_hydro_standalone'
+root_data_path = os.path.join(ROOT_LIBRARY_PATH, 'data')
+cpp_lib_path = os.path.join(ROOT_LIBRARY_PATH, 'cpp', 'cmake-build-release')
+sys.path.append(cpp_lib_path)
+
+# Importing local libraries and paths
+from hydro_standalone import Simulation_Single_Hainich
+from hydro_standalone import DateTime
+from src.Parameters import Parameters
+from src.Parameters import SoilLayer
+from src.Parameters import Soil_Water_Model_Type
+from src.Parameters import Convert_Soil_Parameters
+from contrib.parameter_parser import Parameter_Parser
+
+from appl.Hainich.auxil.output_df import create_output_df
+from appl.Hainich.auxil.output_plotter import std_plot
+from appl.Hainich.auxil.output_plotter import eval_plot
+from appl.Hainich.auxil.output_plotter import eval_plot_24
+
+# Specifying forcing and evalution data paths
+forcing_file = os.path.join(root_data_path, 'hainich', 'input', 'Meteo_Hainich_dT30min_forcing_PHS.csv')
+sapflux_file = os.path.join(root_data_path, 'hainich', 'eval', 'SAP_Hainich_Fagus-mean_dT30min_prog.csv')
+psi_stem_file = os.path.join(root_data_path, 'hainich', 'eval', 'stem_water_pot.csv')
+
+root_output_directory = "/Users/pp/data/Simulations/A08_Hydraulics_standalone/hainich"
+scenario_name = "broad_vg_gmin"
+input_path = os.path.join(root_output_directory,scenario_name,'input')
+output_path = os.path.join(root_output_directory,scenario_name,'output')
+post_path = os.path.join(root_output_directory,scenario_name,'post')
+
+parameters_list = os.path.join(post_path, 'df_both_sel_ordered.csv')
+
+# Reading sapflow and psi_stem data
+df_sap_obs = pd.read_csv(sapflux_file)
+df_sap_obs['datetime']  = pd.to_datetime(df_sap_obs['datetime'])
+df_psi_stem_obs = pd.read_csv(psi_stem_file)
+df_psi_stem_obs['time']  = pd.to_datetime(df_psi_stem_obs['time'])
+# Convert from kg H2O to mol H2O
+df_psi_stem_obs['psi_stem_obs'] = df_psi_stem_obs['FAG']
+
+# ------------------------------------------------------
+# Parameter setup
+# ------------------------------------------------------
+
+# Selectd a paramter id between 0 and 1000
+
+parameter_id = 500
+
+# ----------------------------------------------------------------
+# PHS model simulation
+# ----------------------------------------------------------------
+# Set up the PHS simulation
+# read in the parameter file that we just created
+sim = Simulation_Single_Hainich()
+sim.Init_parameters_fn_single(parameters_list, parameter_id)
+sim.Init_input(forcing_file, sapflux_file, psi_stem_file)
+sim.Set_water_pot_initials(-1.0, -0.2)
+
+# Specify Start and End of the Simulation
+cal_format = "%Y-%m-%d %H:%M:%S"
+date_start_str = "2023-04-01 00:00:00"
+date_end_str = "2023-11-01 00:00:00"
+timebegin = DateTime(date_start_str, cal_format)
+timeend   = DateTime(date_end_str, cal_format)
+
+# Run the simulation
+sim.Run(timebegin, timeend)
+
+# Get output and analysis data
+output = sim.Get_output()
+an = sim.Get_analysis()
+
+# Create the main output from the analysis
+df = create_output_df(output, date_start_str)
+
+# Create standard plots
+std_plot(df, '2023-07-01', '2023-09-01', f"{post_path}/std_out_all.png" )
+std_plot(df, '2023-07-09', '2023-07-27', f"{post_path}/std_out.png" )
+eval_plot(df, df_sap=df_sap_obs, df_psi_stem=df_psi_stem_obs, analysis=an , path=f"{post_path}/eval_out.png",
+          timebegin= '2023-07-09', timeend = '2023-07-27')
+eval_plot_24(df, df_sap=df_sap_obs, df_psi_stem=df_psi_stem_obs, analysis=an ,
+             path=f"{post_path}/eval_out_24.png", timebegin= '2023-07-09', timeend = '2023-07-27')
+
