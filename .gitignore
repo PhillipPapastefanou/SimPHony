@@ -1,11 +1,13 @@
 cmake-build-release
 cmake-build-debug
+build
+unsort
+appl/unsort
+examples/hainich/plt
+tests/hainich/test
 .idea
 *.log
 *.sh
 !scripts/*.sh
-cpp/build/*
 .DS_Store
 */*/__pycache__
-py/appl/LHS/generator_files
-py/analysis/Hainich/out
