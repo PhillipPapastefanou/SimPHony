@@ -10,7 +10,7 @@ major parameters need to (harmonically) play together to mimic realistic plant w
 To maintain the model's integrity and ensure its continued evolution, this musical tradition must be upheld in future development endeavors.
 
 # Theory
-Fundamendtal equations (to be explained):
+Fundamental equations (to be explained):
 ```math
     \kappa_\mathrm{Leaf}\cdot \frac{d\Psi_{\mathrm{Leaf}}}{dt} - J + T = 0
 ```
@@ -22,7 +22,7 @@ T_\mathrm{bark} = 0
 # Application
 ## Prerequisites 
 Get CMake. Get a cpp compiler and an mpi library. It should at least support the 2017 standard. We recommend clang or intel compiles as the model runs up to 5x slower when compiled with GNU.
-Create a python repository that contains the following packages:
+Create a Python repository that contains the following packages:
 * numpy
 * pandas
 * xarray netcdf
@@ -30,11 +30,11 @@ Create a python repository that contains the following packages:
 * scipy
 * ...
 ## Setup
-Clone this repository and create a build folder in the main direcorty. Navigate to that build directory in the terminal an run:
+Clone this repository and create a build folder in the main direcorty. Navigate to that build directory in the terminal and run:
 ``
-cmake ../.
-``
-Once that build system finished sucessfully simply run 
+cmake ../
+``.
+Once that build system is finished successfully, run 
 ``
 make
 ``.
@@ -42,7 +42,7 @@ This should (amongst other) create two files: A binary/executable called SimPHon
 
 ## Tests
 Before running the examples scripts one shoud make sure that SimPHony has been build sucessfully. Therefore unittests both exist for cpp library and the python scripts. 
-The cpp unittests can either be run by some IDE (integrated development environment, such as Pycharm or VS-code) or directly by executing the binary. The python unittests can also be run via IDE or from the terminal in the main directory:
+The cpp unittests can either be run by some IDE (integrated development environment, such as Pycharm or VS-code) or directly by executing the binary. The Python unittests can also be run via IDE or from the terminal in the main directory:
 ``
 python -m unittest tests/main.py
 ``
