@@ -41,12 +41,19 @@ make
 This should (amongst other) create two files: A binary/executable called SimPHony_tests and a python library ending with `*.so`.
 
 ## Tests
-Before running the examples scripts one shoud make sure that SimPHony has been build sucessfully. Therefore unittests both exist for cpp library and the python scripts. 
+Before running the example scripts one should make sure that SimPHony has been built sucessfully. Therefore unittests both exist for cpp library and the python scripts. 
 The cpp unittests can either be run by some IDE (integrated development environment, such as Pycharm or VS-code) or directly by executing the binary. The Python unittests can also be run via IDE or from the terminal in the main directory:
 ``
 python -m unittest tests/main.py
 ``
-## Examples
+## Usage
+
+For now, each simulated location (for now Hainich and Swiss_cc) that SimPHony can be applied requires specific setups and analysis scripts. Therefore testing/example and application scripts are tailored to the respective location. \\
+SimPHony has a **single** and **multi** application variant:
+* The **single** variant returns all the model states and derived variables per timestep. It also contains analysis output that condenses the model output, by for example calculating the RMSE to observed sapflow. Its intended use is to plot few (~ 100) time series of model outputs. 
+* The **multi** variant only returns the the analysis data. It does NOT return the output of the model to save memory. Its intended use is sensitivity analysis and therefore run tens of thousands of model simulations.  
+
+### Examples
 Examples can be found the example/hainich folder. 
 
 
