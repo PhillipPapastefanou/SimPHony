@@ -1,9 +1,15 @@
 cmake-build-release
 cmake-build-debug
+build
+unsort
+appl/unsort
+examples/hainich/local/plt
+examples/hainich/local/parameter_example.csv
+examples/hainich/local/parameter_example_multi.csv
+tests/hainich/test
 .idea
 *.log
 *.sh
 !scripts/*.sh
-build/*
 .DS_Store
 */*/__pycache__
