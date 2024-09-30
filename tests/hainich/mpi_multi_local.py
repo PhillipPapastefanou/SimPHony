@@ -4,8 +4,7 @@ import os
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 sys.path.append(os.path.join(THIS_DIR, os.pardir, os.pardir))
-from src.contrib.auxil.input_files import Get_SimPHony_build_path
-
+from src.contrib.auxil.files import get_SimPHony_build_path
 
 root_library_path = THIS_DIR
 root_data_path = os.path.join(root_library_path, os.pardir, os.pardir, 'data')
@@ -14,7 +13,7 @@ forcing_file = os.path.join(root_data_path, 'hainich', 'input', 'Meteo_Hainich_d
 sapflux_file = os.path.join(root_data_path, 'hainich', 'eval', 'SAP_Hainich_Fagus-mean_dT30min_prog.csv')
 psi_stem_file = os.path.join(root_data_path, 'hainich', 'eval', 'stem_water_pot.csv')
 
-found_cpp_lib, cpp_bin_path, cpp_lib_path = Get_SimPHony_build_path(THIS_DIR)
+found_cpp_lib, cpp_bin_path, cpp_lib_path = get_SimPHony_build_path()
 sys.path.append(cpp_lib_path)
 
 from src.contrib.config import Config

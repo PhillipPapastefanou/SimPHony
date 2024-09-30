@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
-project(SimPHony)
-
+project(SimPHony VERSION 0.5)
 set(USE_PYBIND11 ON)
-
 cmake_host_system_information(RESULT _host_name QUERY HOSTNAME)
 
 string(FIND ${_host_name} "bgc-jena.mpg" res)
@@ -28,7 +26,7 @@ message(STATUS "Found pybind11 v${pybind11_VERSION}: ${pybind11_INCLUDE_DIRS}")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
+message("Setting up build files for SimPHony version ${PROJECT_VERSION}")
 if(APPLE)
     message("Using Mac")
 elseif (UNIX)
@@ -71,16 +69,3 @@ add_executable(SimPHony_tests ${sources} ${test_sources})
 target_link_libraries(SimPHony_tests GTest::gtest_main)
 gtest_discover_tests(SimPHony_tests)
 
-
-
-
-##add_executable(hydro_standalone_test ${test_sources} ${sources})
-#add_executable(hydro_standalone_test
-#        tests/general/basic_test.h)
-#target_link_libraries(
-#        hydro_standalone_test
-#        GTest::gtest_main
-#)
-#
-#include(GoogleTest)
-#gtest_discover_tests(hydro_standalone_test)

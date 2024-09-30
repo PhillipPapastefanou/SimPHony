@@ -24,7 +24,7 @@ class Test_Multi_Mpi(unittest.TestCase):
 
 
     def test_mpi_hainich_mpi_simulation(self):
-        print("Testing if simulation be executed via MPI", end='')
+        print("Testing if simulation be executed via MPI...", end='')
         command = "mpiexec -n 2 python mpi_multi_local.py"
         process = subprocess.Popen(command.split(), stdout=subprocess.PIPE, cwd = THIS_DIR)
         output, error = process.communicate()

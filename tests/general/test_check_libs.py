@@ -3,7 +3,7 @@ import os
 import glob
 import sys
 import importlib.util
-from src.contrib.auxil.input_files import Get_SimPHony_build_path
+from src.contrib.auxil.files import get_SimPHony_build_path
 from src.contrib.auxil.messaging import print_failure, print_sucess
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -24,7 +24,7 @@ class Test_General_Setup(unittest.TestCase):
     def test_check_SimPHony_lib(self):
 
         print("Checking for SimPHony build...", end ='')
-        found_lib, lib_path, lib_folder = Get_SimPHony_build_path(THIS_DIR)
+        found_lib, lib_path, lib_folder = get_SimPHony_build_path()
 
         if found_lib:
             print_sucess("Found!")

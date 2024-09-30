@@ -7,7 +7,7 @@ import pandas as pd
 import datetime
 from src.contrib.param_generation.example_generator import create_example_parameter_list
 from src.contrib.param_generation.LHS import LHS_Multi_Hainich_Example
-from src.contrib.auxil.input_files import Get_SimPHony_build_path
+from src.contrib.auxil.files import get_SimPHony_build_path
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class Test_Hainich_From_File_Multi(unittest.TestCase):
@@ -20,7 +20,7 @@ class Test_Hainich_From_File_Multi(unittest.TestCase):
         sapflux_file = os.path.join(root_data_path, 'hainich', 'eval', 'SAP_Hainich_Fagus-mean_dT30min_prog.csv')
         psi_stem_file = os.path.join(root_data_path, 'hainich', 'eval', 'stem_water_pot.csv')
 
-        found_cpp_lib, cpp_bin_path, cpp_lib_path = Get_SimPHony_build_path(THIS_DIR)
+        found_cpp_lib, cpp_bin_path, cpp_lib_path = get_SimPHony_build_path()
         sys.path.append(cpp_lib_path)
 
         # Importing local libraries and paths
