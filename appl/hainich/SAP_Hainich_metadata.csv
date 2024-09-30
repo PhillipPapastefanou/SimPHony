@@ -1,5 +1,0 @@
-var,unit,desc,processing,comment
-datetime,UTC,time stamp,Aggregated to 30min that fit an equaly grid,data originally sampled in 10 minute spacing with unequal step at times
-J,μmol m-2 s-1,sap flux density,flux of moles water per m2 sap wood area and second,Median of 17 Fagus trees
-J_sd,μmol m-2 s-1,stdev of sap flux density,Stdev of flux of moles water per m2 sap wood area and second,Stdev of 17 Fagus trees
-n_trees,1,number of trees in average,,

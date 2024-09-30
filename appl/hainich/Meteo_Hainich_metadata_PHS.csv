@@ -1,9 +1,0 @@
-var,descr,unit
-datetime,Timestamp start of 30min measured interval,UTC
-Ta_4400,Air temperature at 44 m height,°C
-P_4400,Precipitation sum at 44 m height (above canopy),mm
-Pa_4400,Atmospheric pressure at 44 m height,hPa
-VPD_4400,"Vapor pressure deficit at 44m height, calculated according to: Monteith JL, Unsworth MH (1990) Principles of environmental physics",kPa
-PPFD_IN_4400,Photosynthetically active photon flux density at 44 m height,umol m-2 s-1
-SWDR_4400,Shortwave downwelling radiation at 44 m height,W m-2
-SM_xx,Volumetric soil moisture content at depth (in cm),%vol
