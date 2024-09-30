@@ -1,0 +1,59 @@
+# The SimPHony model 
+
+The **Sim**ple **P**lant **H**ydraulics **on**l**y** model is standalone modelling tool that describes the water flow throught a plant via roots, stem and leaves 
+based on the fundamental laws of water transport.
+
+### Name origin
+The name simphony is an acronym for symphony, which generally refers to a large-scale orchestral composition
+with a complex structure, typically consisting of four movements. Despite its simplicity, the SimPHony model can also exhibit complex behavior and its
+major parameters need to (harmonically) play together to mimic realistic plant water flows and pools. Furthermore, the SimPHony model development was exclusively accompanied by classical symphonies by renowned composers such as Bach and Beethoven.
+To maintain the model's integrity and ensure its continued evolution, this musical tradition must be upheld in future development endeavors.
+
+# Theory
+Fundamental equations (to be explained):
+```math
+    \kappa_\mathrm{Leaf}\cdot \frac{d\Psi_{\mathrm{Leaf}}}{dt} - J + T = 0
+```
+
+```math
+       \kappa_{\mathrm{Stem}} \cdot \frac{d\Psi_{\mathrm{Stem_G}}}{dt} + J - G +
+T_\mathrm{bark} = 0
+```
+# Application
+## Prerequisites 
+Get CMake. Get a cpp compiler and an mpi library. It should at least support the 2017 standard. We recommend clang or intel compiles as the model runs up to 5x slower when compiled with GNU.
+Create a Python environment that contains the following packages:
+* numpy
+* pandas
+* xarray netcdf
+* mpi4py
+* scipy
+* ...
+## Setup
+Clone this repository and create a build folder in the main direcorty. Navigate to that build directory in the terminal and run:
+``
+cmake ../
+``.
+Once that build system is finished successfully, run 
+``
+make
+``.
+This should (amongst other) create two files: A binary/executable called SimPHony_tests and a python library ending with `*.so`.
+
+## Tests
+Before running the example scripts one should make sure that SimPHony has been built sucessfully. Therefore unittests both exist for cpp library and the python scripts. 
+The cpp unittests can either be run by some IDE (integrated development environment, such as Pycharm or VS-code) or directly by executing the binary. The Python unittests can also be run via IDE or from the terminal in the main directory:
+``
+python -m unittest tests/main.py
+``
+## Usage
+
+For now, each simulated location (for now Hainich and Swiss_cc) that SimPHony can be applied requires specific setups and analysis scripts. Therefore testing/example and application scripts are tailored to the respective location. \\
+SimPHony has a **single** and **multi** application variant:
+* The **single** variant returns all the model states and derived variables per timestep. It also contains analysis output that condenses the model output, by for example calculating the RMSE to observed sapflow. Its intended use is to plot few (~ 100) time series of model outputs. 
+* The **multi** variant only returns the the analysis data. It does NOT return the output of the model to save memory. Its intended use is sensitivity analysis and therefore run tens of thousands of model simulations.  
+
+### Examples
+Examples can be found the example/hainich folder. 
+
+
