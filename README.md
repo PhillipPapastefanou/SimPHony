@@ -22,7 +22,7 @@ T_\mathrm{bark} = 0
 # Application
 ## Prerequisites 
 Get CMake. Get a cpp compiler and an mpi library. It should at least support the 2017 standard. We recommend clang or intel compiles as the model runs up to 5x slower when compiled with GNU.
-Create a Python repository that contains the following packages:
+Create a Python environment that contains the following packages:
 * numpy
 * pandas
 * xarray netcdf
