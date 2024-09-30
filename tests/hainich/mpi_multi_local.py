@@ -2,6 +2,8 @@ import sys
 import os
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+
+sys.path.append(os.path.join(THIS_DIR, os.pardir, os.pardir))
 from src.contrib.auxil.input_files import Get_SimPHony_build_path
 
 
@@ -41,7 +43,6 @@ comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
 
-print("X")
 # Create the MPI binding object
 binder = ParallelSetupHainich(comm, rank, size)
 # 

@@ -185,11 +185,14 @@ class ParallelSetupHainich:
         if self.is_root:
             displ = np.copy(self.displ)
             displ *= ny
+            displ = displ.astype(int)
         else:
             displ = self.displ
 
+
         print(f"Rank {self.rank} count {self.n_array_per_process}")
         print(f"Rank {self.rank} disp {self.displ}")
+        print(f"Rank {count_transfer} disp {self.displ}")
 
         self.comm.Gatherv(sendbuf, [recvbuf, count_transfer,  displ, MPI.DOUBLE], root=0)
         # if self.is_root == 0:

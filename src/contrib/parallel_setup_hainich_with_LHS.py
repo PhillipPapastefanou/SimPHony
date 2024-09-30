@@ -177,6 +177,7 @@ class ParallelSetupHainichWithLHS:
         if self.is_root:
             displ = np.copy(self.displ)
             displ *= ny
+            displ = displ.astype(int)
         else:
             displ = self.displ
 
