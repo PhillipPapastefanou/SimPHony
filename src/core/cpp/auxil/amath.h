@@ -5,6 +5,12 @@
 #pragma once
 #include <math.h>
 #include <algorithm>
+#include <iostream>
+
+const double EULER_GAMMA = 0.5772156649;/* Euler's constant gamma */
+const double MAXIT = 100;		/* Maximum allowed number of iterations. */
+const double  FPMIN =  1.0e-30;	/* close to the smallest representable floting-point number. */
+const double  EPS  = 6.0e-8;	/* Desired relative error, not smaller than the machine precision. */
 
 const double DHUGE     = std::numeric_limits<double>::max();
 const long LHUGE       = std::numeric_limits<long>::max()  ;
@@ -32,7 +38,7 @@ const double D_EPSILON = std::numeric_limits<double>::min();
  *  x   : the argument of the CDF.
  *  cdf : the value of the CDF.
  */
-void normal_01_cdf ( double x, double cdf ) {
+static void normal_01_cdf ( double x, double cdf ) {
 
     const double A1 = 0.398942280444E+00 ;
     const double A2 = 0.399903438504E+00 ;
@@ -173,7 +179,7 @@ void normal_01_cdf ( double x, double cdf ) {
  * Input
  *  x : the argument of the Gamma function (> 0.0)
  */
-double gamma_log( double x ) {
+static double gamma_log( double x ) {
 
     double c[7] = {
             -1.910444077728E-03,
@@ -367,8 +373,8 @@ double gamma_log( double x ) {
  * Input
  *  p  : the exponent parameter (0.0 < P)
  *  x  : the integral limit parameter. If X is less than or equal to 0, GAMMA_INC is returned as 0.
- */
-double gamma_inc ( double p, double x ) {
+// */
+static double gamma_inc ( double p, double x ) {
 
     double  a;
     double  arg;
@@ -494,3 +500,123 @@ double gamma_inc ( double p, double x ) {
     }
     return gamma_inc;
 }
+
+/*********************************************************************
+   Returns the exponential integral function
+   E_n(x) = int_1^infinity e^{-x*t}/t^n dt,     for x > 0.
+   C.A. Bertulani        May/15/2000
+*********************************************************************/
+
+static double expint(double n, double x)
+{
+    int i,ii;
+    double nm1; // was doube before
+    double a,b,c,d,del,fact,h,psi,ans;
+
+    nm1=n-1;
+    if (n < 0 || x < 0.0 || (x==0.0 && (n==0 || n==1))){
+        std::cout << "\n Bad arguments in expint";
+        exit(99);
+    }
+
+    else {
+        if (std::abs(n)< EPS) ans=exp(-x)/x;   /* Special case */
+        else {
+            if (std::abs(x)< EPS) ans=1.0/nm1;  /* Another special case */
+
+            else {
+                if (x > 1.0) {		/* Lentz's algorithm */
+                    b=x+n;
+                    c=1.0/FPMIN;
+                    d=1.0/b;
+                    h=d;
+                    for (i=1;i<=MAXIT;i++) {
+                        a = -i*(nm1+i);
+                        b += 2.0;
+                        d=1.0/(a*d+b);	/* Denominators cannot be zero */
+                        c=b+a/c;
+                        del=c*d;
+                        h *= del;
+                        if (fabs(del-1.0) < EPS) {
+                            ans=h*exp(-x);
+                            return ans;
+                        }
+                    }
+                    std::cout << "\n Continued fraction failed in expint";
+                    exit(99);
+                } else {
+                    ans = (nm1!=0 ? 1.0/nm1 : -log(x)-EULER_GAMMA);	/* Set first term */
+                    fact=1.0;
+                    for (i=1;i<=MAXIT;i++) {
+                        fact *= -x/i;
+                        if (i != nm1) del = -fact/(i-nm1);
+                        else {
+                            psi = -EULER_GAMMA;  /* Compute psi(n) */
+                            for (ii=1;ii<=nm1;ii++) psi += 1.0/ii;
+                            del=fact*(-log(x)+psi);
+                        }
+                        ans += del;
+                        if (fabs(del) < fabs(ans)*EPS) return ans;
+                    }
+                    std::cout << "\n series failed in expint";
+                    exit(99);
+                }
+            }
+        }
+    }
+    return ans;
+}
+///************************************************************************
+//   Returns the exponential integral function
+//   E_i(x) = - int_x^infinity e^{-t}/t dt = int_(-infinity)^x e^{-t}/t dt,
+//   for x > 0.
+//   C.A. Bertulani        May/15/2000
+//************************************************************************/
+
+static double ei(double x)
+{
+    int k;
+    double fact,prev,sum,term;
+
+    if (x <= 0.0){
+        std::cout << "\n Bad argument in ei";
+        exit(99);
+    }
+    if (x < FPMIN) return log(x)+EULER_GAMMA;	/* Special case: avoid failure of convergence */
+    if (x <= -log(EPS)) {				/* test because of underflow.  */
+        sum=0.0;				/* Use poer series  */
+        fact=1.0;
+        for (k=1;k<=MAXIT;k++) {
+            fact *= x/k;
+            term=fact/k;
+            sum += term;
+            if (term < EPS*sum) break;
+        }
+        if (k > MAXIT){
+            std::cout << "\n Series failed in ei";
+            exit(99);
+        }
+        return sum+log(x)+EULER_GAMMA;
+    } else {			/* Use asymptotic series. */
+        sum=0.0;		/* Start with second term. */
+        term=1.0;
+        for (k=1;k<=MAXIT;k++) {
+            prev=term;
+            term *= k/x;
+            if (term < EPS) break;
+            /* Since final sum is greater than one, term itself approximates the */
+            /* relative error. */
+            if (term < prev) sum += term;		/* Still converging: add new term. */
+            else {
+                sum -= prev;		/* Diverging: subtract previous term and exit. */
+                break;
+            }
+        }
+        return exp(x)*(1.0+sum)/x;
+    }
+}
+///*********************************************************************/
+//
+//
+
+

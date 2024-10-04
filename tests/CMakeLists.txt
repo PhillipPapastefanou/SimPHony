@@ -5,6 +5,7 @@ set(headers
 set(source
         general/water_flow_segments_approx_test.cpp
         general/soil_models_test.cpp
+        general/special_functions_test.cpp
 
         hainich/test_driver_exist.cpp
         hainich/source_hainich_direct_test.cpp

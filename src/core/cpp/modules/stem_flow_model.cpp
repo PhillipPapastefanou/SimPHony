@@ -1,11 +1,9 @@
 //
 // Created by ppapastefanou on 4/8/24.
 //
-
 #include "stem_flow_model.h"
-#include "../auxil/amath.h"
-#include "math.h"
 #include <iostream>
+#include "../auxil/amath.h"
 
 Stem_flow_module::Stem_flow_module(const Parameters &params) :
         params(params),
