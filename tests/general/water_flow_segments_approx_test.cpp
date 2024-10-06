@@ -25,7 +25,6 @@ TEST(General_tests, Stem_flow_model_tests)
     modules.push_back(std::make_unique<Kirchhoff_Weibull_stem_flow>(parameters));
     modules.push_back(std::make_unique<Linear_Segmented_flow>(parameters));
 
-
     for (auto& module: modules) {
         module->Init();
     }
@@ -41,11 +40,8 @@ TEST(General_tests, Stem_flow_model_tests)
     double mathematica_value = 2.0490506751287496;
     ASSERT_NEAR(mathematica_value, modules[0]->Get_Stem_flow(psi_stem, psi_leaf), EPS);
 
-
-
     std::cout << "Testing Linear waterflow approximation vs. Mathematica implementation..";
     mathematica_value = 2.049664469676958;
-
     ASSERT_NEAR(mathematica_value, modules[1]->Get_Stem_flow(psi_stem, psi_leaf), EPS);
 
     double max_error = 0.0;

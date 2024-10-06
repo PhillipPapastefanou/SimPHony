@@ -10,7 +10,7 @@ Stem_flow_module::Stem_flow_module(const Parameters &params) :
         gravity(params.constants.GRAVITY),
         rho_water(params.constants.RHO_WATER),
         MPaToPa(params.constants.MPaToPa),
-        PA_TO_MPA(params.constants.PaToMPa){
+        PaToMPa(params.constants.PaToMPa){
 
     min_frac_con_per_segment.resize(params.n_stem_segments);
     // Setting the fraction of healthy xylem to 100% at the beginning
@@ -84,7 +84,7 @@ double Linear_Segmented_flow::Get_Stem_flow(double psi_stem_ground, double psi_l
     double segment_height =  params.canopy_height / params.n_stem_segments;
 
     // Hydrostatic perssure per segment [MPa]
-    double psi_hydrostatic_per_segment = (rho_water * gravity *segment_height) * PA_TO_MPA;
+    double psi_hydrostatic_per_segment = (rho_water * gravity *segment_height) * PaToMPa;
 
     // Total water flow through the stem [mol m-2 s-1]
     double stem_water_flow = 0.0;
@@ -149,7 +149,7 @@ double Kirchhoff_Weibull_stem_flow::KirchhoffIntegral(double psi) {
 double Kirchhoff_Weibull_stem_flow::Get_Stem_flow(double psi_stem, double psi_leaf) {
 
     // Calculate hydrostatic pressure
-    double psi_hydro = (rho_water * gravity * params.canopy_height) * PA_TO_MPA;
+    double psi_hydro = (rho_water * gravity * params.canopy_height) * PaToMPa;
 
     // If leaf wand soil water potential are (almost) identical we avoid the divide by zero calcuation and
     // return zero water flow
@@ -250,7 +250,7 @@ double Kirchhoff_Piecewise_Erf::KirchhoffIntegralSplit(double psi) {
 
 double Kirchhoff_Piecewise_Erf::Get_Stem_flow(double psi_stem, double psi_leaf) {
     // Calculate hydrostatic pressure
-    double psi_hydro = (rho_water * gravity * params.canopy_height) * PA_TO_MPA;
+    double psi_hydro = (rho_water * gravity * params.canopy_height) * PaToMPa;
 
     // If leaf wand soil water potential are (almost) identical we avoid the divide by zero calcuation and
     // return zero water flow

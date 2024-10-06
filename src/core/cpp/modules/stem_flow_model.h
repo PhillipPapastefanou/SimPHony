@@ -26,7 +26,7 @@ protected:
 
     const double gravity;
     const double rho_water;
-    const double PA_TO_MPA;
+    const double PaToMPa;
     const double MPaToPa;
 
 };
