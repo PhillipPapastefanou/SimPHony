@@ -6,9 +6,7 @@
 #include <vector>
 #include <string>
 #include <memory>
-
-
-
+#include <iostream>
 #include <fstream>
 #include <sstream>
 
@@ -69,6 +67,72 @@ namespace io {
 
             return data;
         };
+
+
+        template<typename T>
+        vector<vector<T> > Get(vector<string> columns) {
+
+            string line, word;
+
+            vector<vector<T> > data;
+            vector<T> row;
+            vector<string> row_vec;
+
+
+            if (file->is_open() == false){
+                file = std::make_unique<std::fstream>(filename,  std::ios::in);
+                if (has_header){
+                    getline(*file, line);
+                }
+            }
+
+
+            if (!has_header){
+                std::cout << "Using the column string as index does only work with header" << std::endl;
+                exit(99);
+            }
+
+            vector<int> indexes;
+            for (string column : columns) {
+                auto it = std::find(header.begin(), header.end(), column);
+                if (it == header.end()){
+                    std::cout << "Could not find element: " <<  column << std::endl;
+                    exit(99);
+                }
+                else{
+                    auto index = std::distance(header.begin(), it);
+                    indexes.push_back(index);
+                }
+            }
+
+            // Read rows
+            while (getline(*file, line)) {
+                row.clear();
+                row_vec.clear();
+                std::stringstream row_str(line);
+
+                while (getline(row_str, word, delimiter)) {
+                    row_vec.push_back(word);
+                }
+
+
+                for (auto itr: indexes) {
+                    row.push_back(Convert<T>(row_vec[itr]));
+                }
+
+                //vector<T> slice = vector<T>(row.begin() + col_min, row.begin() + col_max);
+
+                data.push_back(row);
+            }
+
+            if (file->is_open()) {
+                file->close();
+            }
+
+            return data;
+        };
+
+
 
         template<typename T>
         vector<vector<T> > Get() {

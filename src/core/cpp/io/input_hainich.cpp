@@ -49,6 +49,5 @@ void Input_Hainich::Add_Forcing_File(std::string file) {
 }
 
 void Input_Hainich::Add_Soilwater_File(std::string file) {
-
     // Nothing to be done here as this file is part of the forcing
 }

@@ -15,6 +15,7 @@ set(headers
         modules/root_distribution_model.h
         io/input_swiss.h
         io/input_swiss_mult_soils.h
+        io/input_swiss_std_variation.h
         io/input_hainich.h
         io/input.h
         framework/parameters.h
@@ -56,6 +57,7 @@ set(source
         framework/parameters.cpp
         io/input_swiss.cpp
         io/input_swiss_mult_soils.cpp
+        io/input_swiss_std_variation.cpp
         io/input_hainich.cpp
         io/input.cpp
         io/output.cpp

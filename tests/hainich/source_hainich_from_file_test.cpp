@@ -25,7 +25,6 @@ TEST(Hainich_tests, Apply_model_from_file) {
     string psi_stem_file = "../data/hainich/eval/stem_water_pot.csv";
     string parameters_list = "../tests/hainich/parameter_example.csv";
 
-
     double psi_leaf_init = -1.0;
     double psi_stem_init = -0.2;
 

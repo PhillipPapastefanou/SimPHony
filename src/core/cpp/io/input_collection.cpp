@@ -64,3 +64,7 @@ void InputCollection::init_irregular(std::string dt_header, std::string format) 
 vector<vector<float> > InputCollection::get_data(vector<int> indexes) {
     return reader.Get<float>(indexes);
 }
+
+vector<vector<float> > InputCollection::get_data(vector<string> columns) {
+    return reader.Get<float>(columns);
+}

@@ -7,6 +7,17 @@
 
 Soil_water_module::Soil_water_module(const Parameters& parameters, const Input& input):
 parameters(parameters), input_module(input){
+
+    if(std::abs(parameters.wcont_sigma_deviation) > 1E-8 ){
+
+        if (input_module.theta_sd.empty()){
+            std::cout << "Trying to use water content deviation without having water content data available." << std::endl;
+            std::cout << "Consider setting parameter wcont_sigma_deviation to 0.0" << std::endl;
+            exit(99);
+
+        }
+
+    }
 }
 
 Soil_water_module::~Soil_water_module() {

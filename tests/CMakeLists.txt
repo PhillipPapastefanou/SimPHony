@@ -11,6 +11,8 @@ set(source
         hainich/source_hainich_direct_test.cpp
         hainich/source_hainich_from_file_test.cpp
 
+        swiss_cc/source_swiss_cc_direct_test.cpp
+
         main.cpp
         )
 include(add_test_sources)

@@ -32,12 +32,18 @@ void Van_Genuchten::CalculatePsiAndKs() {
 
     for (int i = 0; i < theta_array.size(); ++i) {
 
+        // Get water contents today for the number of soil layers
         vector<float> theta_list = theta_array[i];
 
-        // Resize all theta water contents of each layers
-        for (float &wcont: theta_list) {
-            wcont *= parameters.theta_emp_multiplier;
+        // Rescale all  water content in units of standard deviation
+        // but only if this value is not zero
+        if (!(std::abs(parameters.wcont_sigma_deviation) < 1E-8 )){
+
+            for (int s = 0; s < theta_list.size(); ++s) {
+                theta_list[s] += parameters.wcont_sigma_deviation * input_module.theta_sd[i];
+            }
         }
+
 
 
         vector<double> psi_row(nsoil);

@@ -184,7 +184,7 @@ class Parameters:
 
         # Multiplier for the soil water content of each layer
         # Should only be used for testing purposes
-        self.theta_emp_multiplier = 1.0
+        self.wcont_sigma_deviation = 0.0
 
         # Solver precision
         self.solver_precision = 1E-10
@@ -286,7 +286,7 @@ class Parameters:
         cparameters.g1 = self.g1
         cparameters.g_bark = self.g_bark
         cparameters.jackson_root_beta = self.jackson_root_beta
-        cparameters.theta_emp_multiplier = self.theta_emp_multiplier
+        cparameters.wcont_sigma_deviation = self.wcont_sigma_deviation
         cparameters.dts_input = self.dts_input
         cparameters.sw_rad_max = self.sw_rad_max
         cparameters.anet_max = self.anet_max

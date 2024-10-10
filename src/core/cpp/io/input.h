@@ -25,6 +25,10 @@ public:
     std::vector<std::vector<float>> theta_per_layer;
     // Date that are going to be simulated
     std::vector<DateTime> dates;
+
+    // Volumetric water standard deviation [m3 m-3]
+    // Currently only available for the Swiss sites
+    std::vector<float> theta_sd;
 };
 
 

@@ -21,10 +21,8 @@ void Input_Swiss_Multi_Soils::Read_N_Parse() {
     std::string format = "%Y-%m-%d %H:%M:%S";
     theta_parser->init_regular("dates", format);
 
-
     // Read all inputs
     all_theta_data = theta_parser->get_data(theta_indexes);
-
 
     vector<int> forcing_indexes= {2,8};
     format = "%Y-%m-%d %H:%M:%S";
@@ -93,6 +91,8 @@ void Input_Swiss_Multi_Soils::Read_N_Parse() {
         }
     }
 
+
+    // Thist part has not been fixed and cannot be used in the current implementation.
     // Todo Fix
 //    // Each soil location has three soil layer depths
 //    vector<vector<float>> input_theta_per_layer(all_theta_data.size());

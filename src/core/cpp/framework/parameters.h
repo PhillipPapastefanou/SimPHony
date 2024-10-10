@@ -147,11 +147,9 @@ public:
     // Jackson rooting parameter [-]
     double jackson_root_beta  = 0.96;
 
-    // Empirical water content multiplier [-]
-    // Should be 1.0 for runs where the given wcont is known precisely
-    double theta_emp_multiplier = 1.0;
-
-
+    // Number of standard deviation (sd) that the water content is moved away from the mean sensors
+    // Choose 0.0 to have the mean water content, 1.0 equals to 1SD higher water content
+    double wcont_sigma_deviation = 0.0;
 
 
     // According to the forcing input [W m-2]

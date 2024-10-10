@@ -244,7 +244,7 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
 
 
         parse_value(params.solver_precision,  "solver_precision");
-        parse_value(params.theta_emp_multiplier,  "theta_emp_multiplier");
+        parse_value(params.wcont_sigma_deviation, "wcont_sigma_deviation");
         parse_value(params.tree_density,  "tree_density");
 
 

@@ -29,7 +29,7 @@ void Parameter_Examples::Define() {
 //    Baseline_one.camp_b = 10.4;
 //    Baseline_one.psi_soil_sat = -1.5E-6;
 //
-    Baseline_one.theta_emp_multiplier = 1.0;
+    Baseline_one.wcont_sigma_deviation = 1.0;
 
 
 
