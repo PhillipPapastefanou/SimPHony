@@ -1,3 +1,8 @@
+import sys
+import os
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(THIS_DIR, os.pardir))
+
 import unittest
 from tests.general.test_check_libs import Test_General_Setup
 from tests.hainich.test_driver_files import Test_Driver_Files

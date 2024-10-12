@@ -6,10 +6,12 @@ appl/unsort
 examples/hainich/local/plt
 examples/hainich/local/parameter_example.csv
 examples/hainich/local/parameter_example_multi.csv
+examples/swiss_cc/local/plt
 tests/hainich/test
+tests/swiss_cc/test
 .idea
 *.log
-*.sh
-!scripts/*.sh
+*.err
+*.pyc
 .DS_Store
 */*/__pycache__

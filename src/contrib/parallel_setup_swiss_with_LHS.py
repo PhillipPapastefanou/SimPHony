@@ -98,7 +98,7 @@ class ParallelSetupHainichWithLHS:
                                             np.arange(0,self.n_sims_per_process))
         self.sim.Init_input(self.config.soilwater_file,
                             self.config.forcing_file,
-                            self.config.tree_folder_path,
+                            self.config.tree_folder,
                             self.rank)
 
         self.sim.Set_water_pot_initials(-1.0, -0.2)

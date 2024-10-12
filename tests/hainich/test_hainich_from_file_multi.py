@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 import datetime
 from src.contrib.param_generation.example_generator import create_example_parameter_list
-from src.contrib.param_generation.LHS import LHS_Multi_Hainich_Example
 from src.contrib.auxil.files import get_SimPHony_build_path
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 

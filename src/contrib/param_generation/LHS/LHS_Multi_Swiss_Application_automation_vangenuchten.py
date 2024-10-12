@@ -72,7 +72,7 @@ def Calculate_LHS_per_process(rank, ncombs, path):
     g1_s            = rescale(slicer.get(), min = 2.0, max = 3.0)
     sel_cols.append("g1")
 
-    anet_max    = rescale(slicer.get(), min = 0.5, max = 3.5)
+    anet_max    = rescale(slicer.get(), min = 0.05, max = 0.5)
     sel_cols.append("anet_max")
 
     k_xylems_sats   = rescale(slicer.get(), min=1.0, max=10.0)
