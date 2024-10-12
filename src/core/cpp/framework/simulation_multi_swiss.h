@@ -3,7 +3,7 @@
 //
 #pragma once
 #include "../io/output.h"
-#include "../io/input_swiss_mult_soils.h"
+#include "../io/input_swiss_std_variation.h"
 #include "parameters.h"
 #include <memory>
 #include "../io/analysis_swiss.h"
@@ -37,7 +37,7 @@ private:
     std::string theta_file;
     std::string forcing_file;
 
-    std::unique_ptr<Input_Swiss_Multi_Soils> input;
+    std::unique_ptr<Input_Swiss_Std_Variation> input;
     std::unique_ptr<Swiss_Drought_Trees> swiss_trees;
 
     std::vector<std::tuple<Parameters, int> > parameter_list;

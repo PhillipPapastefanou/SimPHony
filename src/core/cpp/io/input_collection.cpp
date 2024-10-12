@@ -39,7 +39,11 @@ void InputCollection::init_irregular(std::string dt_header, std::string format) 
     auto index_it = std::find(reader.header.begin(), reader.header.end(), dt_header);
 
     if (index_it == reader.header.end()){
-        std::cout << "Could not find " << dt_header << " header string." << std::endl;
+        std::cout << "Could not find " << dt_header << " header string in header. Available strings:" << std::endl;
+        for (auto str: reader.header) {
+        std::cout << str << " ";
+        }
+        std::cout << std::endl;
         std::cout << "Exiting..." << std::endl;
         exit(99);
     }

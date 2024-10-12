@@ -43,10 +43,10 @@ def Calculate_LHS_per_process(rank, ncombs, path):
     # Setting up soil layers
     nsoil_layers = 3
 
-    k_soil_sats_logs = rescale(slicer.get(), min=-8, max = -6.5)
-    psi_soil_sats= rescale(slicer.get(), min=-0.0001, max = -0.002)
-    theta_s = rescale(slicer.get(), min=0.47, max = 0.55)
-    theta_r = rescale(slicer.get(), min=0.02, max = 0.1)
+    k_soil_sats_logs = rescale(slicer.get(), min=-8, max = -5)
+    psi_soil_sats= rescale(slicer.get(), min=-0.0001, max = -0.05)
+    theta_s = rescale(slicer.get(), min=0.5, max = 0.6)
+    theta_r = rescale(slicer.get(), min=0.03, max = 0.09)
     pore_size_ind = rescale(slicer.get(), min=0.40, max = 0.60)
 
     soil_collection = []
@@ -67,27 +67,27 @@ def Calculate_LHS_per_process(rank, ncombs, path):
     sel_cols.append("psi_01")
 
 
-    g0_s            = rescale(slicer.get(), min=0.001, max = 0.02)
+    g0_s            = rescale(slicer.get(), min=0.005, max = 0.02)
     sel_cols.append("g0")
-    g1_s            = rescale(slicer.get(), min = 1.25, max = 5.5)
+    g1_s            = rescale(slicer.get(), min = 2.0, max = 3.0)
     sel_cols.append("g1")
 
     anet_max    = rescale(slicer.get(), min = 0.5, max = 3.5)
     sel_cols.append("anet_max")
 
-    k_xylems_sats   = rescale(slicer.get(), min=0.5, max=10.0)
+    k_xylems_sats   = rescale(slicer.get(), min=1.0, max=10.0)
     k_xylems_sats *= KG_TO_MOL
     sel_cols.append("k_xylem_sat")
 
-    huber_values    =  rescale(slicer.get(), min = 0.0003, max= 0.0004)
+    huber_values    =  rescale(slicer.get(), min = 1/3600, max= 1/2000)
     sel_cols.append("huber_value")
 
-    cstem_s         = rescale(slicer.get(), min=30, max=300)
+    cstem_s         = rescale(slicer.get(), min=10, max=300)
     cstem_s *= KG_TO_MOL
     sel_cols.append("kappa_stem")
 
-    lai_s           = rescale(slicer.get(), min= 4.6, max = 5.0)
-    sel_cols.append("lai")
+    # lai_s           = rescale(slicer.get(), min= 4.6, max = 5.0)
+    # sel_cols.append("lai")
 
     cleaf_s_log        = rescale(slicer.get(), min=np.log10(0.001), max=np.log10(0.1))
     sel_cols.append("kappa_leaf")
@@ -95,10 +95,10 @@ def Calculate_LHS_per_process(rank, ncombs, path):
     d_50close_s     = rescale(slicer.get(), min = 1.0, max = 4.0)
     sel_cols.append("d50_close")
 
-    psi_50_close_s  = rescale(slicer.get(), min = -2.4, max = -2.1)
+    psi_50_close_s  = rescale(slicer.get(), min = -2.2, max = -2.1)
     sel_cols.append("psi50_close")
 
-    jackson_s       = rescale(slicer.get(), min = 0.95, max = 0.97)
+    jackson_s       = rescale(slicer.get(), min = 0.90, max = 0.97)
     sel_cols.append("root_beta")
 
     psi50_xylems    = rescale(slicer.get(), min = -3.7, max = -3.4)
@@ -110,8 +110,8 @@ def Calculate_LHS_per_process(rank, ncombs, path):
     root_area_indexes    = rescale(slicer.get(), min = 2, max = 14)
     sel_cols.append("root_area_indexes")
 
-    tree_densities    = rescale(slicer.get(), min = (64-32)/10000, max = (64)/10000)
-    sel_cols.append("tree_densities")
+    # tree_densities    = rescale(slicer.get(), min = (64-32)/10000, max = (64)/10000)
+    # sel_cols.append("tree_densities")
 
     g_barks    = rescale(slicer.get(), min = 0.0, max = 0.02)
     sel_cols.append("g_barks")
@@ -137,7 +137,7 @@ def Calculate_LHS_per_process(rank, ncombs, path):
         Convert_Soil_Parameters(soil_layers=soil_layers, parameters=params)
 
         params.stem_hydraulic_capacitance = cstem_s[i]
-        params.leaf_area_index = lai_s[i]
+        # params.leaf_area_index = lai_s[i]
         params.g0 = g0_s[i]
         params.g_bark = g_barks[i]
         params.g1 = g1_s[i]
@@ -153,7 +153,7 @@ def Calculate_LHS_per_process(rank, ncombs, path):
         params.d_50_close = d_50close_s[i]
         params.jackson_root_beta = jackson_s[i]
 
-        params.tree_density = tree_densities[i]
+        params.tree_density = 10/1000
 
         params.canopy_height = 35
 
@@ -170,5 +170,5 @@ def Calculate_LHS_per_process(rank, ncombs, path):
 
         plist.Add(params)
 
-    plist.Write_Full_Parameter_File(f"{path}/Hainich_parameters.csv{rank}")
-    plist.Write_Partial_Parameter_File(f"{path}/Hainich_partial_parameters.csv{rank}", sel_cols)
+    plist.Write_Full_Parameter_File(f"{path}/Swiss_cc_parameters.csv{rank}")
+    plist.Write_Partial_Parameter_File(f"{path}/Swiss_cc_partial_parameters.csv{rank}", sel_cols)

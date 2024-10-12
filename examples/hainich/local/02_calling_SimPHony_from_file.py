@@ -25,7 +25,7 @@ from src.contrib.auxil.files import get_SimPHony_build_path
 from src.contrib.auxil.files import get_forcing_hainich
 from src.contrib.auxil.files import get_sapflow_obs_hainich
 from src.contrib.auxil.files import get_psi_stem_obs_hainich
-from src.contrib.param_generation.example_generator import create_example_file
+from src.contrib.param_generation.example_generator import create_example_hainich_file
 from src.contrib.auxil.output_df import create_output_df
 from src.contrib.auxil.output_plotter import std_plot, eval_plot_24
 from src.contrib.auxil.output_plotter import eval_plot
@@ -49,7 +49,7 @@ file_psi_stem_obs, df_psi_stem_obs = get_psi_stem_obs_hainich()
 
 # Create an example parameter file and export it to this directory
 parameter_file = os.path.join(THIS_DIR, "parameter_example.csv")
-create_example_file(parameter_file)
+create_example_hainich_file(parameter_file)
 
 # ----------------------------------------------------------------
 # SimPHony model simulation

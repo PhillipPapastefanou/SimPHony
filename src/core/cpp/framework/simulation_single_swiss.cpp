@@ -6,6 +6,7 @@
 #include "parameter_csv_reader.h"
 #include "../io/input_swiss.h"
 #include "../io/input_swiss_mult_soils.h"
+#include "../io/input_swiss_std_variation.h"
 
 Simulation_Single_Swiss::Simulation_Single_Swiss(){
 
@@ -13,7 +14,8 @@ Simulation_Single_Swiss::Simulation_Single_Swiss(){
 
 void Simulation_Single_Swiss::Init_input(std::string theta_file, std::string forcing_file, std::string swiss_trees_folder) {
 
-    input = std::make_unique<Input_Swiss_Multi_Soils>();
+    // Todo: Make the input module also a parameter
+    input = std::make_unique<Input_Swiss_Std_Variation>();
     input->Add_Soilwater_File(theta_file);
     input->Add_Forcing_File(forcing_file);
     input->Read_N_Parse();
@@ -47,6 +49,11 @@ void Simulation_Single_Swiss::Run(DateTime timestart, DateTime timeend) {
 Output Simulation_Single_Swiss::Get_output() {
     return model->Get_output();
 }
+
+void Simulation_Single_Swiss::Init_parameters(Parameters params) {
+    parameters = std::make_unique<Parameters>(std::move(params));
+}
+
 
 void Simulation_Single_Swiss::Init_parameters_filename(std::string filename, int index) {
 

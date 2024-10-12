@@ -10,8 +10,9 @@
 #include "../../src/core/cpp/io/time_series.h"
 #include "../../src/core/cpp/io/analysis_swiss.h"
 #include "../../src/core/cpp/io/swiss_drought_trees.h"
+#include "../../src/core/cpp/framework/parameter_csv_reader.h"
 
-TEST(Swiss_cc_tests, Apply_model_direct) {
+TEST(Swiss_cc_tests, Apply_model_from_file) {
 
     std::cout << "Testing if RMSE psi_leaf is not nan...";
 
@@ -22,54 +23,14 @@ TEST(Swiss_cc_tests, Apply_model_direct) {
     string forcing_file = "../data/swiss/input/Forcing_Inter.csv";
     string tree_folder_path = "../data/swiss/eval/Trees";
     string theta_file = "../data/swiss/input/swiss_cc_soil_water_with_sd.csv";
+    string parameters_list = "../tests/swiss_cc/parameter_example.csv";
 
     Swiss_Drought_Trees swiss_drought_tress(tree_folder_path);
 
-    // Default parameters
-    Parameters params;
+    Parameter_CSV_Reader reader(parameters_list);
+    reader.Parse_Full_Files();
 
-    params.canopy_height = 31.0;
-    params.huber_value  = 1.0/3000.0;
-    params.k_xylem_sat = 5 * 1000 / 18.0;
-    params.stem_hydraulic_capacitance_max = 150 * 1000 / 18.0;
-    params.leaf_hydraulic_capacitance = 0.01 *1000/18.0;
-    params.g_bark = 0.01;
-    params.g0 = 0.005;
-    params.g1 = 1.5;
-    params.leaf_area_index = 4.8;
-    params.psi_leaf_50_close = -2.3;
-    params.d_50_close = 2.0;
-    params.psi50_xylem = -3.5;
-    params.psi88_xylem = -5.5;
-    params.root_area_index = 4.5;
-    params.jackson_root_beta = 0.96;
-    params.tree_density = 64.0 / 10000.0;
-    params.anet_max = 2.5;
-    params.soil_water_type = Soil_water_module_type::VanGenuchten;
-
-
-    params.wcont_sigma_deviation = 0.0;
-
-    params.soil_layers.resize(3);
-
-    for (Soil_layer& layer: params.soil_layers) {
-        layer.k_soil_sat = 1.0 / 100.0 / 86400.0;
-//        layer.clay_fraction = 0.6;
-//        layer.sand_fraction = 0.025;
-//        layer.organic_matter_fraction = 0.005;
-//        layer.camp_b =  6.2;
-
-        layer.theta_r =  0.05;
-        layer.theta_s =  0.48;
-
-        layer.psi_soil_sat = -0.5 * 1;
-        layer.pore_size_ind = 0.6;
-    }
-
-    params.soil_layers[0].depth = 0.1;
-    params.soil_layers[1].depth = 0.3;
-    params.soil_layers[2].depth = 0.4;
-
+    Parameters params = reader.Get_parameter_list()[0];
 
     double psi_leaf_init = -1.0;
     double psi_stem_init = -0.2;
@@ -96,8 +57,6 @@ TEST(Swiss_cc_tests, Apply_model_direct) {
     std::vector<double> errors = analysis.Get_rmse();
 
     const double MAX_RMSE_PSI_STEM = 10;
-
-
 
     for (double error: errors) {
         ASSERT_LT(error,MAX_RMSE_PSI_STEM);

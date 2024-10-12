@@ -35,6 +35,7 @@ PYBIND11_MODULE(SimPHony, handle){
     py::class_<Simulation_Single_Swiss>(handle, "Simulation_Single_Swiss").
             def("Init_parameters_def", &Simulation_Single_Swiss::Init_parameters_default).
             def("Init_parameters_fn_single", &Simulation_Single_Swiss::Init_parameters_filename).
+            def("Init_parameters", &Simulation_Single_Swiss::Init_parameters).
             def("Init_input", &Simulation_Single_Swiss::Init_input).
             def("Set_water_pot_initials", &Simulation_Single_Swiss::Set_water_pot_initials).
             def("Run", &Simulation_Single_Swiss::Run).

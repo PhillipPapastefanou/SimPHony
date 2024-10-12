@@ -26,7 +26,6 @@ void Input_Swiss_Std_Variation::Read_N_Parse() {
     forcing_parser = std::make_unique<InputCollection>(forcing_file, true, ',');
 
     vector<string> soil_water_indexes({"v10_adapted","v40_adapted","v80_adapted","sd"});
-
     std::string format = "%Y-%m-%d %H:%M:%S";
     theta_parser->init_regular("date", format);
 

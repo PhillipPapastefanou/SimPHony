@@ -37,13 +37,11 @@ void Van_Genuchten::CalculatePsiAndKs() {
 
         // Rescale all  water content in units of standard deviation
         // but only if this value is not zero
-        if (!(std::abs(parameters.wcont_sigma_deviation) < 1E-8 )){
-
+        if (std::abs(parameters.wcont_sigma_deviation) > 1E-8 ){
             for (int s = 0; s < theta_list.size(); ++s) {
                 theta_list[s] += parameters.wcont_sigma_deviation * input_module.theta_sd[i];
             }
         }
-
 
 
         vector<double> psi_row(nsoil);

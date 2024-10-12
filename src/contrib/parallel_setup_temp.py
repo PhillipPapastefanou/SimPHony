@@ -92,7 +92,7 @@ class ParallelSetupIndividual:
             self.sim = Simulation_Multi_Swiss()
             self.sim.Init_Full_Parameter_Setups(f"{self.config.parameter_input_file_list}{self.rank}",
                                                 np.arange(0, self.n_sims_per_process))
-            self.sim.Init_input(self.config.theta_file, self.config.forcing_file, self.config.tree_folder_path, self.rank)
+            self.sim.Init_input(self.config.soilwater_file, self.config.forcing_file, self.config.tree_folder_path, self.rank)
 
         elif self.config.location == Location.Hainich:
             self.sim = Simulation_Multi_Hainich()

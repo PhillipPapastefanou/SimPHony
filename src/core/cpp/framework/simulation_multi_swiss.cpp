@@ -18,7 +18,6 @@ void Simulation_Multi_Swiss::Init_input(std::string theta_file, std::string forc
     this->theta_file = theta_file;
     this->forcing_file = forcing_file;
 
-
     if(parameter_list.empty()){
         std::cout << "Parameter list is empty." << std::endl;
         std::cout << "This function needs to be called after reading the param list" << std::endl;
@@ -26,8 +25,8 @@ void Simulation_Multi_Swiss::Init_input(std::string theta_file, std::string forc
     }
     swiss_trees = std::make_unique<Swiss_Drought_Trees>(swiss_trees_folder);
 
-    // Create dummy input
-    input = std::make_unique<Input_Swiss_Multi_Soils>();
+    // Make this a variable input
+    input = std::make_unique<Input_Swiss_Std_Variation>();
     input->Add_Soilwater_File(theta_file);
     input->Add_Forcing_File(forcing_file);
     input->Read_N_Parse();
@@ -65,7 +64,7 @@ void Simulation_Multi_Swiss::Run(DateTime timestart, DateTime timeend) {
         // Parameter index is not yet being used
         int parameter_index = std::get<1>(parameter_list[r]);
 
-        input = std::make_unique<Input_Swiss_Multi_Soils>();
+        input = std::make_unique<Input_Swiss_Std_Variation>();
         input->Add_Soilwater_File(theta_file);
         input->Add_Forcing_File(forcing_file);
         input->Read_N_Parse();

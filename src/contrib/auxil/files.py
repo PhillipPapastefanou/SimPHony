@@ -9,11 +9,11 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 def listdir_fullpath(d):
     return [os.path.join(d, f) for f in os.listdir(d)]
 
-def Get_lib_directory():
+def get_lib_directory():
     return os.path.join(THIS_DIR, os.pardir, os.pardir, os.pardir)
 
 def get_forcing_hainich():
-    root_library_path = Get_lib_directory()
+    root_library_path = get_lib_directory()
     root_data_path = os.path.join(root_library_path, 'data')
     file_forcing = os.path.join(root_data_path, 'hainich', 'input', 'Meteo_Hainich_dT30min_forcing_PHS.csv')
     df_forcing = pd.read_csv(file_forcing)
@@ -21,7 +21,7 @@ def get_forcing_hainich():
     return file_forcing, df_forcing
 
 def get_sapflow_obs_hainich():
-    root_library_path = Get_lib_directory()
+    root_library_path = get_lib_directory()
     root_data_path = os.path.join(root_library_path, 'data')
     file_sap_obs = os.path.join(root_data_path, 'hainich', 'eval', 'SAP_Hainich_Fagus-mean_dT30min_prog.csv')
     df_sap_obs = pd.read_csv(file_sap_obs)
@@ -29,7 +29,7 @@ def get_sapflow_obs_hainich():
     return file_sap_obs, df_sap_obs
 
 def get_psi_stem_obs_hainich():
-    root_library_path = Get_lib_directory()
+    root_library_path = get_lib_directory()
     root_data_path = os.path.join(root_library_path, 'data')
     file_psi_stem_obs = os.path.join(root_data_path, 'hainich', 'eval', 'stem_water_pot.csv')
     df_psi_stem_obs = pd.read_csv(file_psi_stem_obs)
@@ -39,7 +39,7 @@ def get_psi_stem_obs_hainich():
     return file_psi_stem_obs,  df_psi_stem_obs
 
 def get_SimPHony_build_path():
-    root_path = Get_lib_directory()
+    root_path = get_lib_directory()
     dir_entries = listdir_fullpath(root_path)
     folders = [a for a in dir_entries if os.path.isdir(a)]
 
@@ -59,3 +59,26 @@ def get_SimPHony_build_path():
                 break
 
     return found_lib, lib_path, lib_folder
+
+def get_forcing_swiss_cc():
+    root_library_path = get_lib_directory()
+    root_data_path = os.path.join(root_library_path, 'data')
+    file_forcing = os.path.join(root_data_path, 'swiss', 'input', 'Forcing_Inter.csv')
+    df_forcing = pd.read_csv(file_forcing)
+    df_forcing['dt'] = pd.to_datetime(df_forcing['dt'])
+    return file_forcing, df_forcing
+
+
+def get_soil_water_swiss_cc():
+    root_library_path = get_lib_directory()
+    root_data_path = os.path.join(root_library_path, 'data')
+    file_soil_water = os.path.join(root_data_path, 'swiss', 'input', 'swiss_cc_soil_water_with_sd.csv')
+    df_soil_water = pd.read_csv(file_soil_water)
+    df_soil_water['date'] = pd.to_datetime(df_soil_water['date'])
+    return file_soil_water, df_soil_water
+
+def get_trees_psi_leaf_cc():
+    root_library_path = get_lib_directory()
+    root_data_path = os.path.join(root_library_path, 'data')
+    file_soil_water = os.path.join(root_data_path, 'swiss', 'eval', 'Trees')
+    return file_soil_water, ""

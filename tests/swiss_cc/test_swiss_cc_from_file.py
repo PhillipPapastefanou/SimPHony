@@ -5,45 +5,50 @@ import copy
 import numpy as np
 import pandas as pd
 import datetime
-from src.contrib.param_generation.example_generator import create_example_hainich_file
 from src.contrib.auxil.files import get_SimPHony_build_path
+from src.contrib.param_generation.example_generator import create_example_swiss_cc_file
+from src.contrib.auxil.messaging import print_failure , print_sucess
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
-class Test_Hainich_From_File(unittest.TestCase):
-    def test_hainich_from_file(self):
-        print("Exporting a parameter file and afterwards calling the lib...", end='')
+class Test_Swiss_From_File(unittest.TestCase):
+    def test_swiss_from_file(self):
+
+        print("Calling the cpp lib directly from python...", end='')
         root_library_path = THIS_DIR
         root_data_path = os.path.join(root_library_path, os.pardir, os.pardir, 'data')
         # Specifying forcing and evalution data paths
-        forcing_file = os.path.join(root_data_path, 'hainich', 'input', 'Meteo_Hainich_dT30min_forcing_PHS.csv')
-        sapflux_file = os.path.join(root_data_path, 'hainich', 'eval', 'SAP_Hainich_Fagus-mean_dT30min_prog.csv')
-        psi_stem_file = os.path.join(root_data_path, 'hainich', 'eval', 'stem_water_pot.csv')
+        forcing_file = os.path.join(root_data_path, 'swiss', 'input', 'Forcing_Inter.csv')
+        soil_water_file = os.path.join(root_data_path, 'swiss', 'input', 'swiss_cc_soil_water_with_sd.csv')
+        tree_path = os.path.join(root_data_path, 'swiss', 'eval', 'Trees')
 
         found_cpp_lib, cpp_bin_path, cpp_lib_path = get_SimPHony_build_path()
         sys.path.append(cpp_lib_path)
 
         # Importing local libraries and paths
-        from SimPHony import Simulation_Single_Hainich
+        from SimPHony import Simulation_Single_Swiss
         from SimPHony import DateTime
 
-        parameter_file = os.path.join(THIS_DIR,"parameter_example.csv")
+        parameter_file = os.path.join(THIS_DIR, "parameter_example.csv")
 
-        create_example_hainich_file(parameter_file)
+        create_example_swiss_cc_file(parameter_file)
+
+
 
         # ----------------------------------------------------------------
         # PHS model simulation
         # ----------------------------------------------------------------
+
         # Set up the PHS simulation
         # read in the parameter file that we just created
-        sim = Simulation_Single_Hainich()
+        sim = Simulation_Single_Swiss()
         sim.Init_parameters_fn_single(parameter_file, 0)
-        sim.Init_input(forcing_file, sapflux_file, psi_stem_file)
+        sim.Init_input(soil_water_file, forcing_file, tree_path)
         sim.Set_water_pot_initials(-1.0, -0.2)
 
         # Specify Start and End of the Simulation
         format = "%Y-%m-%d %H:%M:%S"
-        date_start_str = "2023-04-01 00:00:00"
-        date_end_str = "2023-11-01 00:00:00"
+        date_start_str = "2018-05-01 00:00:00"
+        date_end_str = "2018-12-15 00:00:00"
         timestart = DateTime(date_start_str, format)
         timeend = DateTime(date_end_str, format)
 
@@ -53,11 +58,12 @@ class Test_Hainich_From_File(unittest.TestCase):
         # Get output and analysis data
         # output = sim.Get_output()
         an = sim.Get_analysis()
+        errors = an.Get_rmse()
 
-        REFERENCE_J_RMSE = 0.00030332450112261411;
-        REFERENCE_PSI_STEM_RMSE = 0.11689645042195608;
         EPS = 8
+        REFERENCE_PSI_LEAF_0_RMSE = 1.8912050337701065;
+        REFERENCE_PSI_LEAF_6_RMSE = 2.5209254139403057;
 
-        self.assertAlmostEqual(an.Get_Rmse_psi_stem(), REFERENCE_PSI_STEM_RMSE, places=EPS)
-        self.assertAlmostEqual(an.Get_Rmse_J(), REFERENCE_J_RMSE, places=EPS)
+        self.assertAlmostEqual(errors[0], REFERENCE_PSI_LEAF_0_RMSE, places=EPS)
+        self.assertAlmostEqual(errors[6], REFERENCE_PSI_LEAF_6_RMSE, places=EPS)
         print("Done!")

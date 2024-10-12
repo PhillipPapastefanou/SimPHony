@@ -9,7 +9,7 @@ class Config:
     def __init__(self):
         self.build_path = '/Users/pp/Documents/Repos/hydro_standalone/cmake-build-release'
         self.lib_path  = '/Users/pp/Documents/Repos/plant_hydro_standalone/'
-        self.theta_file  = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Water_Input_type2.csv"
+        self.soilwater_file  = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Water_Input_type2.csv"
         self.forcing_file  = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Forcing_Inter.csv"
         self.psi_stem_file  = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Forcing_Inter.csv"
         self.tree_folder_path  = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Trees"

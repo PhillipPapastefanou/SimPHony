@@ -22,6 +22,7 @@ public:
 
     void Init_parameters_default();
     void Init_parameters_filename(string filename, int index);
+    void Init_parameters(Parameters params);
 
     void Set_water_pot_initials(double psi_leaf, double psi_stem);
     void Run(DateTime timestart, DateTime timeend);

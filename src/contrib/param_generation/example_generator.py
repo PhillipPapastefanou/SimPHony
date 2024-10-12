@@ -29,7 +29,7 @@ class Subslicer:
         self.i += 1
         return self.array[self.i]
 
-def create_example_file(filename):
+def create_example_hainich_file(filename):
 
     plist = Parameter_Parser()
 
@@ -54,6 +54,61 @@ def create_example_file(filename):
     soil_layers[0].depth = 0.08
     soil_layers[1].depth = 0.16
     soil_layers[2].depth = 0.32
+
+    # ------------------------------------------------------
+    # Parameter setup
+    # ------------------------------------------------------
+
+    Convert_Soil_Parameters(soil_layers=soil_layers, parameters=params)
+
+    params.canopy_height = 31
+    params.huber_value = 1.0 / 3000.0
+    params.k_xylem_sat = 5 * 1000 / 18
+    params.stem_hydraulic_capacitance = 150 * 1000 / 18
+    params.leaf_hydraulic_capacitance = 0.01 * 1000 / 18
+    params.g_bark = 0.01
+    params.g0 = 0.005
+    params.g1 = 1.5
+    params.leaf_area_index = 4.8
+    params.psi_leaf_50_close = -2.3
+    params.d_50_close = 2.0
+    params.psi50_xylem = -3.5;
+    params.psi88_xylem = -5.5;
+    params.root_area_index = 4.5
+    params.jackson_root_beta = 0.96
+    params.tree_density = 64.0 / 10000.0
+    params.anet_max = 2.5
+    params.soil_water_model_type = Soil_Water_Model_Type.VanGenuchten.name
+    params.sw_rad_max = 1040
+
+    plist.Add(params)
+    plist.Write_Full_Parameter_File(filename=filename)
+
+def create_example_swiss_cc_file(filename):
+
+    plist = Parameter_Parser()
+
+    # Create parameter setup
+    params = Parameters()
+
+    nsoil_layers = 3
+    layer = SoilLayer()
+    layer.k_soil_sat = 1.0 / 100.0 / 86400.0
+    layer.psi_soil_sat = -0.5 * 1
+    # layer.camp_b  = 10.4
+    layer.theta_s = 0.48
+    layer.theta_r = 0.05
+    layer.pore_size_ind = 0.6
+
+    # Copy the soil layer and assume all layers have the same properties...
+    soil_layers = []
+    for s in range(nsoil_layers):
+        soil_layers.append(copy.deepcopy(layer))
+
+    # ... but not the depth
+    soil_layers[0].depth = 0.1
+    soil_layers[1].depth = 0.3
+    soil_layers[2].depth = 0.4
 
     # ------------------------------------------------------
     # Parameter setup
