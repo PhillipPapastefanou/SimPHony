@@ -31,7 +31,7 @@ TEST(Swiss_cc_tests, Apply_model_direct) {
     params.canopy_height = 31.0;
     params.huber_value  = 1.0/3000.0;
     params.k_xylem_sat = 5 * 1000 / 18.0;
-    params.stem_hydraulic_capacitance_max = 150 * 1000 / 18.0;
+    params.stem_hydraulic_capacitance_max = 150 * 1000 / 18.0 * 0.1;
     params.leaf_hydraulic_capacitance = 0.01 *1000/18.0;
     params.g_bark = 0.01;
     params.g0 = 0.005;
@@ -53,7 +53,7 @@ TEST(Swiss_cc_tests, Apply_model_direct) {
     params.soil_layers.resize(3);
 
     for (Soil_layer& layer: params.soil_layers) {
-        layer.k_soil_sat = 1.0 / 100.0 / 86400.0;
+        layer.k_soil_sat = 1.0 / 100.0 / 86400.0 * 0;
 //        layer.clay_fraction = 0.6;
 //        layer.sand_fraction = 0.025;
 //        layer.organic_matter_fraction = 0.005;
@@ -90,13 +90,17 @@ TEST(Swiss_cc_tests, Apply_model_direct) {
 
     model.Run(begin, end);
 
+    const Output& output = model.Get_output();
+
+    double x = output.Get_psi_leaf()[48*20];
+    double y = output.Get_psi_leaf()[48*100];
+
     Analysis_Swiss analysis(&model, swiss_drought_tress, params);
     analysis.Run();
 
     std::vector<double> errors = analysis.Get_rmse();
 
     const double MAX_RMSE_PSI_STEM = 10;
-
 
 
     for (double error: errors) {

@@ -28,7 +28,6 @@ void Campbell::CalculatePsiAndKs() {
         exit(99);
     }
 
-
     for (int i = 0; i < theta_array.size(); ++i) {
 
         // Get water contents today for the number of soil layers
@@ -57,7 +56,6 @@ void Campbell::CalculatePsiAndKs() {
             double camp_b = layer.camp_b;
             double theta_s = layer.theta_s;
             double psi_soil_sat = layer.psi_soil_sat;
-
 
             double base = theta_list[s] / theta_s;
             if(base < 0.0){

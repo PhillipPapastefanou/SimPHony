@@ -55,7 +55,7 @@ class Parameter_Parser():
             self.df.to_csv(filename, index=False,  float_format='%.4g')
 
 
-    def Read_Parameter_List(self, filename):
+    def Read_Parameter_List(self, filename, nrows = -1):
 
         self.parameters_list.clear()
         self.soil_layers_list.clear()
@@ -65,28 +65,24 @@ class Parameter_Parser():
         params = Parameters()
         var_list = vars(params)
 
-        for name in var_list:
-            if hasattr(params, name):
-                if name in df.columns:
-                    setattr(params, name,  df.loc[0, name])
-                else:
-                    print(f"could not find {name}")
+        if nrows < 0:
+            nrows = df.shape[0]
 
-        params.conductivity_fraction_type = Conductivity_Fraction_Module_Type[params.conductivity_fraction_type].name
-        params.stem_flow_type = Stem_Flow_Model_Type[params.stem_flow_type].name
-        params.soil_water_model_type = Soil_Water_Model_Type[params.soil_water_model_type].name
+        for row_id in range(nrows):
 
-        soil_layers = params.Create_soil_layers()
+            for name in var_list:
+                if hasattr(params, name):
+                    if name in df.columns:
+                        setattr(params, name,  df.loc[row_id, name])
+                    else:
+                        print(f"could not find {name}")
 
-        self.soil_layers_list.append(soil_layers)
-        self.parameters_list.append(params)
+            params.conductivity_fraction_type = Conductivity_Fraction_Module_Type[params.conductivity_fraction_type].name
+            params.stem_flow_type = Stem_Flow_Model_Type[params.stem_flow_type].name
+            params.soil_water_model_type = Soil_Water_Model_Type[params.soil_water_model_type].name
 
+            soil_layers = params.Create_soil_layers()
 
-
-
-
-
-
-        self.parameters_list.append(params)
-
+            self.soil_layers_list.append(soil_layers)
+            self.parameters_list.append(params)
 

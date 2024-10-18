@@ -63,9 +63,6 @@ sim.Init_input(forcing_file, sapflux_file, psi_stem_file)
 def LHS_rmse(rt_params):
 
 
-
-
-
     Convert_Soil_Parameters(soil_layers=soil_layers, parameters=params)
 
     # params.canopy_height = 31

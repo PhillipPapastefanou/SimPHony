@@ -2,6 +2,8 @@ import unittest
 import sys
 import os
 import copy
+from ast import parse
+
 import numpy as np
 import pandas as pd
 import datetime
@@ -18,6 +20,9 @@ from src.contrib.auxil.files import get_soil_water_swiss_cc
 from src.contrib.auxil.output_df import create_output_df
 from src.contrib.auxil.output_plotter import std_plot
 
+from src.contrib.swiss_tree_parser import SwissTreeParser
+from src.contrib.swiss_tree_parser import Tree
+
 
 forcing_file, forcing_df = get_forcing_swiss_cc()
 soil_water_file, soil_water_df = get_soil_water_swiss_cc()
@@ -32,11 +37,16 @@ sys.path.append(os.path.join(THIS_DIR, os.pardir, os.pardir, os.pardir))
 found_cpp_lib, cpp_bin_path, cpp_lib_path = get_SimPHony_build_path()
 sys.path.append(cpp_lib_path)
 
+
 # Importing local libraries and paths
 from SimPHony import Simulation_Single_Swiss
 from SimPHony import DateTime
 
-parameter_file = os.path.join("/Users/pp/data/Simulations/A08_Hydraulics_standalone/swiss/test/post/parameters_best_mean_alive.csv")
+parameter_file = os.path.join("/Users/pp/data/Simulations/A08_SimPHony/swiss/test/post/parameters_best_mean_alive.csv")
+
+# Read in the Swiss trees
+parser = SwissTreeParser(tree_path)
+
 
 # ----------------------------------------------------------------
 # PHS model simulation
@@ -64,7 +74,6 @@ sim.Run(timestart, timeend)
 an = sim.Get_analysis()
 errors = an.Get_rmse()
 
-
 # Getting the raw output data
 output = sim.Get_output()
 # Getting the raw analysis data
@@ -77,14 +86,21 @@ df = create_output_df(output, date_start_str)
 # Plotting model output
 # ----------------------------------------------------------------
 
-std_plot(df = df,
-         timebegin= date_start_str,
-         timeend  = date_end_str,
-         path = os.path.join(THIS_DIR, 'plt','01_std_plot.png'))
+import matplotlib.pyplot as plt
+plt.scatter(parser.df_alive_all.index, parser.df_alive_all['xylem_pressure'])
+plt.plot(df['psiLeaf'])
+plt.show()
 
-std_plot(df = df,
-         timebegin="2018-07-01 00:00:00",
-         timeend="2018-10-01 00:00:00",
-         path = os.path.join(THIS_DIR, 'plt','01_std_plot_jul.png'))
+
+
+# std_plot(df = df,
+#          timebegin= date_start_str,
+#          timeend  = date_end_str,
+#          path = os.path.join(THIS_DIR, 'plt','01_std_plot.png'))
+#
+# std_plot(df = df,
+#          timebegin="2018-07-01 00:00:00",
+#          timeend="2018-10-01 00:00:00",
+#          path = os.path.join(THIS_DIR, 'plt','01_std_plot_jul.png'))
 
 

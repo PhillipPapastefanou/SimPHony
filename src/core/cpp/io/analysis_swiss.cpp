@@ -103,9 +103,7 @@ void Analysis_Swiss::Run() {
 }
 
 void Analysis_Swiss::compare_psi_model_obs() {
-
-    this->swiss_psi_leaf_states->Calculate_rmse(output.Get_psi_stem(), dts);
-
+    this->swiss_psi_leaf_states->Calculate_rmse(output.Get_psi_leaf(), dts);
 }
 
 std::vector<TimeSlice> Analysis_Swiss::Get_time_slices() {
