@@ -21,7 +21,7 @@ T_\mathrm{bark} = 0
 ```
 # Application
 ## Prerequisites 
-Get CMake. Get a cpp compiler and an mpi library. It should at least support the 2017 standard. We recommend clang or intel compiles as the model runs up to 5x slower when compiled with GNU.
+Get CMake. Get a cpp compiler and a mpi library. It should at least support the 2017 standard. We recommend clang or intel compiles as the model runs up to 5x slower when compiled with GNU.
 Create a Python environment that contains the following packages:
 * numpy
 * pandas
@@ -29,6 +29,7 @@ Create a Python environment that contains the following packages:
 * mpi4py
 * scipy
 * ...
+Note: When setting up the python environment on an HPC: Make sure to link your mpi4py installation to the existing MPI setup
 ## Setup
 Clone this repository and create a build folder in the main direcorty. Navigate to that build directory in the terminal and run:
 ``
@@ -39,9 +40,50 @@ Once that build system is finished successfully, run
 make
 ``.
 This should (amongst other) create two files: A binary/executable called SimPHony_tests and a python library ending with `*.so`.
+### MPI-BGC cluster setup
+MPI BGC cluster supports intel and gnu cpp compiler and intel and openmpi MPI libraries. So far only intel cpp libraries have been used as these make the model ~5x faster compared to GNU.
+Futhermore, with intel cpp compiler only intelmpi has been successfully tested.
+#### Intel setup
+To build the SimPHony library we first need to have our python environment setup.
+Therefor, we load the intel cpp and mpi libary versions:
+``
+ml intel/2023.0.0  impi/2021.6.0
+ml netcdf/4.9.0
+ml all/Miniconda3
+``
+We need to figure out where the mpi compiler is located.
+``
+which mpicc
+``
+which for example yields `/opt/intel/oneapi/mpi/2021.6.0/bin/mpicc`
+Then we create a new pyhon environment and install the libraries:
+
+```
+conda create --prefix /Net/Groups/BSI/work_scratch/<user>/envs/SimPHony_intel_oneapi
+conda activate /Net/Groups/BSI/work_scratch/<user>/envs/SimPHony_intel_oneapi
+
+conda config --add pkgs_dirs /Net/Groups/BSI/work_scratch/<user>/pkgs/
+
+conda install -y matplotlib
+conda install -y conda-forge::scipy
+ env MPICC=/opt/intel/oneapi/mpi/2021.6.0/bin/mpicc python -m pip install --no-cache-dir  mpi4py
+conda install -y -c conda-forge xarray netCDF4
+conda install -y numpy
+conda install -y pandas
+conda install -y conda-forge::pybind11
+```
+
+To build SimPHony we activate the before created environment. Then we have to make sure to export the correct cpp libraries
+``
+export CC=/opt/intel/oneapi/compiler/2023.0.0/linux/bin/intel64/icc
+export CXX=/opt/intel/oneapi/compiler/2023.0.0/linux/bin/intel64/icpc
+``
+We can also get these with the `which` command.
+Finally, we build SimPHony using cmake and as described above.
+
 
 ## Tests
-Before running the example scripts one should make sure that SimPHony has been built sucessfully. Therefore unittests both exist for cpp library and the python scripts. 
+Before running the example scripts one should make sure that SimPHony has been built sucessfully. Therefore, unittests both exist for cpp library and the python scripts. 
 The cpp unittests can either be run by some IDE (integrated development environment, such as Pycharm or VS-code) or directly by executing the binary. The Python unittests can also be run via IDE or from the terminal in the main directory:
 ``
 python -m unittest tests/main.py

@@ -10,9 +10,11 @@ set(source
         hainich/test_driver_exist.cpp
         hainich/source_hainich_direct_test.cpp
         hainich/source_hainich_from_file_test.cpp
+        hainich/source_hainich_multi_from_file_test.cpp
 
         swiss_cc/source_swiss_cc_direct_test.cpp
         swiss_cc/source_swiss_cc_from_file_test.cpp
+        swiss_cc/source_swiss_cc_multi_from_file_test.cpp
 
         main.cpp
         )

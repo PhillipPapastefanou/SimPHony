@@ -5,7 +5,7 @@ import copy
 import numpy as np
 import pandas as pd
 import datetime
-from src.contrib.param_generation.example_generator import create_example_parameter_list
+from src.contrib.param_generation.example_generator import create_example_hainich_parameter_list
 from src.contrib.auxil.files import get_SimPHony_build_path
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -28,7 +28,7 @@ class Test_Hainich_From_File_Multi(unittest.TestCase):
 
         os.makedirs(os.path.join(THIS_DIR, 'test', 'input'), exist_ok=True)
         parameter_file = os.path.join(THIS_DIR, 'test', 'input', "parameter_example_2.csv")
-        create_example_parameter_list(2, parameter_file)
+        create_example_hainich_parameter_list(2, parameter_file)
 
         # ----------------------------------------------------------------
         # PHS model simulation

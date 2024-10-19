@@ -127,6 +127,8 @@ void TimeSlice::CalculatePeaks() {
         if(value > maximum)
             maximum = value;
     }
+
+    slice.clear();
     // Todo Figure out why minmax and the second result is not working
 //   auto result =   std::minmax(slice.begin(), slice.end());
 //   minimum =  *result.first;

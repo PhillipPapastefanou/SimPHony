@@ -139,8 +139,7 @@ def create_example_swiss_cc_file(filename):
     plist.Add(params)
     plist.Write_Full_Parameter_File(filename=filename)
 
-
-def create_example_parameter_list(n, filename):
+def create_example_hainich_parameter_list(n, filename):
 
     ncombs = n
 

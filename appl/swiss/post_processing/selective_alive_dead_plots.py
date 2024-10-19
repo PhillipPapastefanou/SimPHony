@@ -41,7 +41,7 @@ from SimPHony import Simulation_Single_Swiss
 from SimPHony import DateTime
 
 root_output_directory = "/Users/pp/data/Simulations/A08_SimPHony/swiss"
-scenario_name = "u_all"
+scenario_name = "wcont_full_1E6"
 input_path = os.path.join(root_output_directory, scenario_name, 'input')
 output_path = os.path.join(root_output_directory, scenario_name, 'output')
 post_path = os.path.join(root_output_directory, scenario_name, 'post')
@@ -64,7 +64,7 @@ for id, ai in zip(selective_range,ax_indexes) :
     # Set up the PHS simulation
     # read in the parameter file that we just created
     sim = Simulation_Single_Swiss()
-    sim.Init_parameters_fn_single(parameter_file, 1000)
+    sim.Init_parameters_fn_single(parameter_file, 0)
     sim.Init_input(soil_water_file, forcing_file, tree_path)
     sim.Set_water_pot_initials(-1.0, -0.2)
 
@@ -101,8 +101,10 @@ for id, ai in zip(selective_range,ax_indexes) :
         tree_df = tree_parser.trees[id].df
 
     ax = fig.add_subplot(3,2, ai)
-    ax.scatter(tree_df.index, tree_df['xylem_pressure'])
-    ax.plot(df_mod['psiLeaf'])
+    ax.scatter(tree_df.index, tree_df['xylem_pressure'], color= 'black', zorder =2)
+    ax.plot(df_mod['psiLeaf'], zorder =1, c = 'tab:green')
+    ax.plot(df_mod['psiStem'], zorder =1, c = 'tab:brown')
+    ax.set_ylim((-7.5,0))
 plt.tight_layout()
 plt.savefig(os.path.join(post_path, "Best_single_fit.png"), dpi = 150)
 
