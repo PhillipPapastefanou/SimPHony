@@ -15,6 +15,8 @@ public:
     Output(const Parameters& parameters);
     ~Output();
 
+
+
     void Add_Timestep(double t);
     void Add_DateTime(DateTime t);
 
@@ -39,6 +41,8 @@ public:
 
     void Add_steps_psi_leaf(int steps_psi_leaf);
     void Add_steps_psi_stem_ground(int steps_psi_stem);
+
+    void Clear();
 
     const vector<DateTime> &Get_dates() const;
     const vector<long> &Get_times() const;

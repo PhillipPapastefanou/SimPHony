@@ -85,11 +85,15 @@ void Simulation_Multi_Swiss::Run(DateTime timestart, DateTime timeend) {
         if (elapsed_timer.count() > params.constants.TMUTE_MILLISEC){
 
             auto elapsed_simulation = std::chrono::duration_cast<std::chrono::milliseconds>( end_timer - start_simulatio);
-
             std::cout << "Rank " << rank << ": Elapsed time: " << format_duration(elapsed_simulation) << " ";
             std::cout << "performed " << r << " out of " << parameter_list.size() << " simulations. "<< std::endl;
             start_timer = std::chrono::high_resolution_clock::now();
         }
+
+
+        // Because of the pybind module output of each model when associated with the analysis might not be cleared automatically
+        model.Clear_output();
+
     }
 
     std::cout << "Simulation finished! "<< std::endl;

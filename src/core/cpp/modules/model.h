@@ -18,6 +18,7 @@ public:
     void Set_initial_conditions(double psi_leaf_zero, double psi_soil_zero);
     void Run(DateTime begin, DateTime end);
     const Output& Get_output();
+    void Clear_output();
 private:
     // Input references
     const Parameters& params;

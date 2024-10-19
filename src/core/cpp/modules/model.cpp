@@ -149,3 +149,7 @@ void Model::add_output() {
 const Output &Model::Get_output() {
     return output;
 }
+
+void Model::Clear_output() {
+    output.Clear();
+}

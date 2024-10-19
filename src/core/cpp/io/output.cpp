@@ -190,6 +190,27 @@ vector<float> Output::Get_J_per_area() const {
     return Ja_adapted;
 }
 
+void Output::Clear() {
+    times.clear();
+    dates.clear();
+    Ta.clear();
+    Ja.clear();
+    Ja_adapted.clear();
+    Ga.clear();
+    Gaa.clear();
+    psi_leaf_a.clear();
+    psi_stem_ground_a.clear();
+    psi_stem_a.clear();
+    psi_soil_aa.clear();
+    gs_a.clear();
+    beta_a.clear();
+    vpd_a.clear();
+    anet_a.clear();
+    k_soil_aa.clear();
+    steps_psi_leaf_a.clear();
+    steps_psi_stem_a.clear();
+}
+
 
 
 
