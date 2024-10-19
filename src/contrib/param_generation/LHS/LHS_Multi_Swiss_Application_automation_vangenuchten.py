@@ -46,7 +46,7 @@ def Calculate_LHS_per_process(rank, ncombs, path):
     k_soil_sats_logs = rescale(slicer.get(), min=-8, max = -5)
     psi_soil_sats= rescale(slicer.get(), min=-0.0001, max = -0.05)
     theta_s = rescale(slicer.get(), min=0.5, max = 0.6)
-    theta_r = rescale(slicer.get(), min=0.03, max = 0.09)
+    theta_r = rescale(slicer.get(), min=0.01, max = 0.09)
     pore_size_ind = rescale(slicer.get(), min=0.40, max = 0.60)
 
     soil_collection = []
@@ -75,7 +75,7 @@ def Calculate_LHS_per_process(rank, ncombs, path):
     anet_max    = rescale(slicer.get(), min = 0.05, max = 0.5)
     sel_cols.append("anet_max")
 
-    k_xylems_sats   = rescale(slicer.get(), min=1.0, max=10.0)
+    k_xylems_sats   = rescale(slicer.get(), min=0.1, max=10.0)
     k_xylems_sats *= KG_TO_MOL
     sel_cols.append("k_xylem_sat")
 
@@ -104,7 +104,7 @@ def Calculate_LHS_per_process(rank, ncombs, path):
     psi50_xylems    = rescale(slicer.get(), min = -3.7, max = -3.4)
     sel_cols.append("psi_50_xylem")
 
-    psi88_xylems_offset    = rescale(slicer.get(), min = 0.6, max = 1.0)
+    psi88_xylems_offset    = rescale(slicer.get(), min = 1.0, max = 1.5)
     sel_cols.append("psi_88_xylem")
 
     root_area_indexes    = rescale(slicer.get(), min = 2, max = 14)
@@ -120,7 +120,7 @@ def Calculate_LHS_per_process(rank, ncombs, path):
     for i in range(ncombs):
         params = Parameters()
 
-        params.id = i;
+        params.id = i
         params.root_area_index = root_area_indexes[i]
         soil_layer_top = soil_collection[i]
 

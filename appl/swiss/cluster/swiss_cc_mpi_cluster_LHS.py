@@ -29,14 +29,14 @@ config.forcing_file = forcing_file
 config.tree_folder = tree_folder
 config.soilwater_file = soilwater_file
 
-root_output_directory = "/Net/Groups/BSI/work_scratch/ppapastefanou/simulations/SimPHony/swiss_cc"
-scenario_name = "test_full"
+root_output_directory = "/Net/Groups/BSI/scratch/ppapastefanou/simulations/SimPHony/swiss_cc"
+scenario_name = "scale_full"
 config.scenario_path =  os.path.join(root_output_directory, scenario_name)
 config.output_path =  os.path.join(root_output_directory, scenario_name, 'output')
 config.post_path =   os.path.join(root_output_directory, scenario_name, 'post')
 config.input_path =   os.path.join(root_output_directory, scenario_name, 'input')
-config.nsims = 1000000
-config.nbest = 100
+config.nsims = 10000000
+config.nbest = 50
 sys.path.append(config.build_path)
 
 from src.contrib.parallel_setup_swiss_with_LHS import ParallelSetupHainichWithLHS
