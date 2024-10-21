@@ -64,7 +64,7 @@ void Van_Genuchten::CalculatePsiAndKs() {
 
             double base = (theta_list[s] - theta_r) / (theta_s  - theta_r);
 
-            // Absoultely no freakin water
+            // Absolutely no freakin water
             if(base < 0.0){
                 base = 0.000001;
             }

@@ -41,13 +41,12 @@ from SimPHony import Simulation_Single_Swiss
 from SimPHony import DateTime
 
 root_output_directory = "/Users/pp/data/Simulations/A08_SimPHony/swiss"
-scenario_name = "wcont_full_1E6"
+scenario_name = "wcont_full_1E7_closer_anet_g1"
 input_path = os.path.join(root_output_directory, scenario_name, 'input')
 output_path = os.path.join(root_output_directory, scenario_name, 'output')
 post_path = os.path.join(root_output_directory, scenario_name, 'post')
 
 selective_range = ['mean_alive', 0, 3, 6, 7]
-selective_range = [1, 0, 3, 6, 7]
 #selective_range = [0, 4, 6, 7]
 ax_indexes = np.arange(1,6)
 
@@ -64,7 +63,7 @@ for id, ai in zip(selective_range,ax_indexes) :
     # Set up the PHS simulation
     # read in the parameter file that we just created
     sim = Simulation_Single_Swiss()
-    sim.Init_parameters_fn_single(parameter_file, 0)
+    sim.Init_parameters_fn_single(parameter_file, 1)
     sim.Init_input(soil_water_file, forcing_file, tree_path)
     sim.Set_water_pot_initials(-1.0, -0.2)
 
