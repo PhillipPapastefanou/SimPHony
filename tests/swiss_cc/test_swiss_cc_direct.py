@@ -17,7 +17,7 @@ class Test_Swiss_Direct(unittest.TestCase):
         root_data_path = os.path.join(root_library_path, os.pardir, os.pardir, 'data')
         # Specifying forcing and evalution data paths
         forcing_file = os.path.join(root_data_path, 'swiss', 'input', 'Forcing_Inter.csv')
-        soil_water_file = os.path.join(root_data_path, 'swiss', 'input', 'swiss_cc_soil_water_with_sd.csv')
+        soil_water_file = os.path.join(root_data_path, 'swiss', 'input', 'vwc_swicc_cc_2023_indiv.csv')
         tree_path = os.path.join(root_data_path, 'swiss', 'eval', 'Trees')
 
         found_cpp_lib, cpp_bin_path, cpp_lib_path = get_SimPHony_build_path()
@@ -108,8 +108,12 @@ class Test_Swiss_Direct(unittest.TestCase):
         errors = an.Get_rmse()
 
         EPS = 8
-        REFERENCE_PSI_LEAF_0_RMSE = 1.8912050337701065;
-        REFERENCE_PSI_LEAF_6_RMSE = 2.5209254139403057;
+        # Previous values for the other soil water input
+        # REFERENCE_PSI_LEAF_0_RMSE = 1.8912050337701065;
+        # REFERENCE_PSI_LEAF_6_RMSE = 2.5209254139403057;
+
+        REFERENCE_PSI_LEAF_0_RMSE = 2.3105808610161884;
+        REFERENCE_PSI_LEAF_6_RMSE = 2.3204660959242789;
 
         self.assertAlmostEqual(errors[0], REFERENCE_PSI_LEAF_0_RMSE, places=EPS)
         self.assertAlmostEqual(errors[6], REFERENCE_PSI_LEAF_6_RMSE, places=EPS)

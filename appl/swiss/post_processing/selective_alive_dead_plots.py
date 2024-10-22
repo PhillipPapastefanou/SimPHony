@@ -41,7 +41,7 @@ from SimPHony import Simulation_Single_Swiss
 from SimPHony import DateTime
 
 root_output_directory = "/Users/pp/data/Simulations/A08_SimPHony/swiss"
-scenario_name = "wcont_full_1E7_closer_anet_g1"
+scenario_name = "2023swp_red_1"
 input_path = os.path.join(root_output_directory, scenario_name, 'input')
 output_path = os.path.join(root_output_directory, scenario_name, 'output')
 post_path = os.path.join(root_output_directory, scenario_name, 'post')

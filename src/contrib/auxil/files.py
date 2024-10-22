@@ -72,9 +72,9 @@ def get_forcing_swiss_cc():
 def get_soil_water_swiss_cc():
     root_library_path = get_lib_directory()
     root_data_path = os.path.join(root_library_path, 'data')
-    file_soil_water = os.path.join(root_data_path, 'swiss', 'input', 'swiss_cc_soil_water_with_sd.csv')
+    file_soil_water = os.path.join(root_data_path, 'swiss', 'input', 'vwc_swicc_cc_2023_indiv.csv')
     df_soil_water = pd.read_csv(file_soil_water)
-    df_soil_water['date'] = pd.to_datetime(df_soil_water['date'])
+    df_soil_water['dates'] = pd.to_datetime(df_soil_water['dates'])
     return file_soil_water, df_soil_water
 
 def get_trees_psi_leaf_cc():

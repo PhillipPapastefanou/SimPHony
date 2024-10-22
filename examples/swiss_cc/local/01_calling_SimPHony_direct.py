@@ -56,11 +56,11 @@ params = Parameters()
 nsoil_layers = 3
 layer = SoilLayer()
 layer.k_soil_sat = 1.0 / 100.0 / 86400.0
-layer.psi_soil_sat = -0.5 * 1
+layer.psi_soil_sat = -0.022 * 1000/9.81
 # layer.camp_b  = 10.4
-layer.theta_s = 0.48
-layer.theta_r = 0.05
-layer.pore_size_ind = 0.6
+layer.theta_s = 0.6
+layer.theta_r = 0.00
+layer.pore_size_ind = 0.22
 
 # Copy the soil layer and assume all layers have the same properties...
 soil_layers = []
