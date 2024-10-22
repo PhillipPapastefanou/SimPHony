@@ -65,14 +65,8 @@ void Input_Swiss_Std_Variation::Read_N_Parse() {
             sl[s] = soil_water_input[i][s];
         }
         theta_per_layer.push_back(sl);
-
-        // Copy std to each layer
-        // We assume that the std applies ot each of the three layers
-        vector<float> sl_std(3);
-        for (int s = 0; s < 3; ++s) {
-            sl_std[s] = soil_water_input[i][3];
-        }
-        theta_sd_per_layer.push_back(sl_std);
+        // Theta sd is in the four column of the dataset
+        theta_sd.push_back(soil_water_input[i][3]);
     }
 
     // Slice forcing input according to indexes as we might have different dates

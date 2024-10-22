@@ -79,7 +79,7 @@ void Saxton06::CalculatePsiAndKs() {
         if (!(std::abs(parameters.wcont_sigma_deviation) < 1E-8 )){
 
             for (int s = 0; s < theta_list.size(); ++s) {
-                theta_list[s] += parameters.wcont_sigma_deviation * input_module.theta_sd[i];
+                theta_list[s] += parameters.wcont_sigma_deviation * input_module.theta_sd_per_layer[i][s];
             }
         }
 

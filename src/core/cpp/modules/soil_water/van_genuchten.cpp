@@ -39,7 +39,7 @@ void Van_Genuchten::CalculatePsiAndKs() {
         // but only if this value is not zero
         if (std::abs(parameters.wcont_sigma_deviation) > 1E-8 ){
             for (int s = 0; s < theta_list.size(); ++s) {
-                theta_list[s] += parameters.wcont_sigma_deviation * input_module.theta_sd[i];
+                theta_list[s] += parameters.wcont_sigma_deviation * input_module.theta_sd_per_layer[i][s];
             }
         }
 
@@ -75,7 +75,6 @@ void Van_Genuchten::CalculatePsiAndKs() {
             }
 
             psi_row[s] = psi_soil_sat * std::pow((std::pow(base, (-1.0 / m_vgn)) - 1.0), (1.0 / n_vgn));
-
             k_row[s] = Ks * std::sqrt(base) * std::pow(1.0 - std::pow(1.0 - std::pow(base, (1.0 / m_vgn)), m_vgn), 2.0);
         }
 

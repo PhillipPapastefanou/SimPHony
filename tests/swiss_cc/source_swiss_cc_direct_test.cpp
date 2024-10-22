@@ -6,6 +6,7 @@
 #include "gtest/gtest.h"
 #include "../../src/core/cpp/framework/parameters.h"
 #include "../../src/core/cpp/io/input_swiss_std_variation.h"
+#include "../../src/core/cpp/io/input_swiss_indiv_variation.h"
 #include "../../src/core/cpp/modules/model.h"
 #include "../../src/core/cpp/io/time_series.h"
 #include "../../src/core/cpp/io/analysis_swiss.h"
@@ -13,7 +14,7 @@
 
 TEST(Swiss_cc_tests, Apply_model_direct) {
 
-    std::cout << "Testing if RMSE psi_leaf is not nan...";
+    std::cout << "Testing direct application of the swiss_cc inputs" << std::endl;
 
     using std::cout;
     using std::endl;
@@ -21,7 +22,6 @@ TEST(Swiss_cc_tests, Apply_model_direct) {
 
     string forcing_file = "../data/swiss/input/Forcing_Inter.csv";
     string tree_folder_path = "../data/swiss/eval/Trees";
-    string theta_file = "../data/swiss/input/swiss_cc_soil_water_with_sd.csv";
 
     Swiss_Drought_Trees swiss_drought_tress(tree_folder_path);
 
@@ -53,7 +53,8 @@ TEST(Swiss_cc_tests, Apply_model_direct) {
     params.soil_layers.resize(3);
 
     for (Soil_layer& layer: params.soil_layers) {
-        layer.k_soil_sat = 1.0 / 100.0 / 86400.0 * 0;
+        layer.k_soil_sat = 1.0 / 100.0 / 86400.0;
+
 //        layer.clay_fraction = 0.6;
 //        layer.sand_fraction = 0.025;
 //        layer.organic_matter_fraction = 0.005;
@@ -74,40 +75,55 @@ TEST(Swiss_cc_tests, Apply_model_direct) {
     double psi_leaf_init = -1.0;
     double psi_stem_init = -0.2;
 
-    Input_Swiss_Std_Variation input;
-    input.Add_Forcing_File(forcing_file);
-    input.Add_Soilwater_File(theta_file);
-    input.Read_N_Parse();
 
-    auto start_clock = std::chrono::high_resolution_clock::now();
-    Model model(params, input);
+    for (int i = 0; i < 2; ++i) {
 
-    model.Set_derived_parameters();
-    model.Set_initial_conditions(psi_leaf_init, psi_stem_init);
+        std:unique_ptr<Input> input;
+        string theta_file;
 
-    DateTime begin =  DateTime("2018-05-01 00:00:00", "%Y-%m-%d %H:%M:%S");
-    DateTime end   =  DateTime("2018-12-15 00:00:00", "%Y-%m-%d %H:%M:%S");
+        if (i == 0){
+            input = std::make_unique<Input_Swiss_Indiv_Variation>();
+            theta_file =  "../data/swiss/input/vwc_swicc_cc_2023_indiv.csv";
+            std::cout << "Testing the Input_Swiss_Indiv_Variation ...";
+        }
+        else{
+            input = std::make_unique<Input_Swiss_Std_Variation>();
+            theta_file = "../data/swiss/input/swiss_cc_soil_water_with_sd.csv";
+            std::cout << "Testing the Input_Swiss_Std_Variation ...";
+        }
 
-    model.Run(begin, end);
+        input->Add_Forcing_File(forcing_file);
+        input->Add_Soilwater_File(theta_file);
+        input->Read_N_Parse();
 
-    const Output& output = model.Get_output();
+        auto start_clock = std::chrono::high_resolution_clock::now();
+        Model model(params, *input);
 
-    double x = output.Get_psi_leaf()[48*20];
-    double y = output.Get_psi_leaf()[48*100];
+        model.Set_derived_parameters();
+        model.Set_initial_conditions(psi_leaf_init, psi_stem_init);
 
-    Analysis_Swiss analysis(&model, swiss_drought_tress, params);
-    analysis.Run();
+        DateTime begin =  DateTime("2018-05-01 00:00:00", "%Y-%m-%d %H:%M:%S");
+        DateTime end   =  DateTime("2018-12-15 00:00:00", "%Y-%m-%d %H:%M:%S");
 
-    std::vector<double> errors = analysis.Get_rmse();
+        model.Run(begin, end);
 
-    const double MAX_RMSE_PSI_STEM = 30;
+        const Output& output = model.Get_output();
 
+        double x = output.Get_psi_leaf()[48*20];
+        double y = output.Get_psi_leaf()[48*100];
 
-    for (double error: errors) {
-        ASSERT_LT(error,MAX_RMSE_PSI_STEM);
+        Analysis_Swiss analysis(&model, swiss_drought_tress, params);
+        analysis.Run();
+
+        std::vector<double> errors = analysis.Get_rmse();
+
+        const double MAX_RMSE_PSI_STEM = 30;
+
+        for (double error: errors) {
+            ASSERT_LT(error,MAX_RMSE_PSI_STEM);
+        }
+
+        cout << "Done!" << endl;
     }
-
-    cout << "Done!" << endl;
-
 }
 

@@ -22,7 +22,7 @@ TEST(Swiss_cc_tests, Apply_model_multi_from_file) {
 
     string forcing_file = "../data/swiss/input/Forcing_Inter.csv";
     string tree_folder_path = "../data/swiss/eval/Trees";
-    string theta_file = "../data/swiss/input/swiss_cc_soil_water_with_sd.csv";
+    string theta_file = "../data/swiss/input/vwc_swicc_cc_2023_indiv.csv";
     string parameters_list = "../tests/swiss_cc/test/input/parameter_example_2.csv";
 
 

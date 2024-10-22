@@ -26,7 +26,8 @@ void Simulation_Multi_Swiss::Init_input(std::string theta_file, std::string forc
     swiss_trees = std::make_unique<Swiss_Drought_Trees>(swiss_trees_folder);
 
     // Make this a variable input
-    input = std::make_unique<Input_Swiss_Std_Variation>();
+    // input = std::make_unique<Input_Swiss_Std_Variation>();
+    input = std::make_unique<Input_Swiss_Indiv_Variation>();
     input->Add_Soilwater_File(theta_file);
     input->Add_Forcing_File(forcing_file);
     input->Read_N_Parse();
@@ -64,7 +65,7 @@ void Simulation_Multi_Swiss::Run(DateTime timestart, DateTime timeend) {
         // Parameter index is not yet being used
         int parameter_index = std::get<1>(parameter_list[r]);
 
-        input = std::make_unique<Input_Swiss_Std_Variation>();
+        input = std::make_unique<Input_Swiss_Indiv_Variation>();
         input->Add_Soilwater_File(theta_file);
         input->Add_Forcing_File(forcing_file);
         input->Read_N_Parse();

@@ -10,11 +10,10 @@ parameters(parameters), input_module(input){
 
     if(std::abs(parameters.wcont_sigma_deviation) > 1E-8 ){
 
-        if (input_module.theta_sd.empty()){
+        if (input_module.theta_sd_per_layer.empty()){
             std::cout << "Trying to use water content deviation without having water content data available." << std::endl;
             std::cout << "Consider setting parameter wcont_sigma_deviation to 0.0" << std::endl;
             exit(99);
-
         }
 
     }

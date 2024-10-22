@@ -28,7 +28,7 @@ public:
 
     // Volumetric water standard deviation [m3 m-3]
     // Currently only available for the Swiss sites
-    std::vector<float> theta_sd;
+    std::vector<std::vector<float>> theta_sd_per_layer;
 };
 
 
