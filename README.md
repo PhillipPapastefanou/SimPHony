@@ -83,10 +83,11 @@ Finally, we build SimPHony using cmake and as described above.
 
 
 ## Tests
-Before running the example scripts one should make sure that SimPHony has been built sucessfully. Therefore, unittests both exist for cpp library and the python scripts. 
-The cpp unittests can either be run by some IDE (integrated development environment, such as Pycharm or VS-code) or directly by executing the binary. The Python unittests can also be run via IDE or from the terminal in the main directory:
+Before running the example scripts one should make sure that SimPHony has been built sucessfully. Therefore, unittests both exist for cpp library and the python application lib. 
+The cpp unittests can either be run by some IDE (integrated development environment, such as Clion or VS-code) or directly by executing the test binary.
+The Python unittests can also be run via IDE or from the terminal. To run all tests we recommend using the designated bash script for that in the tests folder:
 ``
-python -m unittest tests/main.py
+sh run_all_test.sh
 ``
 ## Usage
 

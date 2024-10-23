@@ -7,6 +7,7 @@ examples/hainich/local/plt
 examples/hainich/local/parameter_example.csv
 examples/hainich/local/parameter_example_multi.csv
 examples/swiss_cc/local/plt
+tests/general/test
 tests/hainich/test
 tests/swiss_cc/test
 .idea

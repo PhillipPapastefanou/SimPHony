@@ -5,7 +5,9 @@ import copy
 import numpy as np
 import pandas as pd
 import datetime
-from src.contrib.param_generation.example_generator import create_example_hainich_file
+
+from src.contrib.auxil.messaging import print_sucess
+from src.contrib.param_generation.example_generator import create_example_hainich_parameter_list
 from src.contrib.auxil.files import get_SimPHony_build_path
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -26,9 +28,9 @@ class Test_Hainich_From_File(unittest.TestCase):
         from SimPHony import Simulation_Single_Hainich
         from SimPHony import DateTime
 
-        parameter_file = os.path.join(THIS_DIR,"parameter_example.csv")
+        parameter_file = os.path.join(THIS_DIR, 'test', 'input',"parameter_example_1.csv")
 
-        create_example_hainich_file(parameter_file)
+        create_example_hainich_parameter_list(1, parameter_file)
 
         # ----------------------------------------------------------------
         # PHS model simulation
@@ -54,10 +56,10 @@ class Test_Hainich_From_File(unittest.TestCase):
         # output = sim.Get_output()
         an = sim.Get_analysis()
 
-        REFERENCE_J_RMSE = 0.00030332450112261411;
-        REFERENCE_PSI_STEM_RMSE = 0.11689645042195608;
+        REFERENCE_J_RMSE = 0.002472322128072226;
+        REFERENCE_PSI_STEM_RMSE = 0.3605197342451349;
         EPS = 8
 
         self.assertAlmostEqual(an.Get_Rmse_psi_stem(), REFERENCE_PSI_STEM_RMSE, places=EPS)
         self.assertAlmostEqual(an.Get_Rmse_J(), REFERENCE_J_RMSE, places=EPS)
-        print("Done!")
+        print_sucess("Done!")

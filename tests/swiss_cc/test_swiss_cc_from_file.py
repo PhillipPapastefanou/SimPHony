@@ -6,14 +6,14 @@ import numpy as np
 import pandas as pd
 import datetime
 from src.contrib.auxil.files import get_SimPHony_build_path
-from src.contrib.param_generation.example_generator import create_example_swiss_cc_file
+from src.contrib.param_generation.example_generator import create_example_swiss_cc_parameter_list
 from src.contrib.auxil.messaging import print_failure , print_sucess
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class Test_Swiss_From_File(unittest.TestCase):
     def test_swiss_from_file(self):
 
-        print("Calling the cpp lib directly from python...", end='')
+        print("Calling the cpp lib directly from file...", end='')
         root_library_path = THIS_DIR
         root_data_path = os.path.join(root_library_path, os.pardir, os.pardir, 'data')
         # Specifying forcing and evalution data paths
@@ -28,11 +28,9 @@ class Test_Swiss_From_File(unittest.TestCase):
         from SimPHony import Simulation_Single_Swiss
         from SimPHony import DateTime
 
-        parameter_file = os.path.join(THIS_DIR, "parameter_example.csv")
+        parameter_file = os.path.join(THIS_DIR, 'test', 'input', "parameter_example_1.csv")
 
-        create_example_swiss_cc_file(parameter_file)
-
-
+        create_example_swiss_cc_parameter_list(1, parameter_file)
 
         # ----------------------------------------------------------------
         # PHS model simulation
@@ -64,10 +62,10 @@ class Test_Swiss_From_File(unittest.TestCase):
         # REFERENCE_PSI_LEAF_0_RMSE = 1.8912050337701065;
         # REFERENCE_PSI_LEAF_6_RMSE = 2.5209254139403057;
 
-        REFERENCE_PSI_LEAF_0_RMSE = 2.3105808610161884;
-        REFERENCE_PSI_LEAF_6_RMSE = 2.3204660959242789;
+        REFERENCE_PSI_LEAF_0_RMSE = 14.842429028013507;
+        REFERENCE_PSI_LEAF_6_RMSE = 15.141204438155913;
 
 
         self.assertAlmostEqual(errors[0], REFERENCE_PSI_LEAF_0_RMSE, places=EPS)
         self.assertAlmostEqual(errors[6], REFERENCE_PSI_LEAF_6_RMSE, places=EPS)
-        print("Done!")
+        print_sucess("Done!")

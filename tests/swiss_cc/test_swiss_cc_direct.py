@@ -117,4 +117,4 @@ class Test_Swiss_Direct(unittest.TestCase):
 
         self.assertAlmostEqual(errors[0], REFERENCE_PSI_LEAF_0_RMSE, places=EPS)
         self.assertAlmostEqual(errors[6], REFERENCE_PSI_LEAF_6_RMSE, places=EPS)
-        print("Done!")
+        print_sucess("Done!")

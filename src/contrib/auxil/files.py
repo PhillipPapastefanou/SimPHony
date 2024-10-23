@@ -60,6 +60,32 @@ def get_SimPHony_build_path():
 
     return found_lib, lib_path, lib_folder
 
+def get_SimPHony_test_build_path():
+    root_path = get_lib_directory()
+    dir_entries = listdir_fullpath(root_path)
+    folders = [a for a in dir_entries if os.path.isdir(a)]
+
+    found_lib = False
+    lib_path = ""
+    lib_folder = ""
+    for str_path in folders:
+
+        if 'debug' in str_path:
+            continue
+
+        sub_dir_entries = listdir_fullpath(str_path)
+        files = [a for a in sub_dir_entries if os.path.isfile(a)]
+
+        for file in files:
+            fname = file.split(os.sep)[-1]
+            if (fname == 'SimPHony_tests') |(fname == 'SimPHony_tests.exe'):
+                found_lib = True
+                lib_path = file
+                lib_folder = str_path
+                break
+
+    return found_lib, lib_path, lib_folder
+
 def get_forcing_swiss_cc():
     root_library_path = get_lib_directory()
     root_data_path = os.path.join(root_library_path, 'data')

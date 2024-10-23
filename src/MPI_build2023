@@ -1,6 +1,0 @@
-module purge
-ml intel/2023.0.0 impi/2021.6.0
-ml netcdf/4.9.0
-ml cmake
-export CXX=/opt/intel/oneapi/compiler/2023.0.0/linux/bin/intel64/icc
-export CC=/opt/intel/oneapi/compiler/2023.0.0/linux/bin/intel64/icc

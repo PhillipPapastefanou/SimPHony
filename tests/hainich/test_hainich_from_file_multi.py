@@ -5,13 +5,17 @@ import copy
 import numpy as np
 import pandas as pd
 import datetime
+
+from tornado.gen import sleep
+
 from src.contrib.param_generation.example_generator import create_example_hainich_parameter_list
+from src.contrib.auxil.messaging import print_sucess
 from src.contrib.auxil.files import get_SimPHony_build_path
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class Test_Hainich_From_File_Multi(unittest.TestCase):
     def test_hainich_from_file_multi(self):
-        print("Multiple: Exporting a parameter file and afterwards calling the lib...", end='')
+        print("Multiple: Calling the lib multiple times...", end='')
         root_library_path = THIS_DIR
         root_data_path = os.path.join(root_library_path, os.pardir, os.pardir, 'data')
         # Specifying forcing and evalution data paths
@@ -28,7 +32,6 @@ class Test_Hainich_From_File_Multi(unittest.TestCase):
 
         os.makedirs(os.path.join(THIS_DIR, 'test', 'input'), exist_ok=True)
         parameter_file = os.path.join(THIS_DIR, 'test', 'input', "parameter_example_2.csv")
-        create_example_hainich_parameter_list(2, parameter_file)
 
         # ----------------------------------------------------------------
         # PHS model simulation
@@ -50,8 +53,8 @@ class Test_Hainich_From_File_Multi(unittest.TestCase):
         # Run the simulation
         sim.Run(timestart, timeend)
 
-        REFERENCE_J_RMSE = [0.002554028773026848, 0.000693889552292396]
-        REFERENCE_PSI_STEM_RMSE = [0.7289339483826249, 1.9520272480037195]
+        REFERENCE_J_RMSE = [0.0018895212184391339, 0.0012473781843929319]
+        REFERENCE_PSI_STEM_RMSE = [0.18756163898926925, 0.30507229402876607]
         EPS = 8
 
         # Get analysis data
@@ -61,4 +64,5 @@ class Test_Hainich_From_File_Multi(unittest.TestCase):
         for i in range(len(an_list)):
             self.assertAlmostEqual(an_list[i].Get_Rmse_psi_stem(), REFERENCE_PSI_STEM_RMSE[i], places=EPS)
             self.assertAlmostEqual(an_list[i].Get_Rmse_J(), REFERENCE_J_RMSE[i], places=EPS)
-        print("Done!")
+        print_sucess("Done!")
+        sleep(3)

@@ -32,7 +32,7 @@ class Test_Driver_Files(unittest.TestCase):
 
 
     def test_psi_stem_file(self):
-        print("Cecking if psi_stem file exists...", end='')
+        print("Checking if psi_stem file exists...", end='')
         psi_stem_file = os.path.join(THIS_DIR, os.pardir, os.pardir,
                                     'data/hainich/eval/stem_water_pot.csv')
         exists = os.path.exists(psi_stem_file)

@@ -7,7 +7,6 @@ import pandas as pd
 import datetime
 
 from src.contrib.auxil.files import get_SimPHony_build_path
-from src.contrib.param_generation.example_generator import create_example_swiss_cc_file
 from src.contrib.auxil.messaging import print_failure , print_sucess
 import matplotlib.pyplot as plt
 
@@ -41,7 +40,7 @@ from SimPHony import Simulation_Single_Swiss
 from SimPHony import DateTime
 
 root_output_directory = "/Users/pp/data/Simulations/A08_SimPHony/swiss"
-scenario_name = "2023swp_red_1"
+scenario_name = "2023swp_red_2_sustain"
 input_path = os.path.join(root_output_directory, scenario_name, 'input')
 output_path = os.path.join(root_output_directory, scenario_name, 'output')
 post_path = os.path.join(root_output_directory, scenario_name, 'post')
@@ -63,7 +62,7 @@ for id, ai in zip(selective_range,ax_indexes) :
     # Set up the PHS simulation
     # read in the parameter file that we just created
     sim = Simulation_Single_Swiss()
-    sim.Init_parameters_fn_single(parameter_file, 1)
+    sim.Init_parameters_fn_single(parameter_file, 0)
     sim.Init_input(soil_water_file, forcing_file, tree_path)
     sim.Set_water_pot_initials(-1.0, -0.2)
 

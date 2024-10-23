@@ -120,4 +120,4 @@ class Test_Hainich_Direct(unittest.TestCase):
 
         self.assertAlmostEqual(an.Get_Rmse_psi_stem(), REFERENCE_PSI_STEM_RMSE, places=EPS)
         self.assertAlmostEqual(an.Get_Rmse_J(), REFERENCE_J_RMSE, places=EPS)
-        print("Done!")
+        print_sucess("Done!")

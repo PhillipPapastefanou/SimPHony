@@ -23,7 +23,7 @@ TEST(Hainich_tests, Apply_model_from_file) {
     string forcing_file = "../data/hainich/input/Meteo_Hainich_dT30min_forcing_PHS.csv";
     string sap_file = "../data/hainich/eval/SAP_Hainich_Fagus-mean_dT30min_prog.csv";
     string psi_stem_file = "../data/hainich/eval/stem_water_pot.csv";
-    string parameters_list = "../tests/hainich/parameter_example.csv";
+    string parameters_list = "../tests/hainich/test/input/parameter_example_1.csv";
 
     double psi_leaf_init = -1.0;
     double psi_stem_init = -0.2;

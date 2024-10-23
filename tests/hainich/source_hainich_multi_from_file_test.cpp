@@ -40,8 +40,6 @@ TEST(Hainich_tests, Apply_model_multi_from_file) {
     simulation.Set_water_pot_initials(psi_leaf_init, psi_stem_init);
     simulation.Run(begin, end);
 
-    double x = 3;
-
 //    AnalysisHainich analysis(&model, params);
 //    analysis.CompareSapwood(sap_data);
 //
