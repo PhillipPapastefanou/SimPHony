@@ -5,6 +5,7 @@ sys.path.append(os.path.join(THIS_DIR, os.pardir, os.pardir, os.pardir))
 
 
 from src.contrib.config import Config
+from src.contrib.config import Location
 from src.contrib.auxil.files import get_lib_directory
 from src.contrib.auxil.files import get_SimPHony_build_path
 from src.contrib.auxil.files import get_soil_water_swiss_cc
@@ -23,6 +24,7 @@ soilwater_file, null= get_soil_water_swiss_cc()
 tree_folder, null  = get_trees_psi_leaf_cc()
 
 config = Config()
+config.location = Location.Swiss
 config.build_path = binpath
 config.lib_path = root_library_path
 config.forcing_file = forcing_file
@@ -35,11 +37,11 @@ config.scenario_path =  os.path.join(root_output_directory, scenario_name)
 config.output_path =  os.path.join(root_output_directory, scenario_name, 'output')
 config.post_path =   os.path.join(root_output_directory, scenario_name, 'post')
 config.input_path =   os.path.join(root_output_directory, scenario_name, 'input')
-config.nsims = 10000000
+config.nsims = 100000
 config.nbest = 50
 sys.path.append(config.build_path)
 
-from src.contrib.parallel_setup_swiss_with_LHS import ParallelSetupHainichWithLHS
+from src.contrib.parallel_setup_LHS import ParallelSetupWithLHS
 from mpi4py import MPI
 
 # Initialize MPI
@@ -48,7 +50,7 @@ rank = comm.Get_rank()
 size = comm.Get_size()
 
 # Create the MPI binding object
-binder = ParallelSetupHainichWithLHS(comm, rank, size)
+binder = ParallelSetupWithLHS(comm, rank, size)
 # 
 binder.init(config=config)
 #

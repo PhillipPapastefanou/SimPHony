@@ -6,8 +6,6 @@ import numpy as np
 import pandas as pd
 import datetime
 
-from tornado.gen import sleep
-
 from src.contrib.param_generation.example_generator import create_example_hainich_parameter_list
 from src.contrib.auxil.messaging import print_sucess
 from src.contrib.auxil.files import get_SimPHony_build_path
@@ -65,4 +63,3 @@ class Test_Hainich_From_File_Multi(unittest.TestCase):
             self.assertAlmostEqual(an_list[i].Get_Rmse_psi_stem(), REFERENCE_PSI_STEM_RMSE[i], places=EPS)
             self.assertAlmostEqual(an_list[i].Get_Rmse_J(), REFERENCE_J_RMSE[i], places=EPS)
         print_sucess("Done!")
-        sleep(3)

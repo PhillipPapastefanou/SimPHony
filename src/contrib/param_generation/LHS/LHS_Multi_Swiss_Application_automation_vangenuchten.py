@@ -7,6 +7,7 @@ from src.core.py.Parameters import Parameters
 from src.core.py.Parameters import SoilLayer
 from src.core.py.Parameters import Soil_Water_Model_Type
 from src.core.py.Parameters import Stem_Flow_Model_Type
+from src.core.py.Parameters import Conductivity_Fraction_Module_Type
 from src.contrib.parameter_parser import Parameter_Parser
 from src.core.py.Parameters import Convert_Soil_Parameters
 from scipy.stats import qmc
@@ -31,6 +32,7 @@ class Subslicer:
 def Calculate_LHS_per_process_swiss_cc(rank, ncombs, path):
 
     KG_TO_MOL = 1000.0/18.0
+    MPA_TO_HHEAD = 1000.0/9.81
 
     seed   = 12345 * rank + 1321
     sampler = qmc.LatinHypercube(d = 25, seed= seed)
@@ -43,11 +45,10 @@ def Calculate_LHS_per_process_swiss_cc(rank, ncombs, path):
     # Setting up soil layers
     nsoil_layers = 3
 
-    k_soil_sats_logs = rescale(slicer.get(), min=-8, max = -5)
-    psi_soil_sats= rescale(slicer.get(), min=-0.0001, max = -0.05)
-    theta_s = rescale(slicer.get(), min=0.5, max = 0.6)
-    theta_r = rescale(slicer.get(), min=0.01, max = 0.09)
-    pore_size_ind = rescale(slicer.get(), min=0.40, max = 0.60)
+    k_soil_sats_logs = rescale(slicer.get(), min=-7.7, max = -7.5)
+    psi_soil_sats = rescale(slicer.get(), min=-0.025, max = -0.011)
+    psi_soil_sats *= MPA_TO_HHEAD
+    pore_size_ind = rescale(slicer.get(), min=0.238, max = 0.291)
 
     soil_collection = []
     for i in range(ncombs):
@@ -56,8 +57,8 @@ def Calculate_LHS_per_process_swiss_cc(rank, ncombs, path):
     for i in range(ncombs):
         soil_collection[i].k_soil_sat = 10**k_soil_sats_logs[i]
         soil_collection[i].psi_soil_sat = psi_soil_sats[i]
-        soil_collection[i].theta_s = theta_s[i]
-        soil_collection[i].theta_r = theta_r[i]
+        soil_collection[i].theta_s = 0.6
+        soil_collection[i].theta_r = 0.0
         soil_collection[i].pore_size_ind = pore_size_ind[i]
 
     sel_cols.append("k_soil_sat_01")
@@ -67,53 +68,56 @@ def Calculate_LHS_per_process_swiss_cc(rank, ncombs, path):
     sel_cols.append("psi_01")
 
 
-    g0_s            = rescale(slicer.get(), min=0.005, max = 0.02)
+    g0_s            = rescale(slicer.get(), min=0.001, max = 0.02)
     sel_cols.append("g0")
-    g1_s            = rescale(slicer.get(), min = 2.0, max = 3.0)
+    g1_s            = rescale(slicer.get(), min = 2.4, max = 2.6)
     sel_cols.append("g1")
 
-    anet_max    = rescale(slicer.get(), min = 0.05, max = 0.5)
+    anet_max    = rescale(slicer.get(), min = 0.10, max = 0.24)
     sel_cols.append("anet_max")
 
-    k_xylems_sats   = rescale(slicer.get(), min=0.1, max=10.0)
-    k_xylems_sats *= KG_TO_MOL
+    k_xylems_sats   = rescale(slicer.get(), min=25, max=45)
+    #k_xylems_sats *= KG_TO_MOL
     sel_cols.append("k_xylem_sat")
 
-    huber_values    =  rescale(slicer.get(), min = 1/3600, max= 1/2000)
+    huber_values    =  rescale(slicer.get(), min = 1/4500, max= 1/2500)
     sel_cols.append("huber_value")
 
-    cstem_s         = rescale(slicer.get(), min=10, max=300)
+    cstem_s         = rescale(slicer.get(), min=10, max=600)
     cstem_s *= KG_TO_MOL
     sel_cols.append("kappa_stem")
 
     # lai_s           = rescale(slicer.get(), min= 4.6, max = 5.0)
     # sel_cols.append("lai")
 
-    cleaf_s_log        = rescale(slicer.get(), min=np.log10(0.001), max=np.log10(0.1))
+    cleaf_s_log        = rescale(slicer.get(), min=np.log10(0.0001), max=np.log10(0.01))
     sel_cols.append("kappa_leaf")
 
-    d_50close_s     = rescale(slicer.get(), min = 1.0, max = 4.0)
+    d_50close_s     = rescale(slicer.get(), min = 2.5, max = 4.0)
     sel_cols.append("d50_close")
 
     psi_50_close_s  = rescale(slicer.get(), min = -2.2, max = -2.1)
     sel_cols.append("psi50_close")
 
-    jackson_s       = rescale(slicer.get(), min = 0.90, max = 0.97)
+    jackson_s       = rescale(slicer.get(), min = 0.90, max = 0.98)
     sel_cols.append("root_beta")
 
-    psi50_xylems    = rescale(slicer.get(), min = -3.7, max = -3.4)
+    psi50_xylems    = rescale(slicer.get(), min = -4.2, max = -3.6)
     sel_cols.append("psi_50_xylem")
 
     psi88_xylems_offset    = rescale(slicer.get(), min = 1.0, max = 1.5)
     sel_cols.append("psi_88_xylem")
 
-    root_area_indexes    = rescale(slicer.get(), min = 2, max = 14)
+    root_area_indexes    = rescale(slicer.get(), min = 4, max = 8)
     sel_cols.append("root_area_indexes")
 
     # tree_densities    = rescale(slicer.get(), min = (64-32)/10000, max = (64)/10000)
     # sel_cols.append("tree_densities")
 
-    g_barks    = rescale(slicer.get(), min = 0.0, max = 0.02)
+    sigma_wcont    = rescale(slicer.get(), min = -1, max = 0.5)
+    sel_cols.append("sigma_wconts")
+
+    g_barks    = rescale(slicer.get(), min = 0.01, max = 0.08)
     sel_cols.append("g_barks")
 
     plist = Parameter_Parser()
@@ -134,6 +138,12 @@ def Calculate_LHS_per_process_swiss_cc(rank, ncombs, path):
         soil_layers[1].depth = 0.3
         soil_layers[2].depth = 0.4
 
+        soil_layers[1].psi_soil_sat += -0.06*MPA_TO_HHEAD
+        soil_layers[2].psi_soil_sat += -0.06*MPA_TO_HHEAD
+
+        soil_layers[1].pore_size_ind += 0.04
+        soil_layers[2].pore_size_ind += 0.04
+
         Convert_Soil_Parameters(soil_layers=soil_layers, parameters=params)
 
         params.stem_hydraulic_capacitance = cstem_s[i]
@@ -153,6 +163,8 @@ def Calculate_LHS_per_process_swiss_cc(rank, ncombs, path):
         params.d_50_close = d_50close_s[i]
         params.jackson_root_beta = jackson_s[i]
 
+        params.wcont_sigma_deviation = sigma_wcont[i]
+
         params.tree_density = 10/1000
 
         params.canopy_height = 35
@@ -162,11 +174,14 @@ def Calculate_LHS_per_process_swiss_cc(rank, ncombs, path):
 
         params.soil_water_model_type = Soil_Water_Model_Type.VanGenuchten.name
         params.stem_flow_type = Stem_Flow_Model_Type.Linear.name
+        #params.conductivity_fraction_type = Conductivity_Fraction_Module_Type.Logit
+
+        params.sustain_xylem_damage = True
 
         params.sw_rad_max = 972.935
 
         if i % 5000 == 0:
-            print(f"{i/ncombs * 100.0}% finished.")
+            print(f"{i/ncombs * 100.0}% completed")
 
         plist.Add(params)
 
