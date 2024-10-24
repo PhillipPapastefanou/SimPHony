@@ -14,7 +14,7 @@
 
 TEST(General_tests, Soil_model_tests)
 {
-
+    std::cout << "Performing General_tests.Soil_model_tests..." << std::endl;
     Parameters parameters;
     Input_Hainich input = Input_Hainich();
 
@@ -124,6 +124,8 @@ TEST(General_tests, Soil_model_tests)
         auto head = model->Get_psi_soil_head();
         std::cout << head[1][0] << std::endl;
     }
-    std::cout << "---------" << std::endl;
+
+    std::cout << std::string(64, '-') << std::endl;
+    std::cout << std::endl;
 
 }

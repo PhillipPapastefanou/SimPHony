@@ -8,6 +8,7 @@
 
 TEST(General_tests, Stem_flow_model_tests)
 {
+    std::cout << "Performing General_tests.Stem_flow_model_tests..." << std::endl;
 
     const double EPS  = 1E-6;
 
@@ -76,7 +77,6 @@ TEST(General_tests, Stem_flow_model_tests)
         std::cout << "Psi stem: " << psi_stem_error << std::endl;
     }
     ASSERT_TRUE(max_error < 1E-1);
-
-
-
+    std::cout << std::string(64, '-') << std::endl;
+    std::cout << std::endl;
 }

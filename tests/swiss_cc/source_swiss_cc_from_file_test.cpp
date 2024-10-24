@@ -66,6 +66,8 @@ TEST(Swiss_cc_tests, Apply_model_from_file) {
     }
 
     cout << "Done!" << endl;
+    std::cout << std::string(64, '-') << std::endl;
+    std::cout << std::endl;
 
 }
 

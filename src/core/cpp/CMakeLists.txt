@@ -37,6 +37,7 @@ set(headers
         framework/solver_indiv_eulerimp.h
         framework/solver_2D.h
         framework/solver_rkf.h
+        auxil/misc.h
         )
 
 set(source

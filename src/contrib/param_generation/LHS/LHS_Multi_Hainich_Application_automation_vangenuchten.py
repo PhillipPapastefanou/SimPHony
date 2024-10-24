@@ -28,7 +28,7 @@ class Subslicer:
         return self.array[self.i]
 
 
-def Calculate_LHS_per_process(rank, ncombs, path):
+def Calculate_LHS_per_process_hainich(rank, ncombs, path):
 
     KG_TO_MOL = 1000.0/18.0
 
@@ -154,11 +154,7 @@ def Calculate_LHS_per_process(rank, ncombs, path):
         params.jackson_root_beta = jackson_s[i]
 
         params.tree_density = tree_densities[i]
-
         params.canopy_height = 35
-
-        pressure = 1.013 * 100000.0  # Pa
-        c_a = 415
 
         params.soil_water_model_type = Soil_Water_Model_Type.VanGenuchten.name
         params.stem_flow_type = Stem_Flow_Model_Type.Linear.name
@@ -166,7 +162,7 @@ def Calculate_LHS_per_process(rank, ncombs, path):
         params.sw_rad_max = 972.935
 
         if i % 5000 == 0:
-            print(i/ncombs * 100.0)
+            print(f"{i/ncombs * 100.0}% finished.")
 
         plist.Add(params)
 

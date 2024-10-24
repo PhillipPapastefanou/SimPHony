@@ -14,7 +14,7 @@
 
 TEST(Swiss_cc_tests, Apply_model_direct) {
 
-    std::cout << "Testing direct application of the swiss_cc inputs" << std::endl;
+    std::cout << "Testing direct application of the swiss_cc inputs";
 
     using std::cout;
     using std::endl;
@@ -124,6 +124,9 @@ TEST(Swiss_cc_tests, Apply_model_direct) {
         }
 
         cout << "Done!" << endl;
+        std::cout << std::string(64, '-') << std::endl;
+        std::cout << std::endl;
+
     }
 }
 

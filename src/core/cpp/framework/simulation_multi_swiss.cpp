@@ -1,12 +1,13 @@
 //
 // Created by Phillip on 27.07.23.
 //
-
+#include <iostream>
+#include <chrono>
 #include "simulation_multi_swiss.h"
 #include "parameter_csv_reader.h"
 #include "../modules/model.h"
-#include <iostream>
-#include <chrono>
+#include "../auxil/misc.h"
+
 
 Simulation_Multi_Swiss::Simulation_Multi_Swiss() : rank(0) {
 
@@ -55,7 +56,7 @@ void Simulation_Multi_Swiss::Run(DateTime timestart, DateTime timeend) {
 
     std::cout << "Rank " << rank << ": Performing " << parameter_list.size() << " simulations." << std:: endl;
 
-    auto start_simulatio = std::chrono::high_resolution_clock::now();
+    auto start_simulation = std::chrono::high_resolution_clock::now();
     auto start_timer = std::chrono::high_resolution_clock::now();
 
     for (int r = 0; r < parameter_list.size(); ++r) {
@@ -85,11 +86,11 @@ void Simulation_Multi_Swiss::Run(DateTime timestart, DateTime timeend) {
         auto elapsed_timer = std::chrono::duration_cast<std::chrono::milliseconds>( end_timer - start_timer);
 
         if (elapsed_timer.count() > params.constants.TMUTE_MILLISEC){
-
-            auto elapsed_simulation = std::chrono::duration_cast<std::chrono::milliseconds>( end_timer - start_simulatio);
-            std::cout << "Rank " << rank << ": Elapsed time: " << format_duration(elapsed_simulation) << " ";
-            std::cout << "performed " << r << " out of " << parameter_list.size() << " simulations. "<< std::endl;
-            start_timer = std::chrono::high_resolution_clock::now();
+            auto elapsed_simulation = std::chrono::duration_cast<std::chrono::milliseconds>(end_timer - start_simulation);
+            std::cout << "Rank " << rank << " completed " << r << " out of " << parameter_list.size() << " runs. ";
+            std::cout << "Elapsed time: " << format_duration(elapsed_simulation) << " remaining: "
+            << remaining_str(elapsed_simulation, r, parameter_list.size())  << "." << std::endl;
+             start_timer = std::chrono::high_resolution_clock::now();
         }
 
         // Because of the pybind module output of each model when associated with the analysis might not be cleared automatically
@@ -137,11 +138,11 @@ void Simulation_Multi_Swiss::Init_Partial_Parameter_Setups(string root_filename,
 
 }
 
-DateTime Simulation_Multi_Swiss::Get_first_year() {
+DateTime Simulation_Multi_Swiss::Get_first_date() {
     return input->dates.front();
 }
 
-DateTime Simulation_Multi_Swiss::Get_last_year() {
+DateTime Simulation_Multi_Swiss::Get_last_date() {
     return input->dates.back();
 }
 

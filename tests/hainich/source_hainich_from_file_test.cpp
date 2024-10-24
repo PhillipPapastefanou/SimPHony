@@ -84,5 +84,7 @@ TEST(Hainich_tests, Apply_model_from_file) {
     auto end_clock = std::chrono::high_resolution_clock::now();
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_clock - start_clock);
     std::cout << "Elapsed time: " << ms.count() << " ms\n";
+    std::cout << std::string(64, '-') << std::endl;
+    std::cout << std::endl;
 
 }

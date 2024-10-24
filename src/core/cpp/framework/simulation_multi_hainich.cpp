@@ -6,7 +6,9 @@
 #include "parameters.h"
 #include "parameter_csv_reader.h"
 #include "../modules/model.h"
+#include "../auxil/misc.h"
 #include <iostream>
+
 
 Simulation_Multi_Hainich::Simulation_Multi_Hainich() {
 
@@ -97,8 +99,9 @@ void Simulation_Multi_Hainich::Run(DateTime timestart, DateTime timeend) {
 
         if (elapsed_timer.count() > parameters.constants.TMUTE_MILLISEC){
             auto elapsed_simulation = std::chrono::duration_cast<std::chrono::milliseconds>(end_timer - start_simulation);
-            std::cout << "Rank " << rank << ": Elapsed time: " << format_duration(elapsed_simulation) << " ";
-            std::cout << "performed " << r << " out of " << parameter_list.size() << " simulations. "<< std::endl;
+            std::cout << "Rank " << rank << " completed " << r << " out of " << parameter_list.size() << " runs. ";
+            std::cout << "Elapsed time: " << format_duration(elapsed_simulation) << " remaining: "
+                      << remaining_str(elapsed_simulation, r, parameter_list.size())  << "." << std::endl;
             start_timer = std::chrono::high_resolution_clock::now();
         }
     }

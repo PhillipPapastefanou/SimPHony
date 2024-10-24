@@ -28,7 +28,7 @@ class Subslicer:
         return self.array[self.i]
 
 
-def Calculate_LHS_per_process(rank, ncombs, path):
+def Calculate_LHS_per_process_swiss_cc(rank, ncombs, path):
 
     KG_TO_MOL = 1000.0/18.0
 
@@ -166,7 +166,7 @@ def Calculate_LHS_per_process(rank, ncombs, path):
         params.sw_rad_max = 972.935
 
         if i % 5000 == 0:
-            print(i/ncombs * 100.0)
+            print(f"{i/ncombs * 100.0}% finished.")
 
         plist.Add(params)
 

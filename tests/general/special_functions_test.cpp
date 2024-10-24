@@ -8,11 +8,11 @@
 
 
 TEST(General_tests, Special_functions_test){
-
+    std::cout << "Performing General_tests.Special_functions_test..." << std::endl;
     const double EPS = 1E-9;
 
     double approx, exact;
-    std::cout << "Testing ExpIntergral... ";
+    std::cout << "Testing ExpIntergral... " << std::endl;
 
     approx = expint(1.0, 4.0);
     exact = 0.003779352409848905;
@@ -53,6 +53,8 @@ TEST(General_tests, Special_functions_test){
     approx = expint(8.9, 1.6);
     exact = 0.02085725242618081;
     ASSERT_NEAR(approx, exact, EPS);
+    std::cout << std::string(64, '-') << std::endl;
+    std::cout << std::endl;
 }
 
 

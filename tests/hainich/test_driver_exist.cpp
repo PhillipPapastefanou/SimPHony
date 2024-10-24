@@ -19,4 +19,6 @@ TEST(Hainich_tests, Stem_flow_model_tests) {
 
     bool psi_stem_file_exists = std::filesystem::exists(psi_stem_file);
     ASSERT_TRUE(psi_stem_file_exists);
+    std::cout << std::string(64, '-') << std::endl;
+    std::cout << std::endl;
 }

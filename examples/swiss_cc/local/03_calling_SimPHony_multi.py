@@ -8,7 +8,7 @@
    Version: 0.5
    Description: This script demonstrates the multi-setup functionality of the SimPHony library.
    It performs an ensemble of simulations, comparing simulated sapflow (J) and stem water potential (psi_stem) to observed data.
-   Specifically, the model runs 200 simulations with identical parameters, varying only k_xylem.
+   Specifically, the model runs 300 simulations with identical parameters, varying only k_xylem.
 """
 
 import sys
