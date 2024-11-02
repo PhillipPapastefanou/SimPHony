@@ -6,134 +6,152 @@
 #include <numeric>
 #include <iostream>
 
-Input_Swiss_Multi_Soils::Input_Swiss_Multi_Soils(): Input(){
+Input_Swiss_Multi_Soils::Input_Swiss_Multi_Soils(const Config& config): Input(config){
 
 }
 
 void Input_Swiss_Multi_Soils::Read_N_Parse() {
 
-    theta_parser = std::make_unique<InputCollection>(theta_file, true, ',');
-    forcing_parser = std::make_unique<InputCollection>(forcing_file, true, ',');
+    const std::string format = "%Y-%m-%d %H:%M:%S";
 
-    vector<int> theta_indexes(8*3);
-    std::iota(theta_indexes.begin(), theta_indexes.end(), 1);
+    theta_parser = std::make_unique<InputCollection>(config.soilwater_file.value, true, ',');
+    forcing_parser = std::make_unique<InputCollection>(config.forcing_file.value, true, ',');
 
-    std::string format = "%Y-%m-%d %H:%M:%S";
-    theta_parser->init_regular("dates", format);
+    // Read all soil water inputs
+    vector<vector<float> > soil_water_input;
 
-    // Read all inputs
-    all_theta_data = theta_parser->get_data(theta_indexes);
+    switch (config.swiss_soil_water_input_type.value) {
+
+        case Swiss_soil_water_input_type::NLayersMean:
+            break;
+        case Swiss_soil_water_input_type::NLayersMeanOneStd:{
+            vector<string> soil_water_indexes({"v10_adapted","v40_adapted","v80_adapted","sd"});
+            theta_parser->init_regular("date", format);
+            soil_water_input = theta_parser->get_data(soil_water_indexes);
+            break;
+        }
+        case Swiss_soil_water_input_type::NLayersMeanNStd:{
+            vector<string> soil_water_indexes({"theta_10cm","theta_std_10cm",
+                                               "theta_40cm","theta_std_40cm",
+                                               "theta_80cm","theta_std_80cm"});
+            theta_parser->init_regular("dates", format);
+            soil_water_input = theta_parser->get_data(soil_water_indexes);
+            break;
+        }
+
+        case Swiss_soil_water_input_type::NLayersIndiv:{
+            vector<int> theta_indexes(8*3);
+            std::iota(theta_indexes.begin(), theta_indexes.end(), 1);
+            theta_parser->init_regular("dates", format);
+            soil_water_input = theta_parser->get_data(theta_indexes);
+            break;
+        }
+        default:{
+            std::cout << "Invalid soil water input type specified";
+            exit(99);
+            break;
+        }
+
+    }
 
     vector<int> forcing_indexes= {2,8};
-    format = "%Y-%m-%d %H:%M:%S";
     forcing_parser->init_regular("dt", format);
     vector<vector<float> > forcing_input = forcing_parser->get_data(forcing_indexes);
 
     DateTime t0_f = forcing_parser->dates.front();
     DateTime t0_w = theta_parser->dates.front();
-    DateTime t0 = t0_f;
 
-    if (t0_f < t0_w){
-        t0 = t0_w;
-    }
-    long distance = -1000;
-    imin_forcing = -1;
-    imin_theta = -1;
+    DateTime t_end_f = forcing_parser->dates.back();
+    DateTime t_end_w = theta_parser->dates.back();
 
-    for (int i = 0; i < forcing_parser->dates.size(); ++i) {
-        distance = forcing_parser->dates[i] - t0;
-        if(distance == 0){
-            imin_forcing = i;
-            break;
-        }
-    }
-    for (int i = 0; i < theta_parser->dates.size(); ++i) {
-        distance = theta_parser->dates[i] - t0;
-        if(distance == 0){
-            imin_theta = i;
-            break;
-        }
-    }
-
-    if (imin_forcing == forcing_parser->dates.size() - 1){
-        std::cout << "could not find index in data ";
-        exit(99);
-    }
-    if (imin_theta == forcing_parser->dates.size() - 1){
-        std::cout << "could not find index in data ";
+    if(t0_f != t0_w){
+        std::cout << "Starting dates of forcing and soil_water input do not match" << std:: endl;
         exit(99);
     }
 
-    DateTime tz_f = forcing_parser->dates.back();
-    DateTime tz_w = theta_parser->dates.back();
-    DateTime tz = tz_f;
-
-    if (tz_w < tz_f){
-        tz = tz_w;
+    if(t_end_f != t_end_w){
+        std::cout << "End dates of forcing and soil_water input do not match" << std:: endl;
+        exit(99);
     }
 
-    imax_forcing = -1;
-    imax_theta = -1;
+    if(forcing_parser->dates.size() !=  theta_parser->dates.size()){
+        std::cout << "Number of dates of forcing and soil_water input do not match" << std:: endl;
+        exit(99);
+    }
+    
+    // Read in forcing
+    for (int i = 0; i < forcing_input.size(); ++i) {
+        dates.push_back(forcing_parser->dates[i]);
+        this->vpd.push_back(forcing_input[i][1] * 1000.0);
+        double rad_d = forcing_input[i][0];
+        this->sw_rad.push_back(rad_d);
+    }
 
-    for (int i = 0; i < forcing_parser->dates.size(); ++i) {
-        distance = forcing_parser->dates[i] - tz;
-        if(distance == 0){
-            imax_forcing = i;
+
+    switch (config.swiss_soil_water_input_type.value) {
+
+        case Swiss_soil_water_input_type::NLayersMean:
+            break;
+        case Swiss_soil_water_input_type::NLayersMeanOneStd:{
+
+            // Each soil location has three soil layer depths
+            for (int i = 0; i < soil_water_input.size(); ++i) {
+                vector<float> sl(3);
+                for (int s = 0; s < 3; ++s) {
+                    sl[s] = soil_water_input[i][s];
+                }
+                theta_per_layer.push_back(sl);
+
+                // Copy std to each layer
+                // We assume that the std applies ot each of the three layers
+                vector<float> sl_std(3);
+                for (int s = 0; s < 3; ++s) {
+                    sl_std[s] = soil_water_input[i][3];
+                }
+                theta_sd_per_layer.push_back(sl_std);
+            }
+            break;
+        }
+
+        case Swiss_soil_water_input_type::NLayersMeanNStd:{
+            // Each soil location has three soil layer depths and std
+            for (int i = 0; i < soil_water_input.size(); ++i) {
+                vector<float> sl(3);
+                vector<float> sl_std(3);
+                for (int s = 0; s < 3; ++s) {
+                    sl[s] = soil_water_input[i][2*s];
+                    sl_std[s] = soil_water_input[i][2*s + 1];
+                }
+                theta_per_layer.push_back(sl);
+                theta_sd_per_layer.push_back(sl_std);
+            }
+            break;
+        }
+        case Swiss_soil_water_input_type::NLayersIndiv:{
+            // Copy all data into memory
+            for (int i = 0; i < soil_water_input.size(); ++i) {
+                vector<float> sl(8*3);
+                for (int s = 0; s < 8*3; ++s) {
+                    sl[s] = soil_water_input[i][s];
+                }
+                theta_per_layer.push_back(sl);
+            }
             break;
         }
     }
 
-    for (int i = 0; i < theta_parser->dates.size(); ++i) {
-        distance = theta_parser->dates[i] - tz;
-        if(distance == 0){
-            imax_theta = i;
-            break;
+    // Test input water to be below 0 and 1
+    for (int i = 0; i < theta_per_layer.size(); ++i) {
+        int ymax = theta_per_layer.front().size();
+        for (int s = 0; s < ymax; ++s) {
+            double value =  theta_per_layer[i][s];
+            if ((value < 0.0) || (value > 1.0)){
+                std::cout << "Invalid value for water content received: ";
+                std::cout << std::to_string(value) << std::endl;
+                std::cout << "Exiting..." << std::endl;
+                exit(99);
+            }
         }
     }
 
-
-    // Thist part has not been fixed and cannot be used in the current implementation.
-    // Todo Fix
-//    // Each soil location has three soil layer depths
-//    vector<vector<float>> input_theta_per_layer(all_theta_data.size());
-//    for (int i = 0; i < all_theta_data.size(); ++i) {
-//        vector<float> sl(3);
-//        for (int s = 0; s < 3; ++s) {
-//            sl[s] = all_theta_data[i][3 * parameters.soil_profile_index + s];
-//            // Convert from % to relative
-//            sl[s] /= 100.0;
-//        }
-//        input_theta_per_layer[i] = sl;
-//    }
-//
-//    for (int i = imin_theta; i < imax_theta + 1; ++i) {
-//        this->theta_per_layer.push_back(input_theta_per_layer[i]);
-//    }
-//
-//    // Slice forcing input according to indexes as we might have different dates
-//    // for swc and other
-//    for (int i = imin_forcing; i < imax_forcing + 1; ++i) {
-//        dates.push_back(forcing_parser->dates[i]);
-//        this->vpd.push_back(forcing_input[i][1] * 1000.0);
-//        double rad_d = forcing_input[i][0];
-//        this->rad.push_back(rad_d);
-//        double anet = rad_d /  parameters.sw_rad_max * parameters.anet_max;
-//        this->sw_rad.push_back(anet);
-//    }
-//
-//    if(rad.size() != theta_per_layer.size()){
-//        std::cout << "Thetas and forcing size does not match";
-//        double x = theta_per_layer.size();
-//        throw;
-//    }
-
 }
-
-void Input_Swiss_Multi_Soils::Add_Forcing_File(std::string file) {
-    forcing_file = file;
-}
-
-void Input_Swiss_Multi_Soils::Add_Soilwater_File(std::string file) {
-    theta_file = file;
-}
-

@@ -32,7 +32,7 @@ from src.contrib.auxil.files import get_trees_psi_leaf_cc
 from src.contrib.auxil.files import get_soil_water_swiss_cc
 from src.contrib.parameter_parser import Parameter_Parser
 from src.contrib.auxil.output_df import create_output_df
-
+from src.contrib.config import Config, Location, Swiss_soil_water_input_type
 found_cpp_lib, cpp_bin_path, cpp_lib_path = get_SimPHony_build_path()
 sys.path.append(cpp_lib_path)
 
@@ -49,13 +49,27 @@ tree_path, dummy = get_trees_psi_leaf_cc()
 # ------------------------------------------------------
 
 plist = Parameter_Parser()
-parameter_filename = 'parameter_example_multi.csv'
+root_library_path = THIS_DIR
+root_data_path = os.path.join(root_library_path, os.pardir, os.pardir, 'data')
+
+# Specifying forcing and evalution data paths
+config = Config()
+config.location = Location.Swiss_cc
+config.forcing_file, forcing_df = get_forcing_swiss_cc()
+config.soilwater_file, soilwater_df = get_soil_water_swiss_cc()
+config.swiss_tree_folder_path, dummy = get_trees_psi_leaf_cc()
+config.swiss_soil_water_input_type = Swiss_soil_water_input_type.NLayers_Indiv
+config_path = os.path.join(THIS_DIR, 'config_3_py.txt')
+config.parameters_list_file = os.path.join(THIS_DIR, "parameter_example_3.csv")
+
+config.Export(config_path)
+
 
 # Provide a list of sigma water content deviations
 
-wcont_sigma_deviations = np.arange(-1.5, 1.5, 0.01)
+soil_profile_indexes = np.arange(0, 8)
 
-for wcont_sigma_dev in wcont_sigma_deviations:
+for spi in soil_profile_indexes:
 
     # Create parameter setup
     params = Parameters()
@@ -105,19 +119,24 @@ for wcont_sigma_dev in wcont_sigma_deviations:
     params.soil_water_model_type = Soil_Water_Model_Type.VanGenuchten.name
     params.sw_rad_max = 1040
 
-    params.wcont_sigma_deviation = wcont_sigma_dev
+    params.wcont_sigma_deviation = 0.0
+    params.soil_profile_index = spi
     plist.Add(params)
 
-plist.Write_Full_Parameter_File(filename=parameter_filename)
+plist.Write_Full_Parameter_File(filename=config.parameters_list_file)
 
 # ----------------------------------------------------------------
 # SimPHony model simulation
 # ----------------------------------------------------------------
 
 # Setting up the simulation
-sim = Simulation_Multi_Swiss()
-sim.Init_Full_Parameter_Setups(parameter_filename, np.arange(plist.df.shape[0]))
-sim.Init_input(soil_water_file, forcing_file, tree_path, 0)
+rank = 0
+# Set up the PHS simulation
+# read in the parameter file that we just created
+sim = Simulation_Multi_Swiss(rank, False)
+sim.Read_config(config_path)
+sim.Init_Full_Parameter_Setups(np.arange(0, len(plist.parameters_list)))
+sim.Init_input()
 
 # Specify initial leaf and stem water potential
 sim.Set_water_pot_initials(-1.0, -0.2)
@@ -129,7 +148,8 @@ date_end_str = "2018-12-15 00:00:00"
 timestart = DateTime(date_start_str, format)
 timeend = DateTime(date_end_str, format)
 
-# Running SimPHony
+sim.Init_eval(timestart, timeend)
+# Run the simulation
 sim.Run(timestart, timeend)
 
 # Getting the raw analysis list
@@ -161,7 +181,7 @@ df_an.columns = [f'd{i}' for i in range_dead]
 data_alive_mean = np.mean(data_alive, axis=0)
 
 df_an['a'] = data_alive_mean
-df_an['sigma'] = wcont_sigma_deviations
+df_an['sigma'] = soil_profile_indexes
 
 
 import matplotlib.pyplot as plt

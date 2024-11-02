@@ -27,7 +27,7 @@ class ParallelSetupHainich:
     def _calculate_gridpoints(self):
 
         # Get the length of the paramter input files
-        df = pd.read_csv(self.config.parameter_input_file_list)
+        df = pd.read_csv(self.config.parameters_list_file)
         n = df.shape[0]
 
         min_np = int(n / self.size)
@@ -50,7 +50,7 @@ class ParallelSetupHainich:
 
         for i in range(0, self.size):
             df_i = df.iloc[ri: ri + self.n_array_per_process[i]]
-            df_i.to_csv(f"{self.config.parameter_input_file_list}{i}")
+            df_i.to_csv(f"{self.config.parameters_list_file}{i}")
             self.displ[i] = ri
             ri += self.n_array_per_process[i]
 
@@ -86,7 +86,7 @@ class ParallelSetupHainich:
             t1 = perf_counter()
 
         self.sim = Simulation_Multi_Hainich()
-        self.sim.Init_Full_Parameter_Setups(f"{self.config.parameter_input_file_list}{self.rank}", np.arange(0,self.n_sims_per_process))
+        self.sim.Init_Full_Parameter_Setups(f"{self.config.parameters_list_file}{self.rank}", np.arange(0, self.n_sims_per_process))
         self.sim.Init_input(self.config.forcing_file,
                             self.config.sap_file,
                             self.config.psi_stem_file,

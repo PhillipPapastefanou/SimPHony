@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(SimPHony VERSION 0.5)
+project(SimPHony VERSION 0.6)
 set(USE_PYBIND11 ON)
 cmake_host_system_information(RESULT _host_name QUERY HOSTNAME)
 

@@ -8,7 +8,7 @@ config.build_path = '/Users/pp/Documents/Repos/plant_hydro_standalone/cmake-buil
 config.lib_path = '/Users/pp/Documents/Repos/plant_hydro_standalone/'
 config.forcing_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/appl/hainich/Meteo_Hainich_dT30min_forcing_PHS.csv"
 config.sap_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/appl/hainich/SAP_Hainich_Fagus-mean_dT30min_prog.csv"
-config.parameter_input_file_list = f"ParameterList{50000}.csv"
+config.parameters_list_file = f"ParameterList{50000}.csv"
 
 sys.path.append(config.build_path)
 from contrib.ParallelRunFull import ParallelSetupFull

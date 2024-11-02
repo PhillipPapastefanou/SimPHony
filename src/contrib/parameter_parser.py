@@ -69,7 +69,7 @@ class Parameter_Parser():
             nrows = df.shape[0]
 
         for row_id in range(nrows):
-
+            params = Parameters()
             for name in var_list:
                 if hasattr(params, name):
                     if name in df.columns:
@@ -85,4 +85,5 @@ class Parameter_Parser():
 
             self.soil_layers_list.append(soil_layers)
             self.parameters_list.append(params)
+            #print(params.stem_hydraulic_capacitance)
 

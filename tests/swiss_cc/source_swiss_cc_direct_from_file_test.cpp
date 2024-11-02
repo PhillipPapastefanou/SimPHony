@@ -5,8 +5,7 @@
 #include <chrono>
 #include "gtest/gtest.h"
 #include "../../src/core/cpp/framework/parameters.h"
-#include "../../src/core/cpp/io/input_swiss_std_variation.h"
-#include "../../src/core/cpp/io/input_swiss_indiv_variation.h"
+#include "../../src/core/cpp/io/input_swiss_mult_soils.h"
 #include "../../src/core/cpp/modules/model.h"
 #include "../../src/core/cpp/io/time_series.h"
 #include "../../src/core/cpp/io/analysis_swiss.h"
@@ -20,16 +19,16 @@ TEST(Swiss_cc_tests, Apply_model_from_file) {
     using std::cout;
     using std::endl;
     using std::string;
+    string config_filenname = "../tests/swiss_cc/test/input/config.txt";
 
-    string forcing_file = "../data/swiss/input/Forcing_Inter.csv";
-    string tree_folder_path = "../data/swiss/eval/Trees";
-    //string theta_file = "../data/swiss/input/swiss_cc_soil_water_with_sd.csv";
-    string theta_file = "../data/swiss/input/vwc_swicc_cc_2023_indiv.csv";
-    string parameters_list = "../tests/swiss_cc/parameter_example.csv";
+    Config config;
+    config.Create_swiss_cc();
+    config.Export(config_filenname);
+    config.Read( config_filenname);
 
-    Swiss_Drought_Trees swiss_drought_tress(tree_folder_path);
+    Swiss_Drought_Trees swiss_drought_tress(config.swiss_tree_folder_path.value);
 
-    Parameter_CSV_Reader reader(parameters_list);
+    Parameter_CSV_Reader reader(config.parameters_list_file.Get());
     reader.Parse_Full_Files();
 
     Parameters params = reader.Get_parameter_list()[0];
@@ -37,14 +36,13 @@ TEST(Swiss_cc_tests, Apply_model_from_file) {
     double psi_leaf_init = -1.0;
     double psi_stem_init = -0.2;
 
-    //Input_Swiss_Std_Variation input;
-    Input_Swiss_Indiv_Variation input;
-    input.Add_Forcing_File(forcing_file);
-    input.Add_Soilwater_File(theta_file);
+
+    //Input_Swiss_NLayersMeanOneStd input;
+    Input_Swiss_Multi_Soils input(config);
     input.Read_N_Parse();
 
     auto start_clock = std::chrono::high_resolution_clock::now();
-    Model model(params, input);
+    Model model(params, input, config);
 
     model.Set_derived_parameters();
     model.Set_initial_conditions(psi_leaf_init, psi_stem_init);
@@ -54,7 +52,7 @@ TEST(Swiss_cc_tests, Apply_model_from_file) {
 
     model.Run(begin, end);
 
-    Analysis_Swiss analysis(&model, swiss_drought_tress, params);
+    Analysis_Swiss analysis(model, swiss_drought_tress, params);
     analysis.Run();
 
     std::vector<double> errors = analysis.Get_rmse();

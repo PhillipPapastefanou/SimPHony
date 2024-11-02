@@ -7,16 +7,15 @@ set(headers
         framework/simulation_single_hainich.h
         framework/simulation_multi_swiss.h
         framework/simulation_multi_hainich.h
+        framework/simulation_single.h
+        framework/simulation_multi.h
         auxil/solvers.h
         modules/soil_water/soil_water_model.h
         modules/soil_water/saxton.h
         modules/soil_water/campbell.h
         modules/soil_water/van_genuchten.h
         modules/root_distribution_model.h
-        io/input_swiss.h
         io/input_swiss_mult_soils.h
-        io/input_swiss_std_variation.h
-        io/input_swiss_indiv_variation.h
         io/input_hainich.h
         io/input.h
         framework/parameters.h
@@ -37,6 +36,7 @@ set(headers
         framework/solver_indiv_eulerimp.h
         framework/solver_2D.h
         framework/solver_rkf.h
+        framework/config.h
         auxil/misc.h
         )
 
@@ -46,6 +46,8 @@ set(source
         framework/simulation_multi_swiss.cpp
         framework/simulation_multi_hainich.cpp
         framework/simulation_single_hainich.cpp
+        framework/simulation_single.cpp
+        framework/simulation_multi.cpp
         auxil/solvers.cpp
         auxil/rkf_solver.cpp
         modules/soil_water/soil_water_model.cpp
@@ -57,10 +59,7 @@ set(source
         modules/soil_layer.cpp
         auxil/csv_reader.cpp
         framework/parameters.cpp
-        io/input_swiss.cpp
         io/input_swiss_mult_soils.cpp
-        io/input_swiss_std_variation.cpp
-        io/input_swiss_indiv_variation.cpp
         io/input_hainich.cpp
         io/input.cpp
         io/output.cpp
@@ -78,5 +77,6 @@ set(source
         framework/solver_indiv_eulerimp.cpp
         framework/solver_2D.cpp
         framework/solver_rkf.cpp
+        framework/config.cpp
         )
 include(add_model_sources)

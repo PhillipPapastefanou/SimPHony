@@ -19,9 +19,8 @@ TEST(Hainich_tests, Apply_model_direct) {
     using std::endl;
     using std::string;
 
-    string forcing_file = "../data/hainich/input/Meteo_Hainich_dT30min_forcing_PHS.csv";
-    string sap_file = "../data/hainich/eval/SAP_Hainich_Fagus-mean_dT30min_prog.csv";
-    string psi_stem_file = "../data/hainich/eval/stem_water_pot.csv";
+    Config config;
+    config.Create_hainich();
 
     // Default parameters
     Parameters params;
@@ -65,22 +64,20 @@ TEST(Hainich_tests, Apply_model_direct) {
     params.soil_layers[1].depth = 0.16;
     params.soil_layers[2].depth = 0.32;
 
-
     double psi_leaf_init = -1.0;
     double psi_stem_init = -0.2;
 
-    Input_Hainich input;
-    input.Add_Forcing_File(forcing_file);
+    Input_Hainich input(config);
     input.Read_N_Parse();
 
-    TimeSeries sap_data(sap_file, true, ',');
+    TimeSeries sap_data(config.sap_flow_file.Get(), true, ',');
     sap_data.Load("datetime", "%Y-%m-%d %H:%M:%S", {1});
 
-    TimeSeries psi_stem_data(psi_stem_file, true  , ',');
+    TimeSeries psi_stem_data(config.psi_stem_file.Get(), true  , ',');
     psi_stem_data.Load("time", "%Y-%m-%d %H:%M:%S", {1});
 
     auto start_clock = std::chrono::high_resolution_clock::now();
-    Model model(params, input);
+    Model model(params, input, config);
 
     model.Set_derived_parameters();
     model.Set_initial_conditions(psi_leaf_init, psi_stem_init);

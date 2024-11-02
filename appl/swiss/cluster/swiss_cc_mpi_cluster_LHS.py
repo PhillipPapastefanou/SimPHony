@@ -24,11 +24,11 @@ soilwater_file, null= get_soil_water_swiss_cc()
 tree_folder, null  = get_trees_psi_leaf_cc()
 
 config = Config()
-config.location = Location.Swiss
+config.location = Location.Swiss_cc
 config.build_path = binpath
 config.lib_path = root_library_path
 config.forcing_file = forcing_file
-config.tree_folder = tree_folder
+config.swiss_tree_folder_path = tree_folder
 config.soilwater_file = soilwater_file
 
 root_output_directory = "/Net/Groups/BSI/scratch/ppapastefanou/simulations/SimPHony/swiss_cc"

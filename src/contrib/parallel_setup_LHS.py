@@ -83,9 +83,9 @@ class ParallelSetupWithLHS:
         print("Calculating parameter setup...")
         # Create LHS parameter setup
         if self.config.location == Location.Hainich:
-            Calculate_LHS_per_process_hainich(self.rank, self.n_sims_per_process, self.config.input_path)
-        elif self.config.location == Location.Swiss:
-            Calculate_LHS_per_process_swiss_cc(self.rank, self.n_sims_per_process, self.config.input_path)
+            Calculate_LHS_per_process_hainich(self.rank, self.n_sims_per_process, self.config.parameters_list_file)
+        elif self.config.location == Location.Swiss_cc:
+            Calculate_LHS_per_process_swiss_cc(self.rank, self.n_sims_per_process, self.config.parameters_list_file)
         else:
             print("Invalid location specified. Exiting...")
             exit(99)
@@ -99,34 +99,24 @@ class ParallelSetupWithLHS:
             t1 = perf_counter()
 
         if self.config.location == Location.Hainich:
-            self.sim = Simulation_Multi_Hainich()
-            self.sim.Init_Full_Parameter_Setups(f"{self.config.input_path}/Hainich_parameters.csv{self.rank}",
-                                                np.arange(0,self.n_sims_per_process))
-            self.sim.Init_input(self.config.forcing_file,
-                                self.config.sap_file,
-                                self.config.psi_stem_file,
-                                self.rank)
-
+            self.sim = Simulation_Multi_Hainich(self.rank, True)
             timestart = DateTime("2023-04-01 00:00:00", DATE_FORMAT)
             timeend   = DateTime("2023-11-01 00:00:00", DATE_FORMAT)
 
-        elif self.config.location == Location.Swiss:
-            self.sim = Simulation_Multi_Swiss()
-            self.sim.Init_Full_Parameter_Setups(f"{self.config.input_path}/Swiss_cc_parameters.csv{self.rank}",
-                                                np.arange(0, self.n_sims_per_process))
-            self.sim.Init_input(self.config.soilwater_file,
-                                self.config.forcing_file,
-                                self.config.tree_folder,
-                                self.rank)
 
+        elif self.config.location == Location.Swiss_cc:
+            self.sim = Simulation_Multi_Swiss(self.rank, True)
             timestart = DateTime("2018-05-01 00:00:00", DATE_FORMAT)
-            timeend = DateTime("2018-12-15 00:00:00", DATE_FORMAT)
+            timeend   = DateTime("2018-12-15 00:00:00", DATE_FORMAT)
         else:
             print("Invalid location specified. Exiting...")
             exit(99)
 
-
+        self.sim.Read_config(self.config.config_file)
+        self.sim.Init_Full_Parameter_Setups(np.arange(0, self.n_sims_per_process))
+        self.sim.Init_input()
         self.sim.Set_water_pot_initials(-1.0, -0.2)
+        self.sim.Init_eval(timestart, timeend)
 
         print(f"Rank {self.rank} is starting SimPHony...")
         self.sim.Run(timestart, timeend)
@@ -161,9 +151,9 @@ class ParallelSetupWithLHS:
             df_rmse['rmse_G'] = rmse_G
             df_rmse['rmse_psi_stem'] = rmse_psi_stem
 
-            df_input = pd.read_csv(f"{self.config.input_path}/Hainich_parameters.csv{self.rank}")
+            df_input = pd.read_csv(f"{self.config.parameters_list_file}{self.rank}")
 
-        elif self.config.location == Location.Swiss:
+        elif self.config.location == Location.Swiss_cc:
             data = np.zeros((nx, 14))
             for i in range(nx):
                 data[i] = analysis[i].Get_rmse()
@@ -176,7 +166,7 @@ class ParallelSetupWithLHS:
             data_alive_mean = np.mean(data_alive, axis=0)
             df_rmse['alive_mean'] = data_alive_mean
 
-            df_input = pd.read_csv(f"{self.config.input_path}/Swiss_cc_parameters.csv{self.rank}")
+            df_input = pd.read_csv(f"{self.config.parameters_list_file}{self.rank}")
 
 
         df_input['psi_soil_sat0'] = df_input['psi_soil_sats'].str.split(';', expand=True).values[:, 0].astype(float)
@@ -203,7 +193,7 @@ class ParallelSetupWithLHS:
             df_best_both = df_c.sort_values(by='rmse_com_avg').iloc[0:nbest]
             df_best_both.to_csv(f"{output_path}/parameters_best_both.csv{self.rank}")
 
-        elif self.config.location == Location.Swiss:
+        elif self.config.location == Location.Swiss_cc:
             for i in range(14):
                 df_best_psi_stem = df_c.sort_values(by=f't{i}').iloc[0:nbest]
                 df_best_psi_stem.to_csv(f"{output_path}/parameters_f{i}.csv{self.rank}")
@@ -222,7 +212,7 @@ class ParallelSetupWithLHS:
                         df_0 = pd.concat([df_0, df], axis = 0)
                     df_0.to_csv(f"{self.config.post_path}/parameters_best_{str}.csv")
 
-            elif self.config.location == Location.Swiss:
+            elif self.config.location == Location.Swiss_cc:
                 for j in range(14):
                     df_0 = pd.read_csv(f"{output_path}/parameters_f{j}.csv{0}")
                     for i in range(1, self.size):

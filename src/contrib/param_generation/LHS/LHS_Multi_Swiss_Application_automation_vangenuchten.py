@@ -29,7 +29,7 @@ class Subslicer:
         return self.array[self.i]
 
 
-def Calculate_LHS_per_process_swiss_cc(rank, ncombs, path):
+def Calculate_LHS_per_process_swiss_cc(rank, ncombs, parameter_file):
 
     KG_TO_MOL = 1000.0/18.0
     MPA_TO_HHEAD = 1000.0/9.81
@@ -164,6 +164,7 @@ def Calculate_LHS_per_process_swiss_cc(rank, ncombs, path):
         params.jackson_root_beta = jackson_s[i]
 
         params.wcont_sigma_deviation = sigma_wcont[i]
+        params.wcont_sigma_deviation = 0.0
 
         params.tree_density = 10/1000
 
@@ -185,5 +186,5 @@ def Calculate_LHS_per_process_swiss_cc(rank, ncombs, path):
 
         plist.Add(params)
 
-    plist.Write_Full_Parameter_File(f"{path}/Swiss_cc_parameters.csv{rank}")
-    plist.Write_Partial_Parameter_File(f"{path}/Swiss_cc_partial_parameters.csv{rank}", sel_cols)
+    plist.Write_Full_Parameter_File(f"{parameter_file}{rank}")
+    #plist.Write_Partial_Parameter_File(f"{parameter_file}{rank}", sel_cols)

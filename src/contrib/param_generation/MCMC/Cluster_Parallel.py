@@ -14,7 +14,7 @@ config.build_path = rtpath_model + 'cpp/build'
 config.lib_path = rtpath_model + 'py/'
 config.forcing_file = rtpath_model + "/data/hainich/Meteo_Hainich_dT30min_forcing_PHS.csv"
 config.sap_file = rtpath_model + "/data/hainich/SAP_Hainich_Fagus-mean_dT30min_prog.csv"
-config.parameter_input_file_list = f"{rtpath_input}UniformParameterList{ncombs}.csv"
+config.parameters_list_file = f"{rtpath_input}UniformParameterList{ncombs}.csv"
 config.parameter_input_file_list_partial = f"{rtpath_input}UniformPartialParameterList{ncombs}.csv"
 config.output_path = "/Net/Groups/BSI/work_scratch/ppapastefanou/simulations/plant_hydraulics_standalone/2024/Hainich/MCMC/linear/"
 

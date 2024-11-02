@@ -13,8 +13,8 @@ from tests.hainich.test_hainich_from_file import Test_Hainich_From_File
 from tests.hainich.test_hainich_from_file_multi import Test_Hainich_From_File_Multi
 from tests.hainich.test_hainich_multi_mpi import Test_Multi_Mpi
 
-from tests.swiss_cc.test_swiss_cc_direct import Test_Swiss_Direct
-from tests.swiss_cc.test_swiss_cc_from_file import Test_Swiss_From_File
+from tests.swiss_cc.test_swiss_cc_single_direct import Test_Swiss_Single_Direct
+from tests.swiss_cc.test_swiss_cc_single_from_file import Test_Swiss_Single_From_File
 
 if __name__ == '__main__':
     unittest.main()

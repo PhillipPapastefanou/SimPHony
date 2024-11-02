@@ -7,13 +7,13 @@
 #include <algorithm>
 
 
-Input_Hainich::Input_Hainich() : Input() {
+Input_Hainich::Input_Hainich(const Config& config) : Input(config) {
 
 }
 
 void Input_Hainich::Read_N_Parse() {
-    forcing_parser = std::make_unique<InputCollection>(forcing_file, true, ',');
 
+    forcing_parser = std::make_unique<InputCollection>(config.forcing_file.value, true, ',');
 
     vector<int> forcing_indexes= {2,6,7,8,9 };
     string format = "%Y-%m-%d %H:%M:%S";
@@ -42,12 +42,4 @@ void Input_Hainich::Read_N_Parse() {
         }
         this->theta_per_layer.push_back(theta_run);
     }
-}
-
-void Input_Hainich::Add_Forcing_File(std::string file) {
-    forcing_file = file;
-}
-
-void Input_Hainich::Add_Soilwater_File(std::string file) {
-    // Nothing to be done here as this file is part of the forcing
 }

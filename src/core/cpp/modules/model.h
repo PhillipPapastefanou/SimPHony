@@ -1,6 +1,6 @@
 #pragma once
 #include "../framework/parameters.h"
-#include "../io/input_swiss.h"
+#include "../io/input.h"
 #include <vector>
 #include "soil_water/soil_water_model.h"
 #include "../auxil/solvers.h"
@@ -13,16 +13,17 @@
 class Model{
 
 public:
-    Model(Parameters& parameters, Input& input);
+    Model(Parameters& parameters, Input& input, Config& config);
     void Set_derived_parameters();
     void Set_initial_conditions(double psi_leaf_zero, double psi_soil_zero);
     void Run(DateTime begin, DateTime end);
-    const Output& Get_output();
+    const Output& Get_output() const;
     void Clear_output();
 private:
     // Input references
     const Parameters& params;
     Input& input_module;
+    const Config& config;
 
     vector<float> input_vpd;
     vector<float> input_anet;

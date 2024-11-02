@@ -8,7 +8,7 @@ config.build_path = '/Users/pp/Documents/Repos/plant_hydro_standalone/cpp/cmake-
 config.lib_path = '/Users/pp/Documents/Repos/plant_hydro_standalone/'
 config.forcing_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/hainich/Meteo_Hainich_dT30min_forcing_PHS.csv"
 config.sap_file = "/Users/pp/Documents/Repos/plant_hydro_standalone/data/hainich/SAP_Hainich_Fagus-mean_dT30min_prog.csv"
-config.parameter_input_file_list = f"../LHS/UniformParameterList{200000}.csv"
+config.parameters_list_file = f"../LHS/UniformParameterList{200000}.csv"
 config.parameter_input_file_list_partial = f"../LHS/UniformPartialParameterList{200000}.csv"
 
 sys.path.append(config.build_path)

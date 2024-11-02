@@ -33,8 +33,9 @@ TEST(Hainich_tests, Apply_model_from_file) {
 
     Parameters params = reader.Get_parameter_list()[0];
 
-    Input_Hainich input;
-    input.Add_Forcing_File(forcing_file);
+    Config config;
+
+    Input_Hainich input(config);
     input.Read_N_Parse();
 
     TimeSeries sap_data(sap_file, true, ',');
@@ -44,7 +45,7 @@ TEST(Hainich_tests, Apply_model_from_file) {
     psi_stem_data.Load("time", "%Y-%m-%d %H:%M:%S", {1});
 
     auto start_clock = std::chrono::high_resolution_clock::now();
-    Model model(params, input);
+    Model model(params, input, config);
 
     model.Set_derived_parameters();
     model.Set_initial_conditions(psi_leaf_init, psi_stem_init);

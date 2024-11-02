@@ -27,8 +27,9 @@ void Simulation_Multi_Hainich::Init_input(std::string forcing_file,
         exit(99);
     }
 
-    input = std::make_unique<Input_Hainich>();
-    input->Add_Forcing_File(forcing_file);
+    Config config;
+
+    input = std::make_unique<Input_Hainich>(config);
     input->Read_N_Parse();
 
     sap_series = std::make_unique<TimeSeries>(sap_flow_file, true, ',');
@@ -83,7 +84,10 @@ void Simulation_Multi_Hainich::Run(DateTime timestart, DateTime timeend) {
         Parameters& parameters = std::get<0>(parameter_list[r]);
         int parameter_index = std::get<1>(parameter_list[r]);
 
-        Model model(parameters, *input);
+        Config config;
+
+
+        Model model(parameters, *input, config);
         model.Set_derived_parameters();
         model.Set_initial_conditions(init_psi_leaf, init_psi_stem);
         model.Run(timestart,timeend);

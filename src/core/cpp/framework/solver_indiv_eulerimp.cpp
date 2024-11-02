@@ -149,7 +149,7 @@ double Solver_Indiv_Euler_Imp::update_transpiration(double psi_leaf) {
     gs = params.g0 + beta_stom_cond * (1.0 + params.g1 / std::sqrt(vpd / pressure)) * anet / ca;
 
     // Convert from Mol CO2 to Mol H2O diffusivity
-    gs *= 1.6;
+    gs *= params.constants.H2O_TO_CO2_DIFFUSIVITY;
 
     // Calculate transpiration per unit leaf area (LAI times canopy area)
     return gs * vpd / pressure;

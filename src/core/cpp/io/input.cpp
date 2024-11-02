@@ -4,7 +4,7 @@
 
 #include "input.h"
 
-Input::Input() {
+Input::Input(const Config& config): config(config) {
 
 }
 

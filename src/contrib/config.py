@@ -2,17 +2,30 @@ from enum import Enum
 
 class Location(Enum):
     Invalid = -1
-    Swiss = 0
+    Swiss_cc = 0
     Hainich = 1
+
+class Swiss_soil_water_input_type(Enum):
+    NLayers_Mean = 0
+    NLayers_Mean_One_Std = 1
+    NLayers_Mean_N_Std = 2
+    NLayers_Indiv = 3
+
+
 
 class Config:
     def __init__(self):
-        self.build_path = '/Users/pp/Documents/Repos/hydro_standalone/cmake-build-release'
-        self.lib_path  = '/Users/pp/Documents/Repos/plant_hydro_standalone/'
-        self.soilwater_file  = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Water_Input_type2.csv"
-        self.forcing_file  = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Forcing_Inter.csv"
-        self.psi_stem_file  = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Forcing_Inter.csv"
-        self.tree_folder  = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/IO/Trees"
+        self.location = Location.Invalid
+        self.config_file = ""
+        self.forcing_file  = ""
+        self.parameters_list_file  = ""
+        self.parameter_input_file_list_partial  = ""
+        self.soilwater_file  = ""
+        self.build_path = ""
+        self.lib_path  = ""
+        self.psi_stem_file  = ""
+        self.swiss_tree_folder_path  = ""
+        self.swiss_soil_water_input_type = Swiss_soil_water_input_type.NLayers_Mean
         self.sap_file = ""
         self.output_path = ""
         self.post_path = ""
@@ -20,6 +33,22 @@ class Config:
         self.scenario_path = ""
         self.nsims = -1
         self.nbest = 30
-        self.location = Location.Invalid
-        self.parameter_input_file_list  = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/Model/ParameterSampling/HypercubeSampling/Full_Parameter_setup.csv"
-        self.parameter_input_file_list_partial  = "/Users/pp/Dropbox/UNI/Projekte/A08_Hydraulic_Standalone/Drougth_experiment_simulation/Model/ParameterSampling/HypercubeSampling/Parial_Parameter_setup.csv"
+
+    def Export(self, filename):
+        variables = vars(self)
+        lines = []
+        for var in variables:
+
+            value = variables[var]
+            if isinstance(value, Enum):
+                str_value = value.name
+            else:
+                str_value = value
+
+            str_row = f'{var}={str_value}'
+            lines.append(str_row)
+
+        with open(filename, 'w') as f:
+            for line in lines:
+                f.write(f"{line}\n")
+

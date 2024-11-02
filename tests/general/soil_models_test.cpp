@@ -16,7 +16,9 @@ TEST(General_tests, Soil_model_tests)
 {
     std::cout << "Performing General_tests.Soil_model_tests..." << std::endl;
     Parameters parameters;
-    Input_Hainich input = Input_Hainich();
+    Config config;
+
+    Input_Hainich input = Input_Hainich(config);
 
     parameters.soil_layers.resize(1);
     parameters.soil_layers[0].k_soil_sat = 9.8084e-06;
@@ -43,7 +45,7 @@ TEST(General_tests, Soil_model_tests)
     }
 
     input.theta_per_layer = thetas;
-    Campbell camp(parameters, input);
+    Campbell camp(parameters, input, config);
     camp.CalculatePsiAndKs();
 
     vector<vector<double>> ks = camp.Get_ks();
@@ -67,7 +69,7 @@ TEST(General_tests, Soil_model_tests)
 
     // Testing Van Genuchten
 
-    Van_Genuchten vng(parameters, input);
+    Van_Genuchten vng(parameters, input, config);
     vng.CalculatePsiAndKs();
 
     ks = vng.Get_ks();
@@ -93,9 +95,9 @@ TEST(General_tests, Soil_model_tests)
 
     std::vector<std::unique_ptr<Soil_water_module> > models;
 
-    models.push_back(std::make_unique<Van_Genuchten>(parameters,input));
-    models.push_back(std::make_unique<Campbell>(parameters,input));
-    models.push_back(std::make_unique<Saxton06>(parameters,input));
+    models.push_back(std::make_unique<Van_Genuchten>(parameters, input, config));
+    models.push_back(std::make_unique<Campbell>(parameters, input, config));
+    models.push_back(std::make_unique<Saxton06>(parameters,input, config));
 
     for (auto& model: models){
         model->CalculatePsiAndKs();

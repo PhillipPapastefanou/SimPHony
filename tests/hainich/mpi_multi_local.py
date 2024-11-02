@@ -30,7 +30,7 @@ scenario_name = "test"
 config.output_path =  os.path.join(root_output_directory, scenario_name, 'output')
 config.scenario_path =  os.path.join(root_output_directory, scenario_name)
 config.input_path =   os.path.join(root_output_directory, scenario_name, 'input')
-config.parameter_input_file_list = os.path.join(config.input_path, 'parameter_example_2.csv')
+config.parameters_list_file = os.path.join(config.input_path, 'parameter_example_2.csv')
 
 
 sys.path.append(config.build_path)

@@ -18,16 +18,11 @@ using std::unique_ptr;
 class Input_Hainich: public Input{
 
 public:
-    Input_Hainich();
-
+    Input_Hainich(const Config& config);
     void Read_N_Parse() override;
 
-    void Add_Forcing_File(std::string file) override;
-    void Add_Soilwater_File(std::string file) override;
 
 private:
     std::unique_ptr<InputCollection> forcing_parser;
     vector<float> rad;
-    string forcing_file;
-
 };

@@ -8,7 +8,7 @@
 
 class Van_Genuchten : public Soil_water_module {
 public:
-    Van_Genuchten(const Parameters &parameters, const Input &input);
+    Van_Genuchten(const Parameters &parameters, const Input &input, const Config &config);
     ~Van_Genuchten();
 
     void CalculatePsiAndKs() override;

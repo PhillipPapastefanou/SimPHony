@@ -15,7 +15,7 @@
 // ------------------------------------------------------------------------------------------
 class Saxton06: public Soil_water_module {
 public:
-    Saxton06(const Parameters& parameters, const Input& input);
+    Saxton06(const Parameters& parameters, const Input& input, const Config& config);
     ~Saxton06();
     void CalculatePsiAndKs() override;
 

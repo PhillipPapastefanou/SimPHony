@@ -11,7 +11,7 @@ config.build_path = rtpath +'cpp/build'
 config.lib_path = rtpath + 'py/'
 config.forcing_file = rtpath +"/data/hainich/Meteo_Hainich_dT30min_forcing_PHS.csv"
 config.sap_file = rtpath + "/data/hainich/SAP_Hainich_Fagus-mean_dT30min_prog.csv"
-config.parameter_input_file_list = f"{rtpath}py/appl/LHS/UniformParameterList{20000000}.csv"
+config.parameters_list_file = f"{rtpath}py/appl/LHS/UniformParameterList{20000000}.csv"
 config.parameter_input_file_list_partial = f"{rtpath}py/appl/LHS/UniformPartialParameterList{20000000}.csv"
 
 

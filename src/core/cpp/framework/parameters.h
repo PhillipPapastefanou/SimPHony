@@ -22,10 +22,11 @@ enum class Soil_water_module_type{
     VanGenuchten
 };
 
+
+
 struct Constants{
 
     public:
-
     const double SEC_IN_DAY = 86400.0;
     const double SEC_IN_HOUR = 3600.0;
     const double CM_IN_M = 100.0;
@@ -34,6 +35,7 @@ struct Constants{
     const double KG_to_G = 1000.0;
     const double PaToMPa = std::pow(10, -6);
     const double MPaToPa = std::pow(10, +6);
+    const double H2O_TO_CO2_DIFFUSIVITY = 1.6;
 
     //const double PI = std::numbers::pi;
     //Todo Use C constants again. Does not work on the MPI cluster atm
@@ -66,7 +68,7 @@ public:
     // Universal parameter setting ID
     int id = -1;
 
-    // Parameters assumed to be constants and will not change
+    // Parameters that assumed to be constants and will not change
     Constants constants;
 
     // Root area index [1]
@@ -139,6 +141,7 @@ public:
 
     // Soil water module type [enum]
     Soil_water_module_type soil_water_type = Soil_water_module_type::VanGenuchten;
+
 
     // Index of current soil profile index if multiple water contents per sites are available
     // Only relevant for

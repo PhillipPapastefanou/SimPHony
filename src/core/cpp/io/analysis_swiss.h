@@ -13,7 +13,7 @@ class Tree_Psi_Leaf_State;
 class Analysis_Swiss {
 
 public:
-    Analysis_Swiss(Model* model, const Swiss_Drought_Trees& swiss_drought_trees, const Parameters& parameters);
+    Analysis_Swiss(const Model& model, const Swiss_Drought_Trees& swiss_drought_trees, const Parameters& parameters);
 
     void Run();
 

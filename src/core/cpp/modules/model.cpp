@@ -17,10 +17,11 @@ int Model::time_index(double elapsed_seconds) {
 }
 
 Model::Model
-(Parameters &parameters, Input &input):
+(Parameters &parameters, Input &input, Config& config):
 params(parameters),
 input_module(input),
-output(parameters)
+output(parameters),
+config(config)
 {
     parameters.Set_derived();
 }
@@ -30,17 +31,17 @@ void Model::Set_derived_parameters() {
     std::string water_model_str;
     switch (params.soil_water_type) {
         case Soil_water_module_type::Saxton06:{
-            soil_water_module = std::make_unique<Saxton06>(params, input_module);
+            soil_water_module = std::make_unique<Saxton06>(params, input_module, config);
             water_model_str = "Saxton06";
             break;
         }
         case Soil_water_module_type::Campbell:{
-            soil_water_module = std::make_unique<Campbell>(params, input_module);
+            soil_water_module = std::make_unique<Campbell>(params, input_module, config);
             water_model_str = "Campbell";
             break;
         }
         case Soil_water_module_type::VanGenuchten:{
-            soil_water_module = std::make_unique<Van_Genuchten>(params, input_module);
+            soil_water_module = std::make_unique<Van_Genuchten>(params, input_module, config);
             water_model_str = "VanGnuchten";
             break;
         }
@@ -146,7 +147,7 @@ void Model::add_output() {
     output.Add_vpd(ivpd);
 }
 
-const Output &Model::Get_output() {
+const Output& Model::Get_output() const {
     return output;
 }
 

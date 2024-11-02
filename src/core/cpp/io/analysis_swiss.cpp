@@ -8,10 +8,10 @@
 #include "swiss_drought_trees.h"
 #include <iostream>
 
-Analysis_Swiss::Analysis_Swiss(Model* model, const Swiss_Drought_Trees& swiss_drought_trees, const Parameters& parameters):
-output(model->Get_output()), swiss_drought_trees(swiss_drought_trees) {
+Analysis_Swiss::Analysis_Swiss(const Model& model, const Swiss_Drought_Trees& swiss_drought_trees, const Parameters& parameters):
+output(model.Get_output()), swiss_drought_trees(swiss_drought_trees) {
 
-    this->swiss_psi_leaf_states = std::make_shared<Tree_Psi_Leaf_State>(swiss_drought_trees, model->Get_output().Get_dates());
+    this->swiss_psi_leaf_states = std::make_shared<Tree_Psi_Leaf_State>(swiss_drought_trees, model.Get_output().Get_dates());
     dts = parameters.dts;
 }
 
@@ -21,7 +21,7 @@ void Analysis_Swiss::run_peak_analysis() {
     //overall_peak_psi_stem = find_overall_peak(output.Get_psi_stem());
 
     vector<std::pair<int,int> > ts_of_interest;
-    vector<string> slices_names;
+    vector<std::string> slices_names;
     int timestart, timeend;
 
     // Day 213 is the last
@@ -37,12 +37,10 @@ void Analysis_Swiss::run_peak_analysis() {
     ts_of_interest.push_back({timestart, timeend});
     slices_names.push_back("first_drop");
 
-
     timestart = 86400 * 36;
     timeend = 86400* 83;
     ts_of_interest.push_back({timestart, timeend});
     slices_names.push_back("second_drop");
-
 
     timestart = 86400* 84;
     timeend = 86400 * 146;
@@ -54,12 +52,10 @@ void Analysis_Swiss::run_peak_analysis() {
     ts_of_interest.push_back({timestart, timeend});
     slices_names.push_back("complete_drop");
 
-
     timestart = 86400 * 200;
     timeend = 86400* 210;
     ts_of_interest.push_back({timestart, timeend});
     slices_names.push_back("recovered");
-
 
 
     int running_index = 0;
@@ -165,6 +161,11 @@ sim_dates(sim_dates){
 
 void Tree_Psi_Leaf_State::Calculate_rmse(const vector<float> &values, const double dts) {
 
+//    if(swiss_drought_trees == nullptr){
+//        std::cout << "Swiss drought trees evaluation data is empty. Did you forget to call the initalization function?"  << std::endl;
+//        std::cout << "Exiting...";
+//        exit(99);
+//    }
 
     for (int t = 0; t < swiss_drought_trees.trees.size(); ++t) {
 

@@ -166,5 +166,5 @@ def Calculate_LHS_per_process_hainich(rank, ncombs, path):
 
         plist.Add(params)
 
-    plist.Write_Full_Parameter_File(f"{path}/Hainich_parameters.csv{rank}")
-    plist.Write_Partial_Parameter_File(f"{path}/Hainich_partial_parameters.csv{rank}", sel_cols)
+    plist.Write_Full_Parameter_File(f"{path}{rank}")
+    #plist.Write_Partial_Parameter_File(f"{path}/Hainich_partial_parameters.csv{rank}", sel_cols)

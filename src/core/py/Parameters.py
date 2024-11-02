@@ -300,6 +300,7 @@ class Parameters:
         cparameters.solver_precision = self.solver_precision
         cparameters.verbose = self.verbose
         cparameters.dts = self.dts
+        cparameters.soil_profile_index = self.soil_profile_index
 
         return cparameters
 
