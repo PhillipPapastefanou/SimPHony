@@ -1,9 +1,8 @@
 import sys
 import os
-
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-
 sys.path.append(os.path.join(THIS_DIR, os.pardir, os.pardir))
+
 from src.contrib.auxil.files import get_SimPHony_build_path
 from src.contrib.config import Config, Location, Swiss_soil_water_input_type
 
@@ -12,7 +11,8 @@ sys.path.append(cpp_lib_path)
 
 root_library_path = THIS_DIR
 root_data_path = os.path.join(root_library_path, os.pardir, os.pardir, 'data')
-# Specifying forcing and evalution data paths
+
+
 # Specifying forcing and evalution data paths
 config = Config()
 config.location = Location.Hainich
