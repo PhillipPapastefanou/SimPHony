@@ -3,7 +3,7 @@
 //
 #pragma once
 #include <string>
-
+#include <ctime>  // Include this header for the tm structure
 
 
 class DateTime {
