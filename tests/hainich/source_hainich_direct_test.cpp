@@ -22,6 +22,8 @@ TEST(Hainich_tests, Apply_model_direct) {
     Config config;
     config.Create_hainich();
 
+    std::cout << "Testing direct application of the hainich inputs";
+
     // Default parameters
     Parameters params;
 
@@ -90,7 +92,7 @@ TEST(Hainich_tests, Apply_model_direct) {
 
     model.Run(begin, end);
 
-    AnalysisHainich analysis(&model, params);
+    AnalysisHainich analysis(model, params);
     analysis.CompareSapwood(sap_data);
 
     std::cout << "RMSE G " << analysis.Get_Rmse_G() << "\n";
@@ -104,8 +106,8 @@ TEST(Hainich_tests, Apply_model_direct) {
     std::cout << "RMSE psi_stem " << analysis.Get_Rmse_psi_stem() << "\n";
     std::cout << "LL psi_stem " << analysis.Get_Log_Likelyhood_psi_stem() << "\n";
 
-    const double MAX_RMSE_J = 1E99;
-    const double MAX_RMSE_PSI_STEM = 1E99;
+    const double MAX_RMSE_J = 30;
+    const double MAX_RMSE_PSI_STEM = 30;
 
     std::cout << "Testing if RMSE J is not nan...";
     double rmse_j = analysis.Get_Rmse_J();

@@ -9,17 +9,26 @@ import datetime
 from src.contrib.param_generation.example_generator import create_example_hainich_parameter_list
 from src.contrib.auxil.messaging import print_sucess
 from src.contrib.auxil.files import get_SimPHony_build_path
+from src.contrib.config import Config, Location, Swiss_soil_water_input_type
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class Test_Hainich_From_File_Multi(unittest.TestCase):
     def test_hainich_from_file_multi(self):
         print("Multiple: Calling the lib multiple times...", end='')
+
         root_library_path = THIS_DIR
         root_data_path = os.path.join(root_library_path, os.pardir, os.pardir, 'data')
+
         # Specifying forcing and evalution data paths
-        forcing_file = os.path.join(root_data_path, 'hainich', 'input', 'Meteo_Hainich_dT30min_forcing_PHS.csv')
-        sapflux_file = os.path.join(root_data_path, 'hainich', 'eval', 'SAP_Hainich_Fagus-mean_dT30min_prog.csv')
-        psi_stem_file = os.path.join(root_data_path, 'hainich', 'eval', 'stem_water_pot.csv')
+        config = Config()
+        config.location = Location.Hainich
+        config.forcing_file = os.path.join(root_data_path, 'hainich', 'input', 'Meteo_Hainich_dT30min_forcing_PHS.csv')
+        config.sap_flow_file = os.path.join(root_data_path, 'hainich', 'eval', 'SAP_Hainich_Fagus-mean_dT30min_prog.csv')
+        config.psi_stem_file = os.path.join(root_data_path,'hainich', 'eval', 'stem_water_pot.csv')
+        config.parameters_list_file = os.path.join(THIS_DIR, 'test', 'input', "parameter_example_2.csv")
+        config_path = os.path.join(THIS_DIR,'test', 'input', 'config_py_multi.txt')
+        config.Export(config_path)
+
 
         found_cpp_lib, cpp_bin_path, cpp_lib_path = get_SimPHony_build_path()
         sys.path.append(cpp_lib_path)
@@ -27,6 +36,8 @@ class Test_Hainich_From_File_Multi(unittest.TestCase):
         # Importing local libraries and paths
         from SimPHony import Simulation_Multi_Hainich
         from SimPHony import DateTime
+
+        create_example_hainich_parameter_list(2, config.parameters_list_file)
 
         os.makedirs(os.path.join(THIS_DIR, 'test', 'input'), exist_ok=True)
         parameter_file = os.path.join(THIS_DIR, 'test', 'input', "parameter_example_2.csv")
@@ -36,9 +47,11 @@ class Test_Hainich_From_File_Multi(unittest.TestCase):
         # ----------------------------------------------------------------
         # Set up the PHS simulation
         # read in the parameter file that we just created
-        sim = Simulation_Multi_Hainich()
-        sim.Init_Full_Parameter_Setups(parameter_file, np.arange(0, 2))
-        sim.Init_input(forcing_file, sapflux_file, psi_stem_file, 0)
+        rank = 0
+        sim = Simulation_Multi_Hainich(rank, False)
+        sim.Read_config(config_path)
+        sim.Init_Full_Parameter_Setups(np.arange(0, 2))
+        sim.Init_input()
         sim.Set_water_pot_initials(-1.0, -0.2)
 
         # Specify Start and End of the Simulation
@@ -48,6 +61,7 @@ class Test_Hainich_From_File_Multi(unittest.TestCase):
         timestart = DateTime(date_start_str, format)
         timeend = DateTime(date_end_str, format)
 
+        sim.Init_eval(timestart, timeend)
         # Run the simulation
         sim.Run(timestart, timeend)
 

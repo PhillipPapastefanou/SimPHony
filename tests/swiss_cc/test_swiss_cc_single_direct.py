@@ -17,7 +17,6 @@ class Test_Swiss_Single_Direct(unittest.TestCase):
         print("Calling the cpp lib directly from python...", end='')
         root_library_path = THIS_DIR
         root_data_path = os.path.join(root_library_path, os.pardir, os.pardir, 'data')
-        # Specifying forcing and evalution data paths
 
         config = Config()
         config.location = Location.Swiss_cc
@@ -124,12 +123,13 @@ class Test_Swiss_Single_Direct(unittest.TestCase):
         # REFERENCE_PSI_LEAF_0_RMSE = 1.8912050337701065;
         # REFERENCE_PSI_LEAF_6_RMSE = 2.5209254139403057;
 
-        REFERENCE_PSI_LEAF_0_RMSE = 2.3105808610161884;
-        REFERENCE_PSI_LEAF_6_RMSE = 2.3204660959242789;
+        REFERENCE_PSI_LEAF_0_RMSE = 2.3339342190183996;
+        REFERENCE_PSI_LEAF_6_RMSE = 2.334786210850298;
 
         self.assertAlmostEqual(errors[0], REFERENCE_PSI_LEAF_0_RMSE, places=EPS)
         self.assertAlmostEqual(errors[6], REFERENCE_PSI_LEAF_6_RMSE, places=EPS)
         print_sucess("Done!")
+
     def test_swiss_direct_multi(self):
 
         print("Calling the cpp lib directly from python...", end='')

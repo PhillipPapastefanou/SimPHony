@@ -21,7 +21,6 @@ void Input_Swiss_Multi_Soils::Read_N_Parse() {
     vector<vector<float> > soil_water_input;
 
     switch (config.swiss_soil_water_input_type.value) {
-
         case Swiss_soil_water_input_type::NLayersMean:
             break;
         case Swiss_soil_water_input_type::NLayersMeanOneStd:{

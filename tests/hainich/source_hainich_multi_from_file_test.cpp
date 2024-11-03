@@ -22,23 +22,77 @@ using std::string;
 
 TEST(Hainich_tests, Apply_model_multi_from_file) {
 
-    string forcing_file = "../data/hainich/input/Meteo_Hainich_dT30min_forcing_PHS.csv";
-    string sap_file = "../data/hainich/eval/SAP_Hainich_Fagus-mean_dT30min_prog.csv";
-    string psi_stem_file = "../data/hainich/eval/stem_water_pot.csv";
-    string parameters_list = "../tests/hainich/test/input/parameter_example_2.csv";
+    std::cout << "Testing if RMSE psi_leaf is not nan...\n";
+
+    using std::cout;
+    using std::endl;
+    using std::string;
+    namespace fs = std::filesystem;
+
+    string config_filenname = "../tests/hainich/test/input/config_multi.txt";
+    if(!fs::exists(config_filenname)){
+        Config config;
+        config.Create_hainich();
+        config.parameters_list_file.value = "../tests/hainich/test/input/parameter_example_2.csv";
+        config.Export(config_filenname);
+    }
 
     double psi_leaf_init = -1.0;
     double psi_stem_init = -0.2;
 
-    Simulation_Multi_Hainich simulation;
-    simulation.Init_Full_Parameter_Setups(parameters_list, std::vector<int>{0,1});
-    simulation.Init_input(forcing_file, sap_file, psi_stem_file, 0);
+
+    Simulation_Multi_Hainich simulation(0, false);
+
+    simulation.Read_Config(config_filenname);
+
+    simulation.Init_Full_Parameter_Setups(
+            std::vector<int>{0,1});
+    simulation.Init_input();
 
     DateTime begin =  DateTime("2023-04-01 00:00:00", "%Y-%m-%d %H:%M:%S");
     DateTime end   =  DateTime("2023-11-01 00:00:00", "%Y-%m-%d %H:%M:%S");
 
+    simulation.Init_eval(begin,end);
+
     simulation.Set_water_pot_initials(psi_leaf_init, psi_stem_init);
     simulation.Run(begin, end);
+
+
+
+    vector<AnalysisHainich> analysis = simulation.Get_analysis_list();
+
+
+    const double MAX_RMSE_PSI_STEM = 10;
+
+    for (int ai = 0; ai < analysis.size(); ++ai) {
+        double rmse = 0.0;
+        rmse =  analysis[ai].Get_Rmse_G();
+        ASSERT_LT(rmse, MAX_RMSE_PSI_STEM);
+
+        rmse =  analysis[ai].Get_Rmse_J();
+        ASSERT_LT(rmse, MAX_RMSE_PSI_STEM);
+
+        rmse =  analysis[ai].Get_Rmse_psi_stem();
+        ASSERT_LT(rmse, MAX_RMSE_PSI_STEM);
+    }
+
+
+    double x,y = 0.0;
+
+    x = analysis[0].Get_Rmse_G();
+    y = analysis[1].Get_Rmse_G();
+    ASSERT_NE(x, y);
+
+
+    x = analysis[0].Get_Rmse_J();
+    y = analysis[1].Get_Rmse_J();
+    ASSERT_NE(x, y);
+
+    x = analysis[0].Get_Rmse_psi_stem();
+    y = analysis[1].Get_Rmse_psi_stem();
+    ASSERT_NE(x, y);
+
+
 
 //    AnalysisHainich analysis(&model, params);
 //    analysis.CompareSapwood(sap_data);

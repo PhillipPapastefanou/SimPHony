@@ -6,7 +6,9 @@ import numpy as np
 import pandas as pd
 import datetime
 from src.contrib.auxil.files import get_SimPHony_build_path
-from src.contrib.auxil.messaging import print_failure ,print_sucess
+from src.contrib.auxil.messaging import print_failure , print_sucess
+from src.contrib.config import Config, Location, Swiss_soil_water_input_type
+
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class Test_Hainich_Direct(unittest.TestCase):
@@ -15,10 +17,14 @@ class Test_Hainich_Direct(unittest.TestCase):
         print("Calling the cpp lib directly from python...", end='')
         root_library_path = THIS_DIR
         root_data_path = os.path.join(root_library_path, os.pardir, os.pardir, 'data')
-        # Specifying forcing and evalution data paths
-        forcing_file = os.path.join(root_data_path, 'hainich', 'input', 'Meteo_Hainich_dT30min_forcing_PHS.csv')
-        sapflux_file = os.path.join(root_data_path, 'hainich', 'eval', 'SAP_Hainich_Fagus-mean_dT30min_prog.csv')
-        psi_stem_file = os.path.join(root_data_path, 'hainich', 'eval', 'stem_water_pot.csv')
+
+        config = Config()
+        config.location = Location.Hainich
+        config.forcing_file = os.path.join(root_data_path, 'hainich', 'input', 'Meteo_Hainich_dT30min_forcing_PHS.csv')
+        config.sap_flow_file = os.path.join(root_data_path, 'hainich', 'eval', 'SAP_Hainich_Fagus-mean_dT30min_prog.csv')
+        config.psi_stem_file = os.path.join(root_data_path,'hainich', 'eval', 'stem_water_pot.csv')
+        config_path = os.path.join(THIS_DIR,'test', 'input', 'config_py.txt')
+        config.Export(config_path)
 
         found_cpp_lib, cpp_bin_path, cpp_lib_path = get_SimPHony_build_path()
         sys.path.append(cpp_lib_path)
@@ -33,9 +39,9 @@ class Test_Hainich_Direct(unittest.TestCase):
         from src.core.py.Parameters import Convert_Soil_Parameters
 
         # Reading sapflow and psi_stem data
-        df_sap_obs = pd.read_csv(sapflux_file)
+        df_sap_obs = pd.read_csv(config.sap_flow_file)
         df_sap_obs['datetime'] = pd.to_datetime(df_sap_obs['datetime'])
-        df_psi_stem_obs = pd.read_csv(psi_stem_file)
+        df_psi_stem_obs = pd.read_csv(config.psi_stem_file)
         df_psi_stem_obs['time'] = pd.to_datetime(df_psi_stem_obs['time'])
         # Convert from kg H2O to mol H2O
         df_psi_stem_obs['psi_stem_obs'] = df_psi_stem_obs['FAG']
@@ -96,8 +102,9 @@ class Test_Hainich_Direct(unittest.TestCase):
         # Set up the PHS simulation
         # read in the parameter file that we just created
         sim = Simulation_Single_Hainich()
+        sim.Read_config(config_path)
         sim.Init_parameters(cparameters)
-        sim.Init_input(forcing_file, sapflux_file, psi_stem_file)
+        sim.Init_input()
         sim.Set_water_pot_initials(-1.0, -0.2)
 
         # Specify Start and End of the Simulation
@@ -107,8 +114,11 @@ class Test_Hainich_Direct(unittest.TestCase):
         timestart = DateTime(date_start_str, format)
         timeend = DateTime(date_end_str, format)
 
+        sim.Init_eval(timestart, timeend)
         # Run the simulation
         sim.Run(timestart, timeend)
+        # Perform the analysis
+        sim.Analyse()
 
         # Get output and analysis data
         # output = sim.Get_output()

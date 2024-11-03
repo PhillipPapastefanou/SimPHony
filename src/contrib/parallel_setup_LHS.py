@@ -103,7 +103,6 @@ class ParallelSetupWithLHS:
             timestart = DateTime("2023-04-01 00:00:00", DATE_FORMAT)
             timeend   = DateTime("2023-11-01 00:00:00", DATE_FORMAT)
 
-
         elif self.config.location == Location.Swiss_cc:
             self.sim = Simulation_Multi_Swiss(self.rank, True)
             timestart = DateTime("2018-05-01 00:00:00", DATE_FORMAT)

@@ -117,6 +117,9 @@ def Calculate_LHS_per_process_swiss_cc(rank, ncombs, parameter_file):
     sigma_wcont    = rescale(slicer.get(), min = -1, max = 0.5)
     sel_cols.append("sigma_wconts")
 
+    soil_profile_indexes = rescale(slicer.get(), min = 0, max = 8).astype(int)
+
+
     g_barks    = rescale(slicer.get(), min = 0.01, max = 0.08)
     sel_cols.append("g_barks")
 
@@ -163,8 +166,10 @@ def Calculate_LHS_per_process_swiss_cc(rank, ncombs, parameter_file):
         params.d_50_close = d_50close_s[i]
         params.jackson_root_beta = jackson_s[i]
 
-        params.wcont_sigma_deviation = sigma_wcont[i]
+        #params.wcont_sigma_deviation = sigma_wcont[i]
         params.wcont_sigma_deviation = 0.0
+
+        params.soil_profile_index = soil_profile_indexes[i]
 
         params.tree_density = 10/1000
 

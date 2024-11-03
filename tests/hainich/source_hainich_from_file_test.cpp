@@ -20,28 +20,33 @@ using std::string;
 
 TEST(Hainich_tests, Apply_model_from_file) {
 
-    string forcing_file = "../data/hainich/input/Meteo_Hainich_dT30min_forcing_PHS.csv";
-    string sap_file = "../data/hainich/eval/SAP_Hainich_Fagus-mean_dT30min_prog.csv";
-    string psi_stem_file = "../data/hainich/eval/stem_water_pot.csv";
-    string parameters_list = "../tests/hainich/test/input/parameter_example_1.csv";
 
-    double psi_leaf_init = -1.0;
-    double psi_stem_init = -0.2;
+    using std::cout;
+    using std::endl;
+    using std::string;
+    string config_filenname = "../tests/hainich/test/input/config.txt";
 
-    Parameter_CSV_Reader reader(parameters_list);
+    Config config;
+    config.Create_hainich();
+    config.Export(config_filenname);
+    config.Read( config_filenname);
+
+
+    Parameter_CSV_Reader reader(config.parameters_list_file.Get());
     reader.Parse_Full_Files();
 
     Parameters params = reader.Get_parameter_list()[0];
 
-    Config config;
+    double psi_leaf_init = -1.0;
+    double psi_stem_init = -0.2;
 
     Input_Hainich input(config);
     input.Read_N_Parse();
 
-    TimeSeries sap_data(sap_file, true, ',');
+    TimeSeries sap_data(config.sap_flow_file.Get(), true, ',');
     sap_data.Load("datetime", "%Y-%m-%d %H:%M:%S", {1});
 
-    TimeSeries psi_stem_data(psi_stem_file, true  , ',');
+    TimeSeries psi_stem_data(config.psi_stem_file.Get(), true  , ',');
     psi_stem_data.Load("time", "%Y-%m-%d %H:%M:%S", {1});
 
     auto start_clock = std::chrono::high_resolution_clock::now();
@@ -49,7 +54,6 @@ TEST(Hainich_tests, Apply_model_from_file) {
 
     model.Set_derived_parameters();
     model.Set_initial_conditions(psi_leaf_init, psi_stem_init);
-
 
     DateTime begin =  DateTime("2023-04-01 00:00:00", "%Y-%m-%d %H:%M:%S");
     DateTime end   =  DateTime("2023-11-01 00:00:00", "%Y-%m-%d %H:%M:%S");
@@ -59,7 +63,7 @@ TEST(Hainich_tests, Apply_model_from_file) {
 
     model.Run(begin, end);
 
-    AnalysisHainich analysis(&model, params);
+    AnalysisHainich analysis(model, params);
     analysis.CompareSapwood(sap_data);
 
     std::cout << "RMSE G " << analysis.Get_Rmse_G() << "\n";
@@ -73,8 +77,8 @@ TEST(Hainich_tests, Apply_model_from_file) {
     std::cout << "RMSE psi_stem " << analysis.Get_Rmse_psi_stem() << "\n";
     std::cout << "LL psi_stem " << analysis.Get_Log_Likelyhood_psi_stem() << "\n";
 
-    const double MAX_RMSE_J = 1E99;
-    const double MAX_RMSE_PSI_STEM = 1E99;
+    const double MAX_RMSE_J = 30;
+    const double MAX_RMSE_PSI_STEM = 30;
 
     std::cout << "Testing if RMSE J is not nan...";
     ASSERT_LT(analysis.Get_Rmse_J(),MAX_RMSE_J);

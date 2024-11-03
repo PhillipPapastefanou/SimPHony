@@ -12,7 +12,7 @@ class AnalysisHainich {
 
 
 public:
-    AnalysisHainich(Model* model, const Parameters& parameters);
+    AnalysisHainich(const Model& model, const Parameters& parameters);
     ~AnalysisHainich();
 
     void CompareSapwood(const TimeSeries& time_series);

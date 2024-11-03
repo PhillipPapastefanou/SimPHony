@@ -10,106 +10,29 @@
 #include <iostream>
 
 
-Simulation_Multi_Hainich::Simulation_Multi_Hainich() {
-
+Simulation_Multi_Hainich::Simulation_Multi_Hainich(int rank, bool split_paramlist): Simulation_Multi(rank, split_paramlist)  {
 }
 
-void Simulation_Multi_Hainich::Init_input(std::string forcing_file,
-                                          std::string sap_flow_file,
-                                          std::string psi_stem_file,
-                                          int rank) {
 
-    this->rank = rank;
 
-    if(parameter_list.empty()){
-        std::cout << "Parameter list is empty." << std::endl;
-        std::cout << "This function needs to be called after reading the param list" << std::endl;
-        exit(99);
-    }
-
-    Config config;
-
-    input = std::make_unique<Input_Hainich>(config);
-    input->Read_N_Parse();
-
-    sap_series = std::make_unique<TimeSeries>(sap_flow_file, true, ',');
+void Simulation_Multi_Hainich::Init_eval(DateTime timestart, DateTime timeend) {
+    sap_series = std::make_unique<TimeSeries>(config->sap_flow_file.value, true, ',');
     sap_series->Load("datetime", "%Y-%m-%d %H:%M:%S", {1});
 
-    psi_stem_series = std::make_unique<TimeSeries>(psi_stem_file, true  , ',');
+    psi_stem_series = std::make_unique<TimeSeries>(config->psi_stem_file.value, true, ',');
     psi_stem_series->Load("time", "%Y-%m-%d %H:%M:%S", {1});
+
+    double dts = std::get<0>(parameter_list[0]).dts;
+    sap_series->GenerateModelObsIndexes(timestart, timeend, dts);
+    psi_stem_series->GenerateModelObsIndexes(timestart, timeend, dts);
 }
 
-void Simulation_Multi_Hainich::Init_Full_Parameter_Setups(string filename, std::vector<int> ids) {
-    Parameter_CSV_Reader param_reader(filename);
+void Simulation_Multi_Hainich::Update_Analysis(const Model &model, const Parameters &parameters) {
 
-    param_reader.Parse_Full_Files();
-
-    vector<Parameters> all_parameters_list = param_reader.Get_parameter_list();
-
-    for (int i = 0; i < ids.size(); ++i) {
-        int index_of_interest = ids[i];
-        std::tuple<Parameters, int> parameter_setup = std::make_tuple(all_parameters_list[index_of_interest], index_of_interest);
-        parameter_list.push_back(parameter_setup);
-    }
-}
-
-void Simulation_Multi_Hainich::Init_Partial_Parameter_Setups(string root_filename, string partial_parameter_filename,
-                                                             std::vector<int> ids) {
-
-}
-
-void Simulation_Multi_Hainich::Set_water_pot_initials(double psi_leaf, double psi_stem) {
-    init_psi_leaf = psi_leaf;
-    init_psi_stem = psi_stem;
-}
-
-void Simulation_Multi_Hainich::Run(DateTime timestart, DateTime timeend) {
-
-    std::cout << "Rank " << rank << ": Performing " << parameter_list.size() << " simulations." << std:: endl;
-    timestart.print();
-    timeend.print();
-
-    auto start_simulation = std::chrono::high_resolution_clock::now();
-    auto start_timer = std::chrono::high_resolution_clock::now();
-
-    if (parameter_list.size() == 0){
-        std::cout << "No Parameter list specified. Skipping!" << std:: endl;
-    }
-
-    sap_series->GenerateModelObsIndexes(timestart, timeend, std::get<0>(parameter_list[0]).dts);
-    psi_stem_series->GenerateModelObsIndexes(timestart, timeend, std::get<0>(parameter_list[0]).dts);
-
-    for (int r = 0; r < parameter_list.size(); ++r) {
-
-        Parameters& parameters = std::get<0>(parameter_list[r]);
-        int parameter_index = std::get<1>(parameter_list[r]);
-
-        Config config;
-
-
-        Model model(parameters, *input, config);
-        model.Set_derived_parameters();
-        model.Set_initial_conditions(init_psi_leaf, init_psi_stem);
-        model.Run(timestart,timeend);
-
-        // Data analysis after simulation
-        AnalysisHainich analysis(&model, parameters);
-        analysis.CompareSapwood(*sap_series);
-        analysis.ComparePsiStem(*psi_stem_series);
-        analysis_list.push_back(analysis);
-
-        auto end_timer = std::chrono::high_resolution_clock::now();
-        auto elapsed_timer = std::chrono::duration_cast<std::chrono::milliseconds>( end_timer - start_timer);
-
-        if (elapsed_timer.count() > parameters.constants.TMUTE_MILLISEC){
-            auto elapsed_simulation = std::chrono::duration_cast<std::chrono::milliseconds>(end_timer - start_simulation);
-            std::cout << "Rank " << rank << " completed " << r << " out of " << parameter_list.size() << " runs. ";
-            std::cout << "Elapsed time: " << format_duration(elapsed_simulation) << " remaining: "
-                      << remaining_str(elapsed_simulation, r, parameter_list.size())  << "." << std::endl;
-            start_timer = std::chrono::high_resolution_clock::now();
-        }
-    }
-    std::cout << "Simulation finished! "<< std::endl;
+    AnalysisHainich analysis(model, parameters);
+    analysis.CompareSapwood(*sap_series);
+    analysis.ComparePsiStem(*psi_stem_series);
+    analysis_list.push_back(analysis);
 }
 
 std::vector<AnalysisHainich> Simulation_Multi_Hainich::Get_analysis_list() {

@@ -4,6 +4,7 @@
 
 #include "simulation_single.h"
 #include "../io/input_swiss_mult_soils.h"
+#include "../io/input_hainich.h"
 #include "parameter_csv_reader.h"
 
 Simulation_Single::Simulation_Single() {
@@ -22,7 +23,12 @@ void Simulation_Single::Init_input() {
         std::cout << "Exiting...";
         exit(99);
     }
-    input = std::make_unique<Input_Swiss_Multi_Soils>(*config);
+
+    if (config->location == Location::Swiss_cc)
+        input = std::make_unique<Input_Swiss_Multi_Soils>(*config);
+    else if (config->location == Location::Hainich)
+        input = std::make_unique<Input_Hainich>(*config);
+
     input->Read_N_Parse();
 }
 

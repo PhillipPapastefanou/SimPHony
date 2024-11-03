@@ -4,7 +4,6 @@
 
 #include "simulation_single_swiss.h"
 #include "../io/input_swiss_mult_soils.h"
-
 Simulation_Single_Swiss::Simulation_Single_Swiss(){
 }
 

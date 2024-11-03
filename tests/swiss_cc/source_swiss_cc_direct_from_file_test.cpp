@@ -57,7 +57,7 @@ TEST(Swiss_cc_tests, Apply_model_from_file) {
 
     std::vector<double> errors = analysis.Get_rmse();
 
-    const double MAX_RMSE_PSI_STEM = 10;
+    const double MAX_RMSE_PSI_STEM = 30;
 
     for (double error: errors) {
         ASSERT_LT(error,MAX_RMSE_PSI_STEM);

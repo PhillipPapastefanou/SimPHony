@@ -45,7 +45,7 @@ class Test_Swiss_Multi_From_File(unittest.TestCase):
         rank = 0
         # Set up the PHS simulation
         # read in the parameter file that we just created
-        sim = Simulation_Multi_Swiss(rank)
+        sim = Simulation_Multi_Swiss(rank, False)
         sim.Read_config(config_path)
         sim.Init_Full_Parameter_Setups(np.arange(0, 2))
         sim.Init_input()
@@ -61,8 +61,6 @@ class Test_Swiss_Multi_From_File(unittest.TestCase):
         sim.Init_eval(timestart, timeend)
         # Run the simulation
         sim.Run(timestart, timeend)
-        # Get output and analysis data
-        # output = sim.Get_output()
 
         an = sim.Get_analysis_list()
         errors = an[1].Get_rmse()
@@ -73,6 +71,10 @@ class Test_Swiss_Multi_From_File(unittest.TestCase):
 
         REFERENCE_PSI_LEAF_0_RMSE = 14.842429028013507;
         REFERENCE_PSI_LEAF_6_RMSE = 15.141204438155913;
+
+        REFERENCE_PSI_LEAF_0_RMSE = 13.938892738981737;
+        REFERENCE_PSI_LEAF_6_RMSE = 14.239149074453056;
+
 
         self.assertAlmostEqual(errors[0], REFERENCE_PSI_LEAF_0_RMSE, places=EPS)
         self.assertAlmostEqual(errors[6], REFERENCE_PSI_LEAF_6_RMSE, places=EPS)

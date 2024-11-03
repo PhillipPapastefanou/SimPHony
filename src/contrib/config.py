@@ -23,10 +23,10 @@ class Config:
         self.soilwater_file  = ""
         self.build_path = ""
         self.lib_path  = ""
+        self.sap_flow_file = ""
         self.psi_stem_file  = ""
         self.swiss_tree_folder_path  = ""
         self.swiss_soil_water_input_type = Swiss_soil_water_input_type.NLayers_Mean
-        self.sap_file = ""
         self.output_path = ""
         self.post_path = ""
         self.input_path = ""

@@ -7,8 +7,8 @@
 #include <algorithm>
 #include <iostream>
 
-AnalysisHainich::AnalysisHainich(Model* model, const Parameters& parameters):
-output(model->Get_output()), parameters(parameters),
+AnalysisHainich::AnalysisHainich(const Model& model, const Parameters& parameters):
+output(model.Get_output()), parameters(parameters),
 sigma_log_likelyhood(parameters.sigma_log_likelyhood){
 }
 

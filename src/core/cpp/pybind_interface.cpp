@@ -21,17 +21,6 @@ namespace py = pybind11;
 using std::vector;
 
 PYBIND11_MODULE(SimPHony, handle){
-//    py::class_<Simulation_Single_Hainich>(handle, "Simulation_Single_Hainich").
-//            def("Init_parameters_def", &Simulation_Single_Hainich::Init_parameters_default).
-//            def("Init_parameters_fn_single", &Simulation_Single_Hainich::Init_parameters_filename).
-//            def("Init_parameters", &Simulation_Single_Hainich::Init_parameters).
-//            def("Init_input", &Simulation_Single_Hainich::Init_input).
-//            def("Set_water_pot_initials", &Simulation_Single_Hainich::Set_water_pot_initials).
-//            def("Run", &Simulation_Single_Hainich::Run).
-//            def("Get_output", &Simulation_Single_Hainich::Get_output).
-//            def("Get_analysis", &Simulation_Single_Hainich::Get_analysis).
-//            def(py::init<>());
-
 
     py::class_<Simulation_Single>(handle, "Simulation_Single").
             def("Read_config", &Simulation_Single::Read_Config).
@@ -42,6 +31,12 @@ PYBIND11_MODULE(SimPHony, handle){
             def("Set_water_pot_initials", &Simulation_Single::Set_water_pot_initials).
             def("Run", &Simulation_Single::Run).
             def("Get_output", &Simulation_Single::Get_output).
+            def(py::init<>());
+
+    py::class_<Simulation_Single_Hainich, Simulation_Single>(handle, "Simulation_Single_Hainich").
+            def("Analyse", &Simulation_Single_Hainich::Analyse).
+            def("Get_analysis", &Simulation_Single_Hainich::Get_analysis).
+            def("Init_eval", &Simulation_Single_Hainich::Init_eval).
             def(py::init<>());
 
     py::class_<Simulation_Single_Swiss, Simulation_Single>(handle, "Simulation_Single_Swiss").
@@ -64,14 +59,10 @@ PYBIND11_MODULE(SimPHony, handle){
             def("Get_analysis_list", &Simulation_Multi_Swiss::Get_analysis_list).
             def(py::init<int, bool>());
 
-    py::class_<Simulation_Multi_Hainich>(handle, "Simulation_Multi_Hainich").
-            def("Init_Full_Parameter_Setups", &Simulation_Multi_Hainich::Init_Full_Parameter_Setups).
-            def("Init_Partial_Parameter_Setups", &Simulation_Multi_Hainich::Init_Partial_Parameter_Setups).
-            def("Init_input", &Simulation_Multi_Hainich::Init_input).
-            def("Set_water_pot_initials", &Simulation_Multi_Hainich::Set_water_pot_initials).
-            def("Run", &Simulation_Multi_Hainich::Run).
+    py::class_<Simulation_Multi_Hainich, Simulation_Multi>(handle, "Simulation_Multi_Hainich").
+            def("Init_eval", &Simulation_Multi_Hainich::Init_eval).
             def("Get_analysis_list", &Simulation_Multi_Hainich::Get_analysis_list).
-            def(py::init<>());
+            def(py::init<int, bool>());
 
     py::class_<Output>(handle, "Output").
             def("Get_T", &Output::Get_T).
@@ -115,7 +106,7 @@ PYBIND11_MODULE(SimPHony, handle){
             def("Get_LL_J", &AnalysisHainich::Get_Log_Likelyhood_J).
             def("Get_Rmse_psi_stem", &AnalysisHainich::Get_Rmse_psi_stem).
             def("Get_LL_psi_stem", &AnalysisHainich::Get_Log_Likelyhood_psi_stem).
-            def(py::init<Model*, Parameters>());
+            def(py::init<Model&, Parameters&>());
 
     py::class_<TimeSlice>(handle, "TimeSlice").
             def_readwrite("Min", &TimeSlice::minimum).

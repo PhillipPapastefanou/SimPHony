@@ -111,7 +111,7 @@ void Config::Create_swiss_cc() {
     location = Location::Swiss_cc;
     forcing_file.value = "../data/swiss/input/Forcing_Inter.csv";
     swiss_tree_folder_path.value = "../data/swiss/eval/Trees";
-    parameters_list_file.value = "../tests/swiss_cc/parameter_example.csv";
+    parameters_list_file.value = "../tests/swiss_cc/test/input/parameter_example_1.csv";
     soilwater_file.value =  "../data/swiss/input/vwc_swicc_cc_2023_std_n.csv";
     swiss_soil_water_input_type.value = Swiss_soil_water_input_type::NLayersMeanNStd;
 }
@@ -123,8 +123,7 @@ void Config::Create_hainich() {
     forcing_file.value = "../data/hainich/input/Meteo_Hainich_dT30min_forcing_PHS.csv";
     sap_flow_file.value = "../data/hainich/eval/SAP_Hainich_Fagus-mean_dT30min_prog.csv";
     psi_stem_file.value  = "../data/hainich/eval/stem_water_pot.csv";
-
-
+    parameters_list_file.value = "../tests/hainich/test/input/parameter_example_1.csv";
 }
 
 void Config::Export(std::string filename) {

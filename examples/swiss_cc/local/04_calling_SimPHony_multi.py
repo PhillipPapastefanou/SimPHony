@@ -56,8 +56,8 @@ config.input_path =   os.path.join(root_output_directory, scenario_name, 'input'
 config.config_file  = os.path.join(root_output_directory, scenario_name, 'input', 'config.txt')
 config.parameters_list_file = os.path.join(root_output_directory, scenario_name, 'input', "parameters.csv")
 
-config.nsims = 100
-config.nbest = 10
+config.nsims = 20000
+config.nbest = 50
 
 config.Export(config.config_file)
 
