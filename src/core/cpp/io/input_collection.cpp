@@ -49,7 +49,7 @@ void InputCollection::init_irregular(std::string dt_header, std::string format) 
     }
 
     int index = std::distance( reader.header.begin(), index_it );
-    vector<vector<string>> dates_str = reader.Get<std::string>({index});
+    vector<vector<std::string>> dates_str = reader.Get<std::string>(std::vector<int>{index});
 
     for (int i = 0; i < dates_str.size(); ++i) {
 

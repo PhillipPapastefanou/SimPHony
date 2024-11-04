@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.14)
 project(SimPHony VERSION 0.6)
+
+# Set PYBIND11_FINDPYTHON to ON
+set(PYBIND11_FINDPYTHON ON)
 set(USE_PYBIND11 ON)
+
 cmake_host_system_information(RESULT _host_name QUERY HOSTNAME)
 
 if(${_host_name} MATCHES "bgc-jena.mpg.de$")
