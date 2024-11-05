@@ -43,15 +43,14 @@ void Config::Read(std::string filename) {
             continue;
         }
 
-        std::transform(value.begin(), value.end(), value.begin(),
-                       [](unsigned char c){ return std::tolower(c); });
+
 
 
         if (key == "location"){
-            if (value == "hainich"){
+            if (value == "Hainich"){
                 location = Location::Hainich;
             }
-            else if(value == "swiss_cc"){
+            else if(value == "Swiss_cc"){
                 location = Location::Swiss_cc;
             }
             else{
@@ -68,6 +67,10 @@ void Config::Read(std::string filename) {
             Parse(swiss_tree_folder_path, key, value);
 
             if(key == swiss_soil_water_input_type.key){
+
+                std::transform(value.begin(), value.end(), value.begin(),
+                       [](unsigned char c){ return std::tolower(c); });
+
                 if(value == "nlayers_mean")
                     swiss_soil_water_input_type.value = Swiss_soil_water_input_type::NLayersMean;
                 else if(value == "nlayers_mean_one_std")

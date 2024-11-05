@@ -7,9 +7,10 @@ from time import perf_counter
 from SimPHony import Simulation_Multi_Hainich
 from SimPHony import Simulation_Multi_Swiss
 from SimPHony import DateTime
-from src.contrib.config import Config, Location
+from src.contrib.config import Config, Location, Swiss_soil_water_input_type
 
-from src.contrib.param_generation.LHS.LHS_Multi_Swiss_Application_automation_vangenuchten import Calculate_LHS_per_process_swiss_cc
+from src.contrib.param_generation.LHS.LHS_Multi_Swiss_Application_automation_vangenuchten import Calculate_LHS_per_process_swiss_cc_indiv
+from src.contrib.param_generation.LHS.LHS_Multi_Swiss_Application_automation_vangenuchten import Calculate_LHS_per_process_swiss_cc_n_std_n
 from src.contrib.param_generation.LHS.LHS_Multi_Hainich_Application_automation_vangenuchten import Calculate_LHS_per_process_hainich
 
 class ParallelSetupWithLHS:
@@ -85,7 +86,14 @@ class ParallelSetupWithLHS:
         if self.config.location == Location.Hainich:
             Calculate_LHS_per_process_hainich(self.rank, self.n_sims_per_process, self.config.parameters_list_file)
         elif self.config.location == Location.Swiss_cc:
-            Calculate_LHS_per_process_swiss_cc(self.rank, self.n_sims_per_process, self.config.parameters_list_file)
+            if self.config.swiss_soil_water_input_type == Swiss_soil_water_input_type.NLayers_Indiv:
+                Calculate_LHS_per_process_swiss_cc_indiv(self.rank, self.n_sims_per_process, self.config.parameters_list_file)
+            elif self.config.swiss_soil_water_input_type == Swiss_soil_water_input_type.NLayers_Mean_N_Std:
+                Calculate_LHS_per_process_swiss_cc_n_std_n(self.rank, self.n_sims_per_process, self.config.parameters_list_file)
+            else:
+                print("Invalid soil water input type specified. Exiting...")
+                exit(99)
+
         else:
             print("Invalid location specified. Exiting...")
             exit(99)
