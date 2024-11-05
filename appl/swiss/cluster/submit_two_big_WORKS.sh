@@ -8,21 +8,21 @@
 #SBATCH --mail-user=papa@tum.de
 #SBATCH --export=NONE
 #SBATCH --time=24:00:00
-#SBATCH --nodes=1
-#SBATCH --ntasks=128
+#SBATCH --nodes=2
+#SBATCH --ntasks=256
 #SBATCH --partition='big'
 #SBATCH --mem='1600G'
+
 module purge
 ml intel/2023.0.0 impi/2021.6.0
 ml netcdf/4.9.0
 ml all/Miniconda3
 
-
 source /User/homes/ppapastefanou/miniconda3/etc/profile.d/conda.sh
 #conda info --envs
-conda activate  /Net/Groups/BSI/work_scratch/ppapastefanou/envs/phs
+conda activate /Net/Groups/BSI/work_scratch/ppapastefanou/envs/SimPHony_intel_oneapi
 which python
 
-#export FI_PROVIDER=tcp
+export FI_PROVIDER=tcp
 
-mpiexec -n 128 python3 swiss_cc_mpi_cluster_LHS.py
+mpiexec -n 256 python3 -u swiss_cc_mpi_cluster_LHS.py
