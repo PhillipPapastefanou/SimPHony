@@ -72,9 +72,9 @@ parameters.anet_max = 0.1
 # # parameters.anet_max = 1.5
 # #
 # #
-parameters.stem_hydraulic_capacitance= 50 * 1000/18.0
+parameters.stem_hydraulic_capacitance= 20 * 1000/18.0
 
-parameters.k_xylem_sat = 20 * 1000/18.0
+parameters.k_xylem_sat = 2 * 1000/18.0
 
 parameters.wcont_sigma_deviation = 0
 #

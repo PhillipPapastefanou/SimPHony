@@ -28,7 +28,7 @@ double Solver_RKF::d_psi_leaf(double psi_leaf, double psi_stem) {
 
     // Medlyn phoytosynthesis model
     // mol CO2 s-1 m-2
-    gs = params.g0 + beta_stom_cond * (1.0 + params.g1 / std::sqrt(vpd) * anet / ca);
+    gs = params.g0 + beta_stom_cond * (1.0 + params.g1*params.constants.KPaToPa / std::sqrt(vpd)) * anet / ca;
 
     // Convert from Mol CO2 to Mol H2O
     gs *= 1.6;

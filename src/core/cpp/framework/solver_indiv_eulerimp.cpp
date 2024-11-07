@@ -146,7 +146,7 @@ double Solver_Indiv_Euler_Imp::update_transpiration(double psi_leaf) {
 
     // Medlyn phoytosynthesis model
     // mol CO2 s-1 m-2
-    gs = params.g0 + beta_stom_cond * (1.0 + params.g1*params.constants.KPaToPa / std::sqrt(vpd) * anet / ca);
+    gs = params.g0 + beta_stom_cond * (1.0 + params.g1*params.constants.KPaToPa / std::sqrt(vpd)) * anet / ca;
 
     // Convert from Mol CO2 to Mol H2O diffusivity
     gs *= params.constants.H2O_TO_CO2_DIFFUSIVITY;
