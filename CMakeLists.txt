@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(SimPHony VERSION 0.6)
 
-# Set PYBIND11_FINDPYTHON to ON
-set(PYBIND11_FINDPYTHON ON)
-set(USE_PYBIND11 ON)
+
 
 cmake_host_system_information(RESULT _host_name QUERY HOSTNAME)
 
@@ -21,7 +19,10 @@ else()
     # You prob have to adapt this path to match your environemnt
     set(PYTHON_EXECUTABLE /Users/pp/anaconda3/envs/PHS-post/bin/python)
 endif()
-#
+
+# We cannot use pybind find python utilities as this ususally 'finds' the wrong function on the cluster
+set(PYBIND11_FINDPYTHON OFF)
+set(USE_PYBIND11 ON)
 
 find_package(pybind11 CONFIG REQUIRED)
 message(STATUS "Found pybind11 v${pybind11_VERSION}: ${pybind11_INCLUDE_DIRS}")
