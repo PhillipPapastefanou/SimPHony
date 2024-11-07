@@ -33,6 +33,7 @@ struct Constants{
     const double KG_H2O_To_Mol = 1000.0 / 18.0;
     const double G_H2O_To_Mol = 1.0 / 18.0;
     const double KG_to_G = 1000.0;
+    const double KPaToPa = 1000.0;
     const double PaToMPa = std::pow(10, -6);
     const double MPaToPa = std::pow(10, +6);
     const double H2O_TO_CO2_DIFFUSIVITY = 1.6;
@@ -131,7 +132,7 @@ public:
     // From Medlyn 2011: 0 - 0.05
     // From the site 0.05
     double g0 = 0.005;
-    // Medlyn 2011 model g1 parameter [1]
+    // Medlyn 2011 model g1 parameter [kPa-1]
     // From Medlynn 1.6 - 12
     double g1 = 1.5;
 
@@ -158,9 +159,7 @@ public:
     // According to the forcing input [W m-2]
     double sw_rad_max = 1040;
 
-    // Todo fix unit
     // Maximum net photosythesis rate [micro mol CO2 m-2 s-1]
-    // According to the excel sheet of Arend 2021 appendix
     double anet_max = 5.7;
 
     // Tree density [Trees m-2]
@@ -185,7 +184,7 @@ public:
     double max_psi_leaf_change_per_hour = 5.0;
     // Multiplier to estimate the minimum leaf water potential
     // psi_leaf_min = muliplier x psi_88
-    double minimum_psi_leaf_multiplier = 4.0;
+    double minimum_psi_leaf_multiplier = 2.0;
 
     // Todo connect to solvers
     double solver_precision = 1E-10;

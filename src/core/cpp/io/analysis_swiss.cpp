@@ -189,14 +189,14 @@ void Tree_Psi_Leaf_State::Calculate_rmse(const vector<float> &values, const doub
                 std::cout << "Observation date lies outside of boundary";
                 exit(99);
             }
-
+            
             // look for the most negative water potential per day
             int index_start = index;
             int index_end  = index_start + 48;
 
             // Allow for some temporal variation
             // the maximum of the model can also be some days earlier or later
-            const int number_of_days_off_from_obs = 1;
+            const int number_of_days_off_from_obs = 0;
 
             // Get the water potential of this day
             std::vector<float> day_slice(values.begin() + index_start - number_of_days_off_from_obs * 48,

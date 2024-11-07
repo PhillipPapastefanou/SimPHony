@@ -23,7 +23,7 @@ sys.path.append(os.path.join(THIS_DIR, os.pardir, os.pardir, os.pardir))
 
 from src.contrib.auxil.files import get_SimPHony_build_path
 from src.contrib.auxil.files import get_forcing_hainich
-from src.contrib.auxil.files import get_sapflow_obs_hainich
+from src.contrib.auxil.files import get_sapflow_filepath_hainich
 from src.contrib.auxil.files import get_psi_stem_obs_hainich
 from src.contrib.param_generation.example_generator import create_example_hainich_file
 from src.contrib.auxil.output_df import create_output_df
@@ -40,7 +40,7 @@ from SimPHony import Simulation_Single_Hainich
 from SimPHony import DateTime
 
 file_forcing, df_forcing = get_forcing_hainich()
-file_sap_obs, df_sap_obs = get_sapflow_obs_hainich()
+file_sap_obs, df_sap_obs = get_sapflow_filepath_hainich()
 file_psi_stem_obs, df_psi_stem_obs = get_psi_stem_obs_hainich()
 
 # ------------------------------------------------------

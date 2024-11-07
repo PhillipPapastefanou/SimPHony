@@ -16,6 +16,7 @@ set(source
         swiss_cc/source_swiss_cc_direct_from_file_test.cpp
         swiss_cc/source_swiss_cc_single_test.cpp
         swiss_cc/source_swiss_cc_multi_test.cpp
+        swiss_cc/source_swiss_cc_direct_RMSE.cpp
 
         main.cpp
         )

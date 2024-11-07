@@ -23,7 +23,7 @@ sys.path.append(os.path.join(THIS_DIR, os.pardir, os.pardir, os.pardir))
 
 from src.contrib.auxil.files import get_SimPHony_build_path
 from src.contrib.auxil.files import get_forcing_hainich
-from src.contrib.auxil.files import get_sapflow_obs_hainich
+from src.contrib.auxil.files import get_sapflow_filepath_hainich
 from src.contrib.auxil.files import get_psi_stem_obs_hainich
 from src.contrib.auxil.output_df import create_output_df
 from src.contrib.auxil.output_plotter import std_plot, eval_plot_24
@@ -43,7 +43,7 @@ from src.core.py.Parameters import Soil_Water_Model_Type
 from src.core.py.Parameters import Convert_Soil_Parameters
 
 file_forcing, df_forcing = get_forcing_hainich()
-file_sap_obs, df_sap_obs = get_sapflow_obs_hainich()
+file_sap_obs, df_sap_obs = get_sapflow_filepath_hainich()
 file_psi_stem_obs, df_psi_stem_obs = get_psi_stem_obs_hainich()
 
 # ------------------------------------------------------

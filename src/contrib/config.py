@@ -22,6 +22,7 @@ class Config:
         self.parameter_input_file_list_partial  = ""
         self.soilwater_file  = ""
         self.build_path = ""
+        self.build_folder = ""
         self.lib_path  = ""
         self.sap_flow_file = ""
         self.psi_stem_file  = ""

@@ -124,7 +124,7 @@ class Parameters:
         # From Medlyn 0 - 0.05
         # From the site 0.05
         self.g0 = 0.005
-        # Medlyn 2011 model g1 parameter [1]
+        # Medlyn 2011 model g1 parameter [kPa -1]
         # From Medlynn 1.6 - 12
         self.g1 = 1.5
 

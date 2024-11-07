@@ -9,7 +9,7 @@ from src.contrib.auxil.files import get_lib_directory
 from src.contrib.auxil.files import get_SimPHony_build_path
 from src.contrib.auxil.files import get_soil_water_swiss_cc
 from src.contrib.auxil.files import get_forcing_swiss_cc
-from src.contrib.auxil.files import get_trees_psi_leaf_cc
+from src.contrib.auxil.files import get_trees_psi_leaf_folder_path_cc
 
 found_cpp_lib, cpp_bin_path, cpp_lib_path = get_SimPHony_build_path()
 if found_cpp_lib:
@@ -28,7 +28,7 @@ root_data_path = os.path.join(root_library_path, os.pardir, os.pardir, 'data')
 
 forcing_file, null = get_forcing_swiss_cc()
 soilwater_file, null= get_soil_water_swiss_cc(swiss_soil_water_type)
-tree_folder, null  = get_trees_psi_leaf_cc()
+tree_folder, null  = get_trees_psi_leaf_folder_path_cc()
 
 # Specifying forcing and evalution data paths
 config = Config()

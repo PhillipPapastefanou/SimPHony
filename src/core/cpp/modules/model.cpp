@@ -51,13 +51,11 @@ void Model::Set_derived_parameters() {
         }
     }
 
-    // Todo Reenable with logging
-    // std::cout << "Using " << water_model_str << " soil water model." << std::endl;
-
     soil_water_module->CalculatePsiAndKs();
     input_k_soil = soil_water_module->Get_ks();
     input_psi_soil = soil_water_module->Get_psi_soil_head();
 
+    // We rescale shortwave radiation to the range if (0, to Anetmax)
     input_anet.resize(input_module.sw_rad.size());
     for (int i = 0; i < input_anet.size(); ++i) {
         input_anet[i] = input_module.sw_rad[i] / params.sw_rad_max * params.anet_max;

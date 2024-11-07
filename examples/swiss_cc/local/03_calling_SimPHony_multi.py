@@ -28,7 +28,7 @@ sys.path.append(os.path.join(THIS_DIR, os.pardir, os.pardir, os.pardir))
 
 from src.contrib.auxil.files import get_SimPHony_build_path
 from src.contrib.auxil.files import get_forcing_swiss_cc
-from src.contrib.auxil.files import get_trees_psi_leaf_cc
+from src.contrib.auxil.files import get_trees_psi_leaf_folder_path_cc
 from src.contrib.auxil.files import get_soil_water_swiss_cc
 from src.contrib.parameter_parser import Parameter_Parser
 from src.contrib.auxil.output_df import create_output_df
@@ -42,7 +42,7 @@ from SimPHony import DateTime
 
 forcing_file, forcing_df = get_forcing_swiss_cc()
 soil_water_file, soil_water_df = get_soil_water_swiss_cc()
-tree_path, dummy = get_trees_psi_leaf_cc()
+tree_path, dummy = get_trees_psi_leaf_folder_path_cc()
 
 # ------------------------------------------------------
 # Parameter setup
@@ -57,7 +57,7 @@ config = Config()
 config.location = Location.Swiss_cc
 config.forcing_file, forcing_df = get_forcing_swiss_cc()
 config.soilwater_file, soilwater_df = get_soil_water_swiss_cc()
-config.swiss_tree_folder_path, dummy = get_trees_psi_leaf_cc()
+config.swiss_tree_folder_path, dummy = get_trees_psi_leaf_folder_path_cc()
 config.swiss_soil_water_input_type = Swiss_soil_water_input_type.NLayers_Indiv
 config_path = os.path.join(THIS_DIR, 'config_3_py.txt')
 config.parameters_list_file = os.path.join(THIS_DIR, "parameter_example_3.csv")

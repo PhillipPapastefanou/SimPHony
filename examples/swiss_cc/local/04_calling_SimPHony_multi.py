@@ -23,7 +23,7 @@ from src.contrib.auxil.files import get_lib_directory
 from src.contrib.auxil.files import get_SimPHony_build_path
 from src.contrib.auxil.files import get_soil_water_swiss_cc
 from src.contrib.auxil.files import get_forcing_swiss_cc
-from src.contrib.auxil.files import get_trees_psi_leaf_cc
+from src.contrib.auxil.files import get_trees_psi_leaf_folder_path_cc
 from src.contrib.config import Config, Location, Swiss_soil_water_input_type
 
 root_library_path = get_lib_directory()
@@ -34,7 +34,7 @@ sys.path.append(os.path.join(root_library_path, 'py'))
 
 forcing_file, null = get_forcing_swiss_cc()
 soil_water_file, null = get_soil_water_swiss_cc()
-tree_path, null = get_trees_psi_leaf_cc()
+tree_path, null = get_trees_psi_leaf_folder_path_cc()
 
 
 # Specifying forcing and evalution data paths

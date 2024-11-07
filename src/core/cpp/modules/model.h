@@ -25,17 +25,20 @@ private:
     Input& input_module;
     const Config& config;
 
+    // vapor pressure deficit [Pa]
     vector<float> input_vpd;
+    // Maximum photosynthetic rate [micro mol m-2 s-1]
     vector<float> input_anet;
-
     std::unique_ptr<Soil_water_module> soil_water_module;
+    // Soil hydraulic conductivity [m s-1]
     vector<vector<double> > input_k_soil;
+    // Soil hydraulic potential [m]
     vector<vector<double> > input_psi_soil;
 
     // Driver values for this timestep
     // Vapour pressure deficit [Pa]
     double ivpd;
-    // Net photosythesis rate [mol CO2 m-2 s-1]
+    // Net photosythesis rate [micro mol CO2 m-2 s-1]
     double ianet;
     // Atmopheric pressure [Pa]
     double ipressure;
@@ -56,6 +59,7 @@ private:
 
     // Elapsed time in seconds since time_start [s]
     long ts;
+    // Mumber of simulated time steps
     int nsteps;
     // Simulation timelength [s]
     double delta_Ts;

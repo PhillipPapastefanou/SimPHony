@@ -5,38 +5,35 @@ import copy
 import numpy as np
 import pandas as pd
 import datetime
-from src.contrib.auxil.files import get_SimPHony_build_path
-from src.contrib.param_generation.example_generator import create_example_swiss_cc_parameter_list
-from src.contrib.auxil.messaging import print_failure , print_sucess
-from src.contrib.config import Config, Location, Swiss_soil_water_input_type
+
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(THIS_DIR, os.pardir, os.pardir))
+
+from src.contrib.auxil.messaging import print_sucess
+from src.contrib.auxil.setups import Setup
+from src.contrib.config import Config, Swiss_soil_water_input_type
+from src.contrib.param_generation.example_generator import create_example_swiss_cc_parameter_list
 
 class Test_Swiss_Multi_From_File(unittest.TestCase):
     def test_swiss_from_file(self):
 
         print("Calling the SimPHony Multi lib from file...", end='')
-        root_library_path = THIS_DIR
-        root_data_path = os.path.join(root_library_path, os.pardir, os.pardir, 'data')
+        root_path = THIS_DIR
+        scenario = "test"
+
+        setup = Setup()
+        setup.Apply_default_swiss(Swiss_soil_water_input_type.NLayers_Mean_N_Std)
+        setup.Apply_default_paths(root_path, scenario)
+        setup.config.parameters_list_file = os.path.join(setup.config.input_path, "parameters_example_2.csv")
+        setup.config.config_file = os.path.join(setup.config.input_path, "config_multi_py.txt")
+        setup.Export()
 
         # Specifying forcing and evalution data paths
-        config = Config()
-        config.location = Location.Swiss_cc
-        config.forcing_file = os.path.join(root_data_path, 'swiss', 'input', 'Forcing_Inter.csv')
-        config.soilwater_file = os.path.join(root_data_path, 'swiss', 'input', 'vwc_swicc_cc_2023_indiv.csv')
-        config.swiss_tree_folder_path = os.path.join(root_data_path, 'swiss', 'eval', 'Trees')
-        config.parameters_list_file = os.path.join(THIS_DIR, 'test', 'input', "parameter_example_2.csv")
-        config.swiss_soil_water_input_type = Swiss_soil_water_input_type.NLayers_Indiv
-        config_path = os.path.join(THIS_DIR,'test', 'input', 'config_multi_py.txt')
-        config.Export(config_path)
-
-        found_cpp_lib, cpp_bin_path, cpp_lib_path = get_SimPHony_build_path()
-        sys.path.append(cpp_lib_path)
-
-        # Importing local libraries and paths
+        sys.path.append(setup.config.build_folder)
         from SimPHony import Simulation_Multi_Swiss
         from SimPHony import DateTime
 
-        create_example_swiss_cc_parameter_list(2, config.parameters_list_file)
+        create_example_swiss_cc_parameter_list(2, setup.config.parameters_list_file)
 
         # ----------------------------------------------------------------
         # PHS model simulation
@@ -46,7 +43,7 @@ class Test_Swiss_Multi_From_File(unittest.TestCase):
         # Set up the PHS simulation
         # read in the parameter file that we just created
         sim = Simulation_Multi_Swiss(rank, False)
-        sim.Read_config(config_path)
+        sim.Read_config(setup.config.config_file)
         sim.Init_Full_Parameter_Setups(np.arange(0, 2))
         sim.Init_input()
         sim.Set_water_pot_initials(-1.0, -0.2)

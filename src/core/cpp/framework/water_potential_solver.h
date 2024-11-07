@@ -40,8 +40,7 @@ protected:
 
     const Parameters& params;
 
-
-
+    // Timestep length [s]
     double dts;
     /// Stomatal conductance [mol H2O m-2 s-1]
     double gs;
@@ -51,15 +50,11 @@ protected:
     // Adjusted gompertz function parameter [MPa]
     double psi_gomp_50;
 
-
-
-
     /// Main states
     /// Leaf water potential at average canopy height [MPa]
     double psi_leaf;
     /// Root water potential at the bottom of the stem [MPa]
     double psi_stem_ground;
-
 
     double psi_leaf_prev_ts;
     double psi_stem_ground_prev_ts;
@@ -85,9 +80,14 @@ protected:
     std::vector<double> psi_soil_sl;
     // List of conductivities per soil layer [m s-1]
     std::vector<double> k_soil_sl;
+
+    // Net photosynthetic rate [micro mols m-2 s-1]
     double anet;
+    // Vapour pressure deficit [Pa]
     double vpd;
+    // Atmosheric Co2 [ppm]
     double ca;
+    // Atmospheric pressure
     double pressure;
 
     /// Stem water flow models

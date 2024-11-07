@@ -133,9 +133,9 @@ void Config::Export(std::string filename) {
     std::ofstream w_config;
     w_config.open(filename);
     if (location == Location::Swiss_cc)
-        w_config << "location" << "=" << "swiss_cc"<< "\n";
+        w_config << "location" << "=" << "Swiss_cc"<< "\n";
     else if (location == Location::Hainich)
-        w_config << "location" << "=" << "hainich"<< "\n";
+        w_config << "location" << "=" << "Hainich"<< "\n";
     else{
         std::cout << "Invalid location specified";
         exit(99);

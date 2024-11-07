@@ -55,6 +55,9 @@ void Solver_2D::Update_water_potentials() {
 
 double Solver_2D::d_psi_leaf(double psi_leaf, double psi_stem) {
 
+    std::cout << " Deprecated stop using this version!";
+    exit(99);
+
     this->psi_leaf = psi_leaf;
 
     // Update beta parameter that rescales stomatal conductance
@@ -66,7 +69,7 @@ double Solver_2D::d_psi_leaf(double psi_leaf, double psi_stem) {
 
     // Medlyn phoytosynthesis model
     // mol CO2 s-1 m-2
-    gs = params.g0 + beta_stom_cond * (1.0 + params.g1 / std::sqrt(vpd / pressure)) * anet / ca;
+    gs = params.g0 + beta_stom_cond * (1.0 + params.g1 / std::sqrt(vpd) * anet / ca);
 
     // Convert from Mol CO2 to Mol H2O
     gs *= 44.0/18.0;
