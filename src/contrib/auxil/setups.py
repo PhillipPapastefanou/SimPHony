@@ -2,6 +2,9 @@ import os
 from src.contrib.config import Config, Location, Swiss_soil_water_input_type
 from src.contrib.auxil.files import get_SimPHony_build_path
 from src.contrib.auxil.files import get_forcing_filepath_swiss_cc
+from src.contrib.auxil.files import get_forcing_filepath_hainich
+from src.contrib.auxil.files import get_psi_stem_filepath_hainich
+from src.contrib.auxil.files import get_sapflow_filepath_hainich
 from src.contrib.auxil.files import get_soil_water_filepath_swiss_cc
 from src.contrib.auxil.files import get_trees_psi_leaf_folder_path_cc
 
@@ -9,6 +12,20 @@ class Setup:
 
     def __init__(self):
         self.config = Config()
+
+    def Apply_default_hainich(self):
+        found_build, build_path, build_folder = get_SimPHony_build_path()
+        if not found_build:
+            print("Could not find build folder.")
+            print("Check if SimPHony has been build already.")
+            print("Exiting...")
+            exit(99)
+        self.config.location = Location.Hainich
+        self.config.build_path = build_path
+        self.config.build_folder = build_folder
+        self.config.forcing_file  = get_forcing_filepath_hainich()
+        self.config.psi_stem_file  = get_psi_stem_filepath_hainich()
+        self.config.sap_flow_file = get_sapflow_filepath_hainich()
 
     def Apply_default_swiss(self,
                                soil_water_input_type: Swiss_soil_water_input_type = Swiss_soil_water_input_type.NLayers_Mean_N_Std):

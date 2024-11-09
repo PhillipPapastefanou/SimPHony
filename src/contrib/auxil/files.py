@@ -1,4 +1,3 @@
-
 import os
 import pandas as pd
 import glob
@@ -61,18 +60,22 @@ def get_SimPHony_test_build_path():
 
     return found_lib, lib_path, lib_folder
 
-def get_forcing_hainich():
-    root_library_path = get_lib_directory()
-    root_data_path = os.path.join(root_library_path, 'data')
-    file_forcing = os.path.join(root_data_path, 'hainich', 'input', 'Meteo_Hainich_dT30min_forcing_PHS.csv')
-    df_forcing = pd.read_csv(file_forcing)
-    df_forcing['datetime'] = pd.to_datetime(df_forcing['datetime'])
-    return file_forcing, df_forcing
+
 
 # ----------------------------------------------------------
 # Hainich setup
 # ----------------------------------------------------------
 
+def get_forcing_filepath_hainich():
+    root_library_path = get_lib_directory()
+    root_data_path = os.path.join(root_library_path, 'data')
+    file_forcing = os.path.join(root_data_path, 'hainich', 'input', 'Meteo_Hainich_dT30min_forcing_PHS.csv')
+    return file_forcing
+
+def get_forcing_data_hainich():
+    df_forcing = pd.read_csv(get_forcing_filepath_hainich)
+    df_forcing['datetime'] = pd.to_datetime(df_forcing['datetime'])
+    return df_forcing
 
 def get_sapflow_filepath_hainich():
     root_library_path = get_lib_directory()

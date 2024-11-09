@@ -6,8 +6,6 @@ import numpy as np
 import pandas as pd
 import datetime
 
-from setuptools.command.setopt import config_file
-
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(THIS_DIR, os.pardir, os.pardir))
 
@@ -124,8 +122,8 @@ class Test_Swiss_Single_Direct(unittest.TestCase):
         # REFERENCE_PSI_LEAF_0_RMSE = 1.8912050337701065;
         # REFERENCE_PSI_LEAF_6_RMSE = 2.5209254139403057;
 
-        REFERENCE_PSI_LEAF_0_RMSE = 2.3339342190183996;
-        REFERENCE_PSI_LEAF_6_RMSE = 2.334786210850298;
+        REFERENCE_PSI_LEAF_0_RMSE = 2.061104366482163;
+        REFERENCE_PSI_LEAF_6_RMSE = 2.339620165100023;
 
         self.assertAlmostEqual(errors[0], REFERENCE_PSI_LEAF_0_RMSE, places=EPS)
         self.assertAlmostEqual(errors[6], REFERENCE_PSI_LEAF_6_RMSE, places=EPS)

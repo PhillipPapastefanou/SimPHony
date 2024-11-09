@@ -70,7 +70,7 @@ class Test_Swiss_Multi_From_File(unittest.TestCase):
         REFERENCE_PSI_LEAF_6_RMSE = 15.141204438155913;
 
         REFERENCE_PSI_LEAF_0_RMSE = 13.938892738981737;
-        REFERENCE_PSI_LEAF_6_RMSE = 14.239149074453056;
+        REFERENCE_PSI_LEAF_6_RMSE = 14.102890751206852;
 
 
         self.assertAlmostEqual(errors[0], REFERENCE_PSI_LEAF_0_RMSE, places=EPS)

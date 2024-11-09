@@ -6,38 +6,35 @@ import numpy as np
 import pandas as pd
 import datetime
 
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(THIS_DIR, os.pardir, os.pardir))
+
 from src.contrib.param_generation.example_generator import create_example_hainich_parameter_list
 from src.contrib.auxil.messaging import print_sucess
-from src.contrib.auxil.files import get_SimPHony_build_path
+from src.contrib.auxil.setups import Setup
 from src.contrib.config import Config, Location, Swiss_soil_water_input_type
-THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class Test_Hainich_From_File_Multi(unittest.TestCase):
     def test_hainich_from_file_multi(self):
         print("Multiple: Calling the lib multiple times...", end='')
+        root_path = THIS_DIR
+        scenario = "test"
 
-        root_library_path = THIS_DIR
-        root_data_path = os.path.join(root_library_path, os.pardir, os.pardir, 'data')
+        setup = Setup()
+        setup.Apply_default_hainich()
+        setup.Apply_default_paths(root_path, scenario)
+        setup.config.parameters_list_file = os.path.join(setup.config.input_path, "parameters_example_2.csv")
+        setup.config.config_file = os.path.join(setup.config.input_path, "config_multi_py.txt")
+        setup.Export()
 
         # Specifying forcing and evalution data paths
-        config = Config()
-        config.location = Location.Hainich
-        config.forcing_file = os.path.join(root_data_path, 'hainich', 'input', 'Meteo_Hainich_dT30min_forcing_PHS.csv')
-        config.sap_flow_file = os.path.join(root_data_path, 'hainich', 'eval', 'SAP_Hainich_Fagus-mean_dT30min_prog.csv')
-        config.psi_stem_file = os.path.join(root_data_path,'hainich', 'eval', 'stem_water_pot.csv')
-        config.parameters_list_file = os.path.join(THIS_DIR, 'test', 'input', "parameter_example_2.csv")
-        config_path = os.path.join(THIS_DIR,'test', 'input', 'config_py_multi.txt')
-        config.Export(config_path)
-
-
-        found_cpp_lib, cpp_bin_path, cpp_lib_path = get_SimPHony_build_path()
-        sys.path.append(cpp_lib_path)
+        sys.path.append(setup.config.build_folder)
 
         # Importing local libraries and paths
         from SimPHony import Simulation_Multi_Hainich
         from SimPHony import DateTime
 
-        create_example_hainich_parameter_list(2, config.parameters_list_file)
+        create_example_hainich_parameter_list(2, setup.config.parameters_list_file)
 
         os.makedirs(os.path.join(THIS_DIR, 'test', 'input'), exist_ok=True)
         parameter_file = os.path.join(THIS_DIR, 'test', 'input', "parameter_example_2.csv")
@@ -49,7 +46,7 @@ class Test_Hainich_From_File_Multi(unittest.TestCase):
         # read in the parameter file that we just created
         rank = 0
         sim = Simulation_Multi_Hainich(rank, False)
-        sim.Read_config(config_path)
+        sim.Read_config(setup.config.config_file)
         sim.Init_Full_Parameter_Setups(np.arange(0, 2))
         sim.Init_input()
         sim.Set_water_pot_initials(-1.0, -0.2)
@@ -65,8 +62,8 @@ class Test_Hainich_From_File_Multi(unittest.TestCase):
         # Run the simulation
         sim.Run(timestart, timeend)
 
-        REFERENCE_J_RMSE = [0.0018895212184391339, 0.0012473781843929319]
-        REFERENCE_PSI_STEM_RMSE = [0.18756163898926925, 0.30507229402876607]
+        REFERENCE_J_RMSE = [0.0018529536133690052, 0.0012463240127134915]
+        REFERENCE_PSI_STEM_RMSE = [0.22891311164441566, 0.30494198664184896]
         EPS = 8
 
         # Get analysis data

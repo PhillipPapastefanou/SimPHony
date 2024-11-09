@@ -17,8 +17,8 @@ from src.contrib.auxil.output_df import create_output_df
 from src.contrib.auxil.files import get_trees_psi_leaf_folder_path_cc
 from src.contrib.config import Config, Swiss_soil_water_input_type
 
-root_output_directory = "/Users/pp/data/Simulations/A08_SimPHony/swiss"
-scenario_name = "11_07_nstdn_g0"
+root_output_directory = "/Users/pp/data/Simulations/A08_SimPHony/swiss/medlyn_fix"
+scenario_name = "base_red_ksuper_low"
 
 setup = Setup()
 setup.Apply_default_swiss(Swiss_soil_water_input_type.NLayers_Mean_N_Std)

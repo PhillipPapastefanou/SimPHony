@@ -39,7 +39,7 @@ from SimPHony import Simulation_Single_Swiss
 from SimPHony import DateTime
 
 # For this example we will only look at the alive trees
-parameter_file = os.path.join("/Users/pp/data/Simulations/A08_SimPHony/swiss/11_06_nstdn_change_1E7/post/parameters_best_6.csv")
+parameter_file = os.path.join("/Users/pp/data/Simulations/A08_SimPHony/swiss/medlyn_fix/base_red/post/parameters_best_mean_alive.csv")
 parameter_parser = Parameter_Parser()
 # Specify number of rows to not read in the whole file
 parameter_parser.Read_Parameter_List(parameter_file, nrows= 100)
@@ -56,12 +56,12 @@ parameters = parameter_parser.parameters_list[0]
 # parameters.psi50_xylem = -4.1
 # parameters.psi88_xylem = -5.1
 
-parameters.wcont_sigma_deviation  = -0.5
-
-parameters.g0 = 0.005
-parameters.g_bark = 0.005 * 3
-parameters.g1 = 1.5
-parameters.anet_max = 0.1
+# parameters.wcont_sigma_deviation  = -0.5
+#
+# parameters.g0 = 0.005
+# parameters.g_bark = 0.005 * 3
+# parameters.g1 = 1.5
+# parameters.anet_max = 0.1
 
 
 # parameters.g0 += 0.0001
@@ -72,23 +72,23 @@ parameters.anet_max = 0.1
 # # parameters.anet_max = 1.5
 # #
 # #
-parameters.stem_hydraulic_capacitance= 20 * 1000/18.0
+#parameters.stem_hydraulic_capacitance= 20 * 1000/18.0
 
-parameters.k_xylem_sat = 2 * 1000/18.0
-
-parameters.wcont_sigma_deviation = 0
+# parameters.k_xylem_sat = 2 * 1000/18.0
 #
-parameters.minimum_psi_leaf_multiplier = 2.0
+# parameters.wcont_sigma_deviation = 0
+# #
+# parameters.minimum_psi_leaf_multiplier = 2.0
+# #
+parameters.k_xylem_sat = 5* 1000/18
 #
-# parameters.k_xylem_sat = 100
-
-parameters.max_psi_leaf_change_per_hour = 0.1
-#
+# parameters.max_psi_leaf_change_per_hour = 0.1
+# #
 soil_layers = parameters.Create_soil_layers()
-# Change soil layer parameters here ---
-#
-soil_layers[0].k_soil_sat *= 2.0
-soil_layers[0].pore_size_ind = 0.25
+# # Change soil layer parameters here ---
+# #
+# soil_layers[0].k_soil_sat *= 2.0
+# soil_layers[0].pore_size_ind = 0.25
 #
 # # soil_layers[1].k_soil_sat = 2E-6
 # soil_layers[2].k_soil_sat = 0
@@ -152,7 +152,7 @@ plt.scatter(tree_parser.trees[6].df.index,
 plt.text(0.1, 0.1, f"RMSE = {np.round(errors[6],2)}", transform=ax.transAxes)
 plt.plot(df['psiLeaf'])
 plt.plot(df['psiStem'])
-plt.ylim(-9,0)
+plt.ylim(-3,0)
 plt.show()
 
 # std_plot(df = df,
