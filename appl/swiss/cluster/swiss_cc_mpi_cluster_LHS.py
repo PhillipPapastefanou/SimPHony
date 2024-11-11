@@ -52,7 +52,7 @@ config.Export(config.config_file)
 
 sys.path.append(config.build_path)
 
-from src.contrib.parallel_setup_LHS import ParallelSetupWithLHS
+from src.contrib.param_generation.LHS.parallel_setup_LHS import ParallelSetupWithLHS
 from mpi4py import MPI
 
 # Initialize MPI

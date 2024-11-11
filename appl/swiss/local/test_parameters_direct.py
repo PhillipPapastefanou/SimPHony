@@ -40,13 +40,14 @@ from SimPHony import DateTime
 
 # For this example we will only look at the alive trees
 parameter_file = os.path.join("/Users/pp/data/Simulations/A08_SimPHony/swiss/medlyn_fix/base_red/post/parameters_best_mean_alive.csv")
+parameter_file = os.path.join("/Users/pp/data/Simulations/A08_SimPHony/swiss/ex_con_test/output/parameters_f2.csv0")
 parameter_parser = Parameter_Parser()
 # Specify number of rows to not read in the whole file
-parameter_parser.Read_Parameter_List(parameter_file, nrows= 100)
+parameter_parser.Read_Parameter_List(parameter_file, nrows= 5)
 
 
 # Obtain one parameter setup of the list
-parameters = parameter_parser.parameters_list[0]
+parameters = parameter_parser.parameters_list[4]
 
 # Change parameters here --------
 # parameters.k_xylem_sat = 40
@@ -80,7 +81,7 @@ parameters = parameter_parser.parameters_list[0]
 # #
 # parameters.minimum_psi_leaf_multiplier = 2.0
 # #
-parameters.k_xylem_sat = 5* 1000/18
+#parameters.k_xylem_sat = 5* 1000/18
 #
 # parameters.max_psi_leaf_change_per_hour = 0.1
 # #
@@ -147,9 +148,9 @@ import matplotlib.pyplot as plt
 
 f, ax = plt.subplots()
 #plt.scatter(tree_parser.df_alive_all.index, tree_parser.df_alive_all['xylem_pressure'])
-plt.scatter(tree_parser.trees[6].df.index,
-            tree_parser.trees[6].df['xylem_pressure'], color='black', zorder = 2 )
-plt.text(0.1, 0.1, f"RMSE = {np.round(errors[6],2)}", transform=ax.transAxes)
+plt.scatter(tree_parser.trees[7].df.index,
+            tree_parser.trees[7].df['xylem_pressure'], color='black', zorder = 2 )
+plt.text(0.1, 0.1, f"RMSE = {np.round(errors[7],5)}", transform=ax.transAxes)
 plt.plot(df['psiLeaf'])
 plt.plot(df['psiStem'])
 plt.ylim(-3,0)

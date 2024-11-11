@@ -29,8 +29,6 @@ class Subslicer:
         return self.array[self.i]
 
 def Calculate_LHS_per_process_swiss_cc_indiv(rank, ncombs, parameter_file):
-    
-
     KG_TO_MOL = 1000.0/18.0
     MPA_TO_HHEAD = 1000.0/9.81
 
