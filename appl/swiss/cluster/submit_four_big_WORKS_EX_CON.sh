@@ -8,8 +8,8 @@
 #SBATCH --mail-user=papa@tum.de
 #SBATCH --export=NONE
 #SBATCH --time=72:00:00
-#SBATCH --nodes=3
-#SBATCH --ntasks=384
+#SBATCH --nodes=4
+#SBATCH --ntasks=512
 #SBATCH --partition='big'
 #SBATCH --mem='1600G'
 
@@ -25,4 +25,4 @@ which python
 
 export FI_PROVIDER=tcp
 
-mpiexec -n 384 python3 -u swiss_cc_mpi_cluster_LHS.py
+mpiexec -n 512 python3 -u swiss_cc_mpi_cluster_EX_CON.py

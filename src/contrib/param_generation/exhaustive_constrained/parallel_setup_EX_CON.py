@@ -135,6 +135,7 @@ class ParallelSetupEXCON:
             if os.path.exists(parameter_file):
                 os.remove(parameter_file)
             self.config.parameters_list_file = parameter_file
+            self.config.config_file = os.path.join(self.config.input_path, f"config_py_{self.rank}.txt")
             self.config.Export(self.config.config_file)
 
             Calculate_LHS_alpha(self.rank, self.ncombs_per_parameter,
@@ -207,7 +208,7 @@ class ParallelSetupEXCON:
                 df_w['target_rmse'] = target_rmse
                 print(target_rmse)
                 output_path = self.config.output_path
-                if target_rmse.values < 1.5:
+                if target_rmse.values < 1.2:
                     df_w.to_csv(f"{output_path}/parameters_f{id}.csv{self.rank}")
 
 
