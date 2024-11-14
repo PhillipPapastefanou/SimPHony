@@ -41,13 +41,13 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
     sel_cols = []
     slicer = Subslicer(array=sample)
 
-    k_soil_sats_logs = rescale(slicer.get(), min=-8.2, max = -7.5)
+    k_soil_sats_logs = rescale(slicer.get(), min=-7.2, max = -6.5)
     psi_soil_sats = rescale(slicer.get(), min=-0.025, max = -0.011) # 1 sigma
     #psi_soil_sats = rescale(slicer.get(), min=-0.035, max = -0.007)  # 2 sigmas
     psi_soil_sats *= MPA_TO_HHEAD
     pore_size_ind = rescale(slicer.get(), min=0.238, max = 0.291) # 1 sigma
     #pore_size_ind = rescale(slicer.get(), min=0.216, max = 0.325)  # 2 sigmas
-    sigma_wcont    = rescale(slicer.get(), min = -1, max = 1)
+    sigma_wcont    = rescale(slicer.get(), min = -0.5, max = 0.5)
 
     soil_collection = []
     for i in range(ncombs):
@@ -97,16 +97,16 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
     d_50close_s     = rescale_mean(slicer.get(), mean = parameters.d_50_close, percent=alpha)
     sel_cols.append("d50_close")
 
-    psi_50_close_s  = rescale_mean(slicer.get(), mean = parameters.psi_leaf_50_close, percent=alpha)
+    psi_50_close_s  = rescale(slicer.get(), min = -2.3, max = -2.0)
     sel_cols.append("psi50_close")
 
-    jackson_s       = rescale_mean(slicer.get(), mean = parameters.jackson_root_beta, percent=alpha)
+    jackson_s       = rescale(slicer.get(), min= 0.90, max = 0.99)
     sel_cols.append("root_beta")
 
-    psi50_xylems    = rescale_mean(slicer.get(), mean = parameters.psi50_xylem, percent=alpha)
+    psi50_xylems    = rescale(slicer.get(), min = -4.2, max = -3.5)
     sel_cols.append("psi_50_xylem")
 
-    psi88_xylems    = rescale_mean(slicer.get(), mean = parameters.psi88_xylem, percent=alpha)
+    psi88_xylems_offset    = rescale(slicer.get(), min = 1.0, max = 1.5)
     sel_cols.append("psi_88_xylem")
 
     root_area_indexes    = rescale_mean(slicer.get(), mean = parameters.root_area_index, percent=alpha)
@@ -149,7 +149,7 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
         params.anet_max = anet_max[i]
 
         params.psi50_xylem = psi50_xylems[i]
-        params.psi88_xylem = psi88_xylems[i]
+        params.psi88_xylem = psi50_xylems[i] - psi88_xylems_offset[i]
 
         if params.psi50_xylem < params.psi88_xylem:
             params.psi88_xylem = params.psi50_xylem - 0.5

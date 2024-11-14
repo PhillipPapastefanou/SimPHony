@@ -44,9 +44,9 @@ def Calculate_parameter_list(rank, ncombs):
         soil_collection.append(SoilLayer())
 
     g0_s            = rescale(slicer.get(), min=0.0045, max = 0.055)
-    g1_s            = rescale(slicer.get(), min = 0.9, max = 1.1)
-    g_barks_factor    = rescale(slicer.get(), min = 3, max = 4)
-    anet_max        = rescale(slicer.get(), min = 0.5, max = 1.5)
+    g1_s            = rescale(slicer.get(), min = 0.95, max = 1.05)
+    g_barks_factor    = rescale(slicer.get(), min = 3.2, max = 3.8)
+    anet_max        = rescale(slicer.get(), min = 0.75, max = 1.235)
     k_xylems_sats   = rescale(slicer.get(), min = 10, max= 100.0)
     huber_values    = rescale(slicer.get(), min = 1/4500, max= 1/1200)
     cstem_s         = rescale(slicer.get(), min = 10, max=600)
@@ -55,10 +55,10 @@ def Calculate_parameter_list(rank, ncombs):
     # lai_s           = rescale(slicer.get(), min= 4.6, max = 5.0)
     cleaf_s_log        = rescale(slicer.get(), min=np.log10(0.001), max=np.log10(0.02))
     d_50close_s     = rescale(slicer.get(), min = 2.5, max = 4.0)
-    psi_50_close_s  = rescale(slicer.get(), min = -2.2, max = -2.1)
+    #psi_50_close_s  = rescale(slicer.get(), min = -2.1, max = -2.2)
     jackson_s       = rescale(slicer.get(), min = 0.90, max = 0.98)
-    psi50_xylems    = rescale(slicer.get(), min = -4.2, max = -3.6)
-    psi88_xylems_offset    = rescale(slicer.get(), min = 1.0, max = 1.5)
+    #psi50_xylems    = rescale(slicer.get(), min = -4.0, max = -3.8)
+    #psi88_xylems_offset    = rescale(slicer.get(), min = 1.0, max = 1.5)
     root_area_indexes    = rescale(slicer.get(), min = 5, max = 12)
 
     # tree_densities    = rescale(slicer.get(), min = (64-32)/10000, max = (64)/10000)
@@ -85,13 +85,13 @@ def Calculate_parameter_list(rank, ncombs):
         params.g1 = g1_s[i]
         params.anet_max = anet_max[i]
 
-        params.psi50_xylem = psi50_xylems[i]
-        params.psi88_xylem = psi50_xylems[i] - psi88_xylems_offset[i]
+        # params.psi50_xylem = psi50_xylems[i]
+        # params.psi88_xylem = psi50_xylems[i] - psi88_xylems_offset[i]
         params.k_xylem_sat = k_xylems_sats[i]
         params.leaf_hydraulic_capacitance = (10**cleaf_s_log[i])*KG_TO_MOL
         params.huber_value = huber_values[i]
 
-        params.psi_leaf_50_close = psi_50_close_s[i]
+        #params.psi_leaf_50_close = psi_50_close_s[i]
         params.d_50_close = d_50close_s[i]
         params.jackson_root_beta = jackson_s[i]
 

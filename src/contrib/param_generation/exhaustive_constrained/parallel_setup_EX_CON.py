@@ -22,7 +22,7 @@ class ParallelSetupEXCON:
         self.is_root = rank == 0
 
         # Latin hypercube parameter samples
-        self.ncombs_per_parameter = 1000
+        self.ncombs_per_parameter =1000
         # Maximum deviation from the plant hydraulic parameters [%]
         self.alpha = 20
 
