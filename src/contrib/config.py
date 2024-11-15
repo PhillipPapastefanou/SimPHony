@@ -16,6 +16,7 @@ class Swiss_soil_water_input_type(Enum):
 class Config:
     def __init__(self):
         self.location = Location.Invalid
+        self.write_individual_parameter_list_progress = True
         self.config_file = ""
         self.forcing_file  = ""
         self.parameters_list_file  = ""
@@ -44,10 +45,17 @@ class Config:
             if isinstance(value, Enum):
                 str_value = value.name
             else:
-                str_value = value
+                if type(value) == bool:
+                    if value == True:
+                        str_value = "true"
+                    else:
+                        str_value = "false"
+                else:
+                    str_value = value
 
             str_row = f'{var}={str_value}'
             lines.append(str_row)
+
 
         with open(filename, 'w') as f:
             for line in lines:

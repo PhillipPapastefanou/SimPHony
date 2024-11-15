@@ -21,11 +21,12 @@ setup.Apply_default_paths(root_path, scenario)
 setup.config.parameters_list_file = os.path.join(setup.config.input_path, "parameters.csv")
 os.makedirs(setup.config.input_path, exist_ok=True)
 setup.config.config_file = os.path.join(setup.config.input_path, "config_py.txt")
-setup.config.nsims = 10
+setup.config.nsims = 40
 setup.config.nbest = 2
+setup.config.write_individual_parameter_list_progress = False
 setup.Export()
 
-ncombs_per_parameter = 100
+ncombs_per_parameter = 10
 alpha = 10
 
 

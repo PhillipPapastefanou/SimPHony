@@ -103,8 +103,8 @@ void Simulation_Multi::Set_water_pot_initials(double psi_leaf, double psi_stem) 
 }
 
 void Simulation_Multi::Run(DateTime timestart, DateTime timeend) {
-
-    std::cout << "Rank " << rank << ": Performing " << parameter_list.size() << " simulations." << std:: endl;
+    if (config->write_individual_parameter_list_progress.Get())
+        std::cout << "Rank " << rank << ": Performing " << parameter_list.size() << " simulations." << std:: endl;
 
     auto start_simulation = std::chrono::high_resolution_clock::now();
     auto start_timer = std::chrono::high_resolution_clock::now();
@@ -135,7 +135,7 @@ void Simulation_Multi::Run(DateTime timestart, DateTime timeend) {
         auto end_timer = std::chrono::high_resolution_clock::now();
         auto elapsed_timer = std::chrono::duration_cast<std::chrono::milliseconds>( end_timer - start_timer);
 
-        if (elapsed_timer.count() > params.constants.TMUTE_MILLISEC){
+        if ((elapsed_timer.count() > params.constants.TMUTE_MILLISEC) & (config->write_individual_parameter_list_progress.Get())){
             auto elapsed_simulation = std::chrono::duration_cast<std::chrono::milliseconds>(end_timer - start_simulation);
             std::cout << "Rank " << rank << " completed " << r << " out of " << parameter_list.size() << " runs. ";
             std::cout << "Elapsed time: " << format_duration(elapsed_simulation) << " remaining: "
@@ -148,7 +148,8 @@ void Simulation_Multi::Run(DateTime timestart, DateTime timeend) {
 
     }
 
-    std::cout << "Simulation finished! "<< std::endl;
+    if (config->write_individual_parameter_list_progress.Get())
+        std::cout << "Simulation finished! "<< std::endl;
 
 }
 

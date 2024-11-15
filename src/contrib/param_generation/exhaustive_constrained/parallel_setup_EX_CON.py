@@ -7,8 +7,8 @@ from time import perf_counter
 from SimPHony import Simulation_Multi_Hainich
 from SimPHony import Simulation_Multi_Swiss
 from SimPHony import DateTime
+from src.core.py.auxil import format_duration, remaining_str
 from src.contrib.config import Config, Location, Swiss_soil_water_input_type
-
 from src.contrib.param_generation.exhaustive_constrained.LHS_swiss_soil_range_alpha import Calculate_LHS_alpha
 from src.contrib.param_generation.exhaustive_constrained.LHS_swiss_parameter_internal_list import Calculate_parameter_list
 #from src.contrib.param_generation.LHS.LHS_Multi_Swiss_Application_automation_vangenuchten import Calculate_LHS_per_process_swiss_cc_n_std_n
@@ -22,7 +22,7 @@ class ParallelSetupEXCON:
         self.is_root = rank == 0
 
         # Latin hypercube parameter samples
-        self.ncombs_per_parameter =1000
+        self.ncombs_per_parameter = 1000
         # Maximum deviation from the plant hydraulic parameters [%]
         self.alpha = 20
 
@@ -73,6 +73,9 @@ class ParallelSetupEXCON:
         self.comm.Bcast(self.n_array_per_process, root=0)
         self.n_sims_per_process = self.n_array_per_process[self.rank]
 
+        self.max_rank_digits = int(np.log10(self.size)) + 1
+        self.max_id_digits = int(np.log10(np.max(self.n_array_per_process))) + 1
+
         # Print the chunk that was received by this process
         print("Process {} received chunk {}".format(self.rank, self.n_sims_per_process))
 
@@ -109,9 +112,7 @@ class ParallelSetupEXCON:
     def start_simulations(self):
 
         DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
-        
-        if self.is_root:
-            t1 = perf_counter()
+        t1 = perf_counter()
 
         if self.config.location == Location.Hainich:
             self.sim = Simulation_Multi_Hainich(self.rank, True)
@@ -126,6 +127,7 @@ class ParallelSetupEXCON:
             print("Invalid location specified. Exiting...")
             exit(99)
 
+        print(f"Rank {self.rank}: is starting SimPHony with {self.n_sims_per_process} alpha runs.")
 
         for id in range(self.n_sims_per_process):
 
@@ -152,15 +154,15 @@ class ParallelSetupEXCON:
             self.sim.Set_water_pot_initials(-1.0, -0.2)
             self.sim.Init_eval(timestart, timeend)
 
-            print(f"Rank {self.rank}-{id}: is starting SimPHony...")
+
             self.sim.Run(timestart, timeend)
-            print(f"Rank {self.rank}-{id} finished simulating.")
+            t2 = perf_counter()
 
+            rstr = remaining_str(t2-t1, id + 1, self.n_sims_per_process)
 
-            #self.comm.Barrier()
-            # if self.is_root:
-            #     t2 = perf_counter()
-            #     print(f"All simulations completed ({np.round(t2 - t1, 1)}) sec.")
+            base_str = f"Rank {self.rank:0{self.max_rank_digits}}-{id:0{self.max_id_digits}}"
+
+            print(f"Rank {base_str}: performed {id+1:0{self.max_id_digits}} out of {self.n_sims_per_process:0{self.max_id_digits}}. Elapsed: {format_duration(int(t2-t1))}, remaining: {rstr}.")
 
             analysis = self.sim.Get_analysis_list()
             nx = self.ncombs_per_parameter
@@ -206,7 +208,6 @@ class ParallelSetupEXCON:
 
                 target_rmse *= 1.0/8.0
                 df_w['target_rmse'] = target_rmse
-                print(target_rmse)
                 output_path = self.config.output_path
                 if target_rmse.values < 1.2:
                     df_w.to_csv(f"{output_path}/parameters_f{id}.csv{self.rank}")
@@ -214,7 +215,33 @@ class ParallelSetupEXCON:
 
     def receive_analysis_data(self):
 
-        x = 3
+        self.comm.Barrier()
+
+        if self.is_root:
+            print("Root is collecting the best output...", end="")
+            import glob
+            outpath = self.config.output_path
+            output_files= glob.glob(f"{outpath}/*csv*")
+            dfcon = pd.DataFrame()
+            for i in range(0, len(output_files)):
+                # for i in range(0,10):
+                df = pd.read_csv(os.path.join(outpath, output_files[i]))
+
+                rmse_max = np.max([
+                    df.loc[0, 'alive_mean'] / 0.48,
+                    df.loc[1, 't0'] / 0.72,
+                    df.loc[2, 't3'] / 0.83,
+                    df.loc[3, 't6'] / 1.28,
+                    df.loc[4, 't7'] / 1.16]
+                )
+                df['RMSE_MAX'] = rmse_max
+                df['id'] = i
+                df['sid'] = np.arange(5)
+                df.drop(['Unnamed: 0'], inplace=True, axis=1)
+                dfcon = pd.concat([dfcon, df], axis=0)
+            dfcon.to_csv(os.path.join(self.config.post_path, "aggregated_out.csv"))
+            print("Done.")
+
         # if self.is_root:
         #     t1 = perf_counter()
         #     print("Starting analysis...")

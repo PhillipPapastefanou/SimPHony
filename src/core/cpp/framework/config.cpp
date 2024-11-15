@@ -14,7 +14,8 @@ Config::Config():
         soilwater_file("soilwater_file"),
         swiss_tree_folder_path("swiss_tree_folder_path"),
         swiss_soil_water_input_type("swiss_soil_water_input_type"),
-        parameters_list_file("parameters_list_file"){
+        parameters_list_file("parameters_list_file"),
+        write_individual_parameter_list_progress("write_individual_parameter_list_progress"){
 }
 
 Config::~Config() {
@@ -61,6 +62,7 @@ void Config::Read(std::string filename) {
 
         Parse(forcing_file, key, value);
         Parse(parameters_list_file, key, value);
+        Parse(write_individual_parameter_list_progress, key, value);
 
         if (location == Location::Swiss_cc) {
             Parse(soilwater_file, key, value);
@@ -97,6 +99,7 @@ void Config::Read(std::string filename) {
     // Check whether all files require have been found
 
     Check(forcing_file);
+    Check(write_individual_parameter_list_progress);
 
     if (location == Location::Swiss_cc) {
         Check(soilwater_file);
@@ -117,6 +120,7 @@ void Config::Create_swiss_cc() {
     parameters_list_file.value = "../tests/swiss_cc/test/input/parameter_example_1.csv";
     soilwater_file.value =  "../data/swiss/input/vwc_swicc_cc_2023_std_n.csv";
     swiss_soil_water_input_type.value = Swiss_soil_water_input_type::NLayersMeanNStd;
+    write_individual_parameter_list_progress.value = true;
 }
 
 
@@ -127,6 +131,7 @@ void Config::Create_hainich() {
     sap_flow_file.value = "../data/hainich/eval/SAP_Hainich_Fagus-mean_dT30min_prog.csv";
     psi_stem_file.value  = "../data/hainich/eval/stem_water_pot.csv";
     parameters_list_file.value = "../tests/hainich/test/input/parameter_example_1.csv";
+    write_individual_parameter_list_progress.value = true;
 }
 
 void Config::Export(std::string filename) {
@@ -141,6 +146,10 @@ void Config::Export(std::string filename) {
         exit(99);
     }
 
+    if (write_individual_parameter_list_progress.value == true)
+        w_config << write_individual_parameter_list_progress.key << "=true\n";
+    else
+        w_config << write_individual_parameter_list_progress.key << "=false\n";
     w_config << forcing_file.key << "=" << forcing_file.value << "\n";
     w_config << parameters_list_file.key << "=" << parameters_list_file.value << "\n";
     w_config << soilwater_file.key << "=" << soilwater_file.value << "\n";

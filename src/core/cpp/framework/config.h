@@ -72,6 +72,8 @@ public:
     Item<std::string> swiss_tree_folder_path;
     // Different variations for soil water input exist for the Swiss site
     Item<Swiss_soil_water_input_type> swiss_soil_water_input_type;
+    // Write individual parameters list progress
+    Item<bool> write_individual_parameter_list_progress;
 
 private:
     void Parse(Item<std::string> & item, std::string key, std::string value){
@@ -90,6 +92,31 @@ private:
         }
     }
 
+    void Parse(Item<bool> & item, std::string key, std::string value){
+        if (key == item.key){
+            if (item.found){
+                std::cout << "Already parsed " << item.found << std::endl;
+                std::cout << "Potential duplicate in list?" << std ::endl;
+                std::cout << "Exiting... ";
+                exit(99);
+            }
+
+            if (value.size() > 0){
+                if (value == "true")
+                    item.value = true;
+                else if(value == "false")
+                    item.value = false;
+                else {
+                    std::cout << "Invalid value for " << item.key << std::endl;
+                    std::cout << "Value obtained: "<< item.value  << std ::endl;
+                    std::cout << "Exiting... ";
+                    exit(99);
+                }
+                item.found = true;
+            }
+        }
+    }
+
     void Check(const Item<std::string> & item){
         if (!item.found){
             std::cout << "Could not parse " << item.key << std::endl;
@@ -98,6 +125,14 @@ private:
         }
     }
     void Check(const Item<Swiss_soil_water_input_type> & item){
+        if (!item.found){
+            std::cout << "Could not parse " << item.key << std::endl;
+            std::cout << "Exiting... ";
+            exit(99);
+        }
+    }
+
+    void Check(const Item<bool> & item){
         if (!item.found){
             std::cout << "Could not parse " << item.key << std::endl;
             std::cout << "Exiting... ";
