@@ -162,7 +162,7 @@ class ParallelSetupEXCON:
 
             base_str = f"Rank {self.rank:0{self.max_rank_digits}}-{id:0{self.max_id_digits}}"
 
-            print(f"Rank {base_str}: performed {id+1:0{self.max_id_digits}} out of {self.n_sims_per_process:0{self.max_id_digits}}. Elapsed: {format_duration(int(t2-t1))}, remaining: {rstr}.")
+            print(f"{base_str}: performed {id+1:0{self.max_id_digits}} out of {self.n_sims_per_process:0{self.max_id_digits}}. Elapsed: {format_duration(int(t2-t1))}, remaining: {rstr}.")
 
             analysis = self.sim.Get_analysis_list()
             nx = self.ncombs_per_parameter
