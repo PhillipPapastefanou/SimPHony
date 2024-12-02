@@ -13,7 +13,7 @@ from src.contrib.auxil.output_df import create_output_df
 from src.contrib.config import Config, Swiss_soil_water_input_type
 
 root_path = "/Net/Groups/BSI/scratch/ppapastefanou/simulations/SimPHony/swiss_cc/excond_supdate"
-scenario = "big_overview_20_10000p"
+scenario = "big_overview_20_10000p_fine"
 
 setup = Setup()
 setup.Apply_default_swiss(Swiss_soil_water_input_type.NLayers_Mean_N_Std)

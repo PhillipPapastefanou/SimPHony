@@ -43,19 +43,19 @@ def Calculate_parameter_list(rank, ncombs):
     for i in range(ncombs):
         soil_collection.append(SoilLayer())
 
-    g0_s            = rescale(slicer.get(), min=0.001, max = 0.055)
+    g0_s            = rescale(slicer.get(), min=0.001, max = 0.002)
     g1_s            = rescale(slicer.get(), min = 0.95, max = 1.05)
     g_barks_factor    = rescale(slicer.get(), min = 3.2, max = 3.8)
     anet_max        = rescale(slicer.get(), min = 0.5, max = 1.0)
-    k_xylems_sats   = rescale(slicer.get(), min = 5, max = 100.0)
-    huber_values    = rescale(slicer.get(), min = 1/4500, max= 1/1200)
+    k_xylems_sats   = rescale(slicer.get(), min = 5, max = 50.0)
+    huber_values    = rescale(slicer.get(), min = 1/2500, max= 1/1200)
     cstem_s         = rescale(slicer.get(), min = 5, max=100)
     cstem_s *= KG_TO_MOL
 
     # lai_s           = rescale(slicer.get(), min= 4.6, max = 5.0)
     cleaf_s_log        = rescale(slicer.get(), min=np.log10(0.001), max=np.log10(0.02))
     d_50close_s     = rescale(slicer.get(), min = 2.5, max = 4.0)
-    #psi_50_close_s  = rescale(slicer.get(), min = -2.1, max = -2.2)
+    #psi_50_close_s  = rescale(slicer.get(), min = -2.0, max = -2.1)
     jackson_s       = rescale(slicer.get(), min = 0.90, max = 0.98)
     #psi50_xylems    = rescale(slicer.get(), min = -4.0, max = -3.8)
     #psi88_xylems_offset    = rescale(slicer.get(), min = 1.0, max = 1.5)

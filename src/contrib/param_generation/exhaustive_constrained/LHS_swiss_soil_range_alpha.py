@@ -47,7 +47,9 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
     psi_soil_sats *= MPA_TO_HHEAD
     pore_size_ind = rescale(slicer.get(), min=0.242, max = 0.301) # 1 sigma
     #pore_size_ind = rescale(slicer.get(), min=0.216, max = 0.325)  # 2 sigmas
-    sigma_wcont    = rescale(slicer.get(), min = -1, max = 1)
+    #sigma_wcont    = rescale(slicer.get(), min = -1, max = 1)
+    sigma_wcont    = rescale(slicer.get(), min = -1, max = 0)
+
 
     soil_collection = []
     for i in range(ncombs):
