@@ -8,8 +8,8 @@
 #SBATCH --mail-user=papa@tum.de
 #SBATCH --export=ALL
 #SBATCH --time=24:00:00
-#SBATCH --nodes=3
-#SBATCH --ntasks=192
+#SBATCH --nodes=8
+#SBATCH --ntasks=512
 #SBATCH --partition='work'
 #SBATCH --mem='300G'
 
@@ -28,5 +28,5 @@ which orted
 
 export FI_PROVIDER=tcp
 
-mpiexec -n 192 /Net/Groups/BSI/work_scratch/ppapastefanou/envs/SimPHony_intel_oneapi/bin/python -u swiss_cc_mpi_cluster_EX_CON.py
+mpiexec -n 512 /Net/Groups/BSI/work_scratch/ppapastefanou/envs/SimPHony_intel_oneapi/bin/python -u swiss_cc_mpi_cluster_EX_CON.py
 

@@ -43,13 +43,13 @@ def Calculate_parameter_list(rank, ncombs):
     for i in range(ncombs):
         soil_collection.append(SoilLayer())
 
-    g0_s            = rescale(slicer.get(), min=0.0045, max = 0.055)
+    g0_s            = rescale(slicer.get(), min=0.001, max = 0.055)
     g1_s            = rescale(slicer.get(), min = 0.95, max = 1.05)
     g_barks_factor    = rescale(slicer.get(), min = 3.2, max = 3.8)
-    anet_max        = rescale(slicer.get(), min = 0.75, max = 1.235)
-    k_xylems_sats   = rescale(slicer.get(), min = 10, max= 100.0)
+    anet_max        = rescale(slicer.get(), min = 0.5, max = 1.0)
+    k_xylems_sats   = rescale(slicer.get(), min = 5, max = 100.0)
     huber_values    = rescale(slicer.get(), min = 1/4500, max= 1/1200)
-    cstem_s         = rescale(slicer.get(), min = 10, max=600)
+    cstem_s         = rescale(slicer.get(), min = 5, max=100)
     cstem_s *= KG_TO_MOL
 
     # lai_s           = rescale(slicer.get(), min= 4.6, max = 5.0)

@@ -41,13 +41,13 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
     sel_cols = []
     slicer = Subslicer(array=sample)
 
-    k_soil_sats_logs = rescale(slicer.get(), min=-8.0, max = -7.5)
-    psi_soil_sats = rescale(slicer.get(), min=-0.025, max = -0.011) # 1 sigma
+    k_soil_sats_logs = rescale(slicer.get(), min=-7.0, max = -6.0)
+    psi_soil_sats = rescale(slicer.get(), min=-0.039, max = -0.019) # 1 sigma
     #psi_soil_sats = rescale(slicer.get(), min=-0.035, max = -0.007)  # 2 sigmas
     psi_soil_sats *= MPA_TO_HHEAD
-    pore_size_ind = rescale(slicer.get(), min=0.238, max = 0.291) # 1 sigma
+    pore_size_ind = rescale(slicer.get(), min=0.242, max = 0.301) # 1 sigma
     #pore_size_ind = rescale(slicer.get(), min=0.216, max = 0.325)  # 2 sigmas
-    sigma_wcont    = rescale(slicer.get(), min = -0.5, max = 0.5)
+    sigma_wcont    = rescale(slicer.get(), min = -1, max = 1)
 
     soil_collection = []
     for i in range(ncombs):
@@ -56,8 +56,8 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
     for i in range(ncombs):
         soil_collection[i].k_soil_sat = 10**k_soil_sats_logs[i]
         soil_collection[i].psi_soil_sat = psi_soil_sats[i]
-        soil_collection[i].theta_s = 0.6
-        soil_collection[i].theta_r = 0.0
+        soil_collection[i].theta_s = 0.54
+        soil_collection[i].theta_r = 0.15
         soil_collection[i].pore_size_ind = pore_size_ind[i]
 
     sel_cols.append("k_soil_sat_01")
