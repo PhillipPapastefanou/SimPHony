@@ -41,6 +41,7 @@ from SimPHony import DateTime
 # For this example we will only look at the alive trees
 parameter_file = os.path.join("/Users/pp/data/Simulations/A08_SimPHony/swiss/medlyn_fix/base_red/post/parameters_best_mean_alive.csv")
 parameter_file = os.path.join("/Users/pp/data/Simulations/A08_SimPHony/swiss/ex_con_test/output/parameters_f2.csv0")
+parameter_file = os.path.join("/Users/pp/data/Simulations/A08_SimPHony/swiss/excon/10000_10p/post/parameters_best_5.csv")
 parameter_parser = Parameter_Parser()
 # Specify number of rows to not read in the whole file
 parameter_parser.Read_Parameter_List(parameter_file, nrows= 5)
@@ -49,9 +50,11 @@ parameter_parser.Read_Parameter_List(parameter_file, nrows= 5)
 # Obtain one parameter setup of the list
 parameters = parameter_parser.parameters_list[4]
 
+
+x = 3
 # Change parameters here --------
-# parameters.k_xylem_sat = 40
-# # parameters.stem_hydraulic_capacitance = 50 * 1000/18
+parameters.k_xylem_sat = 0.6 * 1000/18
+parameters.stem_hydraulic_capacitance = 5 * 1000/18
 #parameters.wcont_sigma_deviation = -1.0
 #
 # parameters.psi50_xylem = -4.1
@@ -59,10 +62,10 @@ parameters = parameter_parser.parameters_list[4]
 
 # parameters.wcont_sigma_deviation  = -0.5
 #
-# parameters.g0 = 0.005
-# parameters.g_bark = 0.005 * 3
+parameters.g0 = 0.005
+parameters.g_bark = 0.005 * 3
 # parameters.g1 = 1.5
-# parameters.anet_max = 0.1
+parameters.anet_max = 4
 
 
 # parameters.g0 += 0.0001
@@ -88,12 +91,14 @@ parameters = parameter_parser.parameters_list[4]
 soil_layers = parameters.Create_soil_layers()
 # # Change soil layer parameters here ---
 # #
-# soil_layers[0].k_soil_sat *= 2.0
-# soil_layers[0].pore_size_ind = 0.25
+soil_layers[0].k_soil_sat = 8E-6
+soil_layers[0].pore_size_ind = 0.25
+soil_layers[0].theta_r = 0.10
 #
-# # soil_layers[1].k_soil_sat = 2E-6
-# soil_layers[2].k_soil_sat = 0
-#
+soil_layers[1].theta_r = 0.15
+soil_layers[1].k_soil_sat = soil_layers[0].k_soil_sat
+soil_layers[2].k_soil_sat = soil_layers[0].k_soil_sat
+
 # soil_layers[0].theta_r = 0.04
 # # soil_layers[0].theta_s = 0.6
 # # soil_layers[1].theta_r = 0.08
@@ -153,7 +158,7 @@ plt.scatter(tree_parser.trees[7].df.index,
 plt.text(0.1, 0.1, f"RMSE = {np.round(errors[7],5)}", transform=ax.transAxes)
 plt.plot(df['psiLeaf'])
 plt.plot(df['psiStem'])
-plt.ylim(-3,0)
+plt.ylim(-7.5, 0 )
 plt.show()
 
 # std_plot(df = df,
