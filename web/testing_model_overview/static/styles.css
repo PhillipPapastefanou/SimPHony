@@ -1,0 +1,17 @@
+/* Or for a more modern look: */
+body {
+    font-family: 'Avenir Next', 'Roboto';
+}
+
+.form-control {
+    max-width: 150px; /* Adjust the value as needed */
+}
+
+
+.irs { /* Target Ion.RangeSlider container */
+    width: 100%; /* Ensure it fills the container */
+}
+
+.irs-bar {
+    overflow: visible; /* Prevents bar from being cut off */
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Interactive Plot</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Interactive Plot</h1>
+
+
+
+    <label for="slider1">Slider 1:</label>
+    <input type="range" id="slider1" step="0.1" name="slider1" min="1" max="3" value="1" class="form-range"><span id="slider1Value">1</span><br>
+
+    <label for="slider2">Slider 2:</label>
+    <input type="range" id="slider2" name="slider2" min="1" max="10" value="1"><span id="slider2Value">1</span><br>
+    <div id="plot"></div>
+
+    <script>
+        $(document).ready(function() {
+            function updatePlot() {
+                var slider1Value = parseFloat($("#slider1").val());
+                var slider2Value = parseFloat($("#slider2").val());
+                $("#slider1Value").text(slider1Value);
+                $("#slider2Value").text(slider2Value);
+                $.ajax({
+                    type: "POST",
+                    url: "/update_plot",
+                    data: {slider1: slider1Value, slider2: slider2Value}, // Send both values
+                    success: function(response) {
+                        $("#plot").html(response.plot);
+                    },
+                    error: function(error) {
+                        console.error("Error updating plot:", error);
+                        if (error.responseJSON && error.responseJSON.error) {
+                            alert(error.responseJSON.error); // Display error message
+                        } else {
+                            alert("An error occurred while updating the plot.");
+                        }
+                    }
+                });
+            }
+
+            $("#slider1").on("input", updatePlot); // Update on either slider change
+            $("#slider2").on("input", updatePlot);
+
+            updatePlot(); // Initial plot load
+        });
+    </script>
+
+</body>
+</html>
