@@ -66,15 +66,14 @@ void Water_Potential_Solver::init_base() {
 }
 
 
-void Water_Potential_Solver::Update_forcing(std::vector<double> psi_soil_sl, std::vector<double> k_soil_sl, double anet,
-                                            double vpd, double ca, double pressure) {
+void Water_Potential_Solver::Update_input(std::vector<double> psi_soil_sl, std::vector<double> k_soil_sl, double gs,
+                                          double vpd, double pressure) {
 
     this->psi_soil_sl = psi_soil_sl;
     this->k_soil_sl = k_soil_sl;
 
-    this->anet = anet;
+    this->gs = gs;
     this->vpd = vpd;
-    this->ca = ca;
     this->pressure = pressure;
 }
 

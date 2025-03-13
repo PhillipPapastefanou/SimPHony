@@ -9,7 +9,7 @@
 // ------------------------------------------------------------------------------------------
 // Soil hydraulic properties implementation based on Saxton and Rawls (2006)
 // 10.2136/sssaj2005.0117
-// Warning: The soil and clay fraction in the org. paper are real fractions, while only the soil
+// Warning: The sand and clay fraction in the org. paper are real fractions, while only the soil
 // organic matter is in percentage
 // Todo reenable Ks calculation
 // ------------------------------------------------------------------------------------------

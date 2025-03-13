@@ -18,23 +18,23 @@ public:
 
     void Init_water_potentials(double psi_leaf_init, double psi_stem_base_init);
 
-    void Update_forcing(std::vector<double> psi_soil_sl,
-                        std::vector<double> k_soil_sl,
-                        double anet,
-                        double vpd,
-                        double ca,
-                        double pressure);
+    void Update_input(std::vector<double> psi_soil_sl,
+                      std::vector<double> k_soil_sl,
+                      double gs,
+                      double vpd,
+                      double pressure);
 
 
     virtual void Init_solver() = 0;
     virtual void Update_water_potentials() = 0;
+    virtual double Get_beta() = 0;
 
     void Update_output(Output& output);
 
 protected:
     void init_base();
 
-    /// Update the stem water potential segments
+    /// Update_photosythesis the stem water potential segments
     void calc_psi_stems();
 
 
@@ -44,7 +44,7 @@ protected:
     double dts;
     /// Stomatal conductance [mol H2O m-2 s-1]
     double gs;
-    /// Downregulation factor of the g1 parameter of the Medyln2011 photosynthesis
+    /// Downregulation factor of the g1 parameter of the Medyln2011 Assimilation
     /// 0 --> No stomatal conductance; 1 --> Full stomatal conductance
     double beta_stom_cond;
     // Adjusted gompertz function parameter [MPa]
@@ -65,11 +65,11 @@ protected:
 
     /// Transpirational water flow [mol H2O m-2 s-1]
     double T;
-    /// Stem water flow [mol H2O m-2 dts-1]
+    /// Stem water flow [mol H2O m-2 s-1]
     double J;
     /// Total Soil water uptake flow [mol H2O m-2 s-1]
     double G;
-    /// Individial soil water uptake flow [mol H2O m-2 s-1]
+    ///  soil water uptake per layer [mol H2O m-2 s-1]
     std::vector<double> Gi;
     /// Bark water loss [mol H2O m-2 s-1]
     double T_G;
@@ -81,13 +81,9 @@ protected:
     // List of conductivities per soil layer [m s-1]
     std::vector<double> k_soil_sl;
 
-    // Net photosynthetic rate [micro mols m-2 s-1]
-    double anet;
     // Vapour pressure deficit [Pa]
     double vpd;
-    // Atmosheric Co2 [ppm]
-    double ca;
-    // Atmospheric pressure
+    // Atmopheric pressure [Pa]
     double pressure;
 
     /// Stem water flow models

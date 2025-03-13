@@ -27,9 +27,9 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(THIS_DIR, os.pardir, os.pardir, os.pardir))
 
 from src.contrib.auxil.files import get_SimPHony_build_path
-from src.contrib.auxil.files import get_forcing_swiss_cc
+from src.contrib.auxil.files import get_forcing_filepath_swiss_cc
 from src.contrib.auxil.files import get_trees_psi_leaf_folder_path_cc
-from src.contrib.auxil.files import get_soil_water_swiss_cc
+from src.contrib.auxil.files import get_soil_water_filepath_swiss_cc
 from src.contrib.parameter_parser import Parameter_Parser
 from src.contrib.auxil.output_df import create_output_df
 from src.contrib.config import Config, Location, Swiss_soil_water_input_type
@@ -40,9 +40,9 @@ sys.path.append(cpp_lib_path)
 from SimPHony import Simulation_Multi_Swiss
 from SimPHony import DateTime
 
-forcing_file, forcing_df = get_forcing_swiss_cc()
-soil_water_file, soil_water_df = get_soil_water_swiss_cc()
-tree_path, dummy = get_trees_psi_leaf_folder_path_cc()
+forcing_file = get_forcing_filepath_swiss_cc()
+soil_water_file = get_soil_water_filepath_swiss_cc(Swiss_soil_water_input_type.NLayers_Mean_One_Std)
+tree_path = get_trees_psi_leaf_folder_path_cc()
 
 # ------------------------------------------------------
 # Parameter setup
@@ -55,9 +55,9 @@ root_data_path = os.path.join(root_library_path, os.pardir, os.pardir, 'data')
 # Specifying forcing and evalution data paths
 config = Config()
 config.location = Location.Swiss_cc
-config.forcing_file, forcing_df = get_forcing_swiss_cc()
-config.soilwater_file, soilwater_df = get_soil_water_swiss_cc()
-config.swiss_tree_folder_path, dummy = get_trees_psi_leaf_folder_path_cc()
+config.forcing_file = get_forcing_filepath_swiss_cc()
+config.soilwater_file = get_soil_water_filepath_swiss_cc(Swiss_soil_water_input_type.NLayers_Indiv)
+config.swiss_tree_folder_path = get_trees_psi_leaf_folder_path_cc()
 config.swiss_soil_water_input_type = Swiss_soil_water_input_type.NLayers_Indiv
 config_path = os.path.join(THIS_DIR, 'config_3_py.txt')
 config.parameters_list_file = os.path.join(THIS_DIR, "parameter_example_3.csv")
@@ -76,7 +76,7 @@ for spi in soil_profile_indexes:
 
     nsoil_layers = 3
     layer = SoilLayer()
-    layer.k_soil_sat = 0.4 / 100.0 / 86400.0
+    layer.k_soil_sat = 2 / 100.0 / 86400.0
     layer.psi_soil_sat = -0.05 * 1
     # layer.camp_b  = 10.4
     layer.theta_s = 0.55
@@ -104,8 +104,8 @@ for spi in soil_profile_indexes:
     params.k_xylem_sat = 5 * 1000/18.0
     params.stem_hydraulic_capacitance = 150 * 1000 / 18
     params.leaf_hydraulic_capacitance = 0.01 * 1000 / 18
-    params.g_bark = 0.005
-    params.g0 = 0.005
+    params.g_bark = 0.001
+    params.g0 = 0.001
     params.g1 = 1.5
     params.leaf_area_index = 4.8
     params.psi_leaf_50_close = -2.1
@@ -115,9 +115,9 @@ for spi in soil_profile_indexes:
     params.root_area_index = 4.5
     params.jackson_root_beta = 0.96
     params.tree_density = 34.0 / 10000.0
-    params.anet_max = 2.5
     params.soil_water_model_type = Soil_Water_Model_Type.VanGenuchten.name
-    params.sw_rad_max = 1040
+    params.vmax25 = 41
+    params.jmax25 = 71
 
     params.wcont_sigma_deviation = 0.0
     params.soil_profile_index = spi

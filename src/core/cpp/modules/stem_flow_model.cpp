@@ -18,6 +18,7 @@ Stem_flow_module::Stem_flow_module(const Parameters &params) :
         value = 1.0;
     }
     actual_frac_con_per_segment.resize(params.n_stem_segments);
+
 }
 
 Stem_flow_module::~Stem_flow_module() {
@@ -236,7 +237,7 @@ void Kirchhoff_Piecewise_Erf::Init() {
 double Kirchhoff_Piecewise_Erf::KirchhoffIntegral(double psi, double s) {
     double a = psi + std::exp(-s*s *(psi-params.psi50_xylem)*(psi-params.psi50_xylem))/std::sqrt(M_PI)/s;
     double b = (psi-params.psi50_xylem) * std::erf(s*(psi-params.psi50_xylem));
-    return 0.5*(a +b);
+    return 0.5*(a+b);
 }
 
 double Kirchhoff_Piecewise_Erf::KirchhoffIntegralSplit(double psi) {

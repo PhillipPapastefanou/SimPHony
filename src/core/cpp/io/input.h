@@ -18,6 +18,8 @@ public:
     std::vector<DateTime> dates;
     /// Shortwave radiation [-]
     std::vector<float> sw_rad;
+    /// Surface air temperature [Degree Celcius]
+    std::vector<float> temp_air;
     /// Vapour pressure deficit [Pa]
     std::vector<float> vpd;
     /// Volumetric water content [m3 m-3]

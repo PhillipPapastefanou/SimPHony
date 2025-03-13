@@ -13,7 +13,6 @@ def create_output_df(output, date_start_str):
     df.set_index('date')
 
     df['vpd'] = output.Get_vpd()
-    df['anet'] = output.Get_anet()
 
     df['ksSoilUp'] = np.array(output.Get_ks_soil())[:, 0];
     df['ksSoil2'] = np.array(output.Get_ks_soil())[:, 1];
@@ -32,6 +31,9 @@ def create_output_df(output, date_start_str):
     df['Js'] = output.Get_J_per_sap()
 
     df['gss'] = output.Get_gs()
+
+    df['beta'] = output.Get_beta()
+    df['anet'] = output.Get_anet()
 
     df.set_index('date', inplace=True)
 

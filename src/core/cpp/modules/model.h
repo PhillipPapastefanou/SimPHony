@@ -27,23 +27,30 @@ private:
 
     // vapor pressure deficit [Pa]
     vector<float> input_vpd;
-    // Maximum photosynthetic rate [micro mol m-2 s-1]
-    vector<float> input_anet;
-    std::unique_ptr<Soil_water_module> soil_water_module;
+    // Shortwave downward radiation [W m-2]
+    vector<float> input_sw_down;
+    // Air temperature [Degree celcius]
+    vector<float> input_air_temperature;
     // Soil hydraulic conductivity [m s-1]
     vector<vector<double> > input_k_soil;
     // Soil hydraulic potential [m]
     vector<vector<double> > input_psi_soil;
 
+
+    std::unique_ptr<Soil_water_module> soil_water_module;
+
     // Driver values for this timestep
     // Vapour pressure deficit [Pa]
     double ivpd;
-    // Net photosythesis rate [micro mol CO2 m-2 s-1]
-    double ianet;
+    // Shortwave radiation of this timestep [W m-2]
+    double isw_down;
     // Atmopheric pressure [Pa]
     double ipressure;
     // Ambient CO2 concentration [ppm]
     double ica;
+    // Air temperature [Degree Celcius]
+    double itemp_air;
+
     // List of soil water potentials per soil layer [m] (hydraulic head)
     vector<double> ipsi_soil;
     // List of conductivities per soil layer [m s-1]

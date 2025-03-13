@@ -43,7 +43,6 @@ TEST(Swiss_cc_tests, Apply_model_direct) {
     params.root_area_index = 4.5;
     params.jackson_root_beta = 0.96;
     params.tree_density = 64.0 / 10000.0;
-    params.anet_max = 2.5;
     params.soil_water_type = Soil_water_module_type::VanGenuchten;
     params.wcont_sigma_deviation = 0.0;
     params.soil_layers.resize(3);
@@ -165,7 +164,7 @@ TEST(Swiss_cc_tests, Test_multi_soils_direct) {
     params.canopy_height = 31.0;
     params.huber_value  = 1.0/3000.0;
     params.k_xylem_sat = 5 * 1000 / 18.0;
-    params.stem_hydraulic_capacitance_max = 150 * 1000 / 18.0 * 0.1;
+    params.stem_hydraulic_capacitance_max = 100 * 1000 / 18.0 * 0.1;
     params.leaf_hydraulic_capacitance = 0.01 *1000/18.0;
     params.g_bark = 0.01;
     params.g0 = 0.005;
@@ -178,7 +177,6 @@ TEST(Swiss_cc_tests, Test_multi_soils_direct) {
     params.root_area_index = 4.5;
     params.jackson_root_beta = 0.96;
     params.tree_density = 64.0 / 10000.0;
-    params.anet_max = 2.5;
     params.soil_water_type = Soil_water_module_type::VanGenuchten;
     params.wcont_sigma_deviation = 0.0;
     params.soil_layers.resize(3);

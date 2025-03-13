@@ -61,10 +61,10 @@ class Parameters:
         # Mathematical shape how the loss of conductivity function is calculated
         self.conductivity_fraction_type = Conductivity_Fraction_Module_Type.Weibull.name
 
-        # Maximum net photosynthesis rate [micro mol CO2 m-2 s-1]
-        self.anet_max = 4.5
-        # Maximum shortwave downward radiation [Watt m-2 s-1]
-        self.sw_rad_max = 900;
+
+        self.vmax25 = 40
+        self.jmax25 = 70
+
 
         # Root area index [1]
         # Katul et al: 5.5 - 14.2
@@ -119,11 +119,11 @@ class Parameters:
         # No reference here yet, be careful with the sign
         self.d_50_close = 10.0
 
-        # Medlyn 2011 model g0 parameter [mol m-2 s-1]
+        # Medlyn 2011 model g0 parameter [mol m-2 s-1 leaf area]
         # (also minmal stomatal condutances)
         # From Medlyn 0 - 0.05
         # From the site 0.05
-        self.g0 = 0.005
+        self.g0 = 0.001
         # Medlyn 2011 model g1 parameter [kPa -1]
         # From Medlynn 1.6 - 12
         self.g1 = 1.5
@@ -288,8 +288,6 @@ class Parameters:
         cparameters.jackson_root_beta = self.jackson_root_beta
         cparameters.wcont_sigma_deviation = self.wcont_sigma_deviation
         cparameters.dts_input = self.dts_input
-        cparameters.sw_rad_max = self.sw_rad_max
-        cparameters.anet_max = self.anet_max
         cparameters.tree_density = self.tree_density
         cparameters.n_stem_segments = self.n_stem_segments
         cparameters.sustain_xylem_damage = self.sustain_xylem_damage
@@ -301,6 +299,8 @@ class Parameters:
         cparameters.verbose = self.verbose
         cparameters.dts = self.dts
         cparameters.soil_profile_index = self.soil_profile_index
+        cparameters.vmax25 = self.vmax25
+        cparameters.jmax25 = self.jmax25
 
         return cparameters
 

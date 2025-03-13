@@ -37,7 +37,9 @@ struct Constants{
     const double PaToMPa = std::pow(10, -6);
     const double MPaToPa = std::pow(10, +6);
     const double H2O_TO_CO2_DIFFUSIVITY = 1.6;
-
+    const double PPM_TO_PA = 101326.0 / 1E6;
+    const double PA_TO_PPM = 1000.0 / 101.325;
+    const double UMOL_TO_MOL = std::pow(10, -6);
     //const double PI = std::numbers::pi;
     //Todo Use C constants again. Does not work on the MPI cluster atm
     const double PI = 3.14159265359;
@@ -135,6 +137,11 @@ public:
     // Medlyn 2011 model g1 parameter [kPa-1]
     // From Medlynn 1.6 - 12
     double g1 = 1.5;
+    // Maximum carboxylation rate at 25 Degree celcius
+    double vmax25 = 43;
+    // Maximum electron transport rate at 25 Degree celcius
+    double jmax25 = 71;
+
 
     // Bark condutance [mol m-2 s-1]
     // We have to check how the diameter and the stem surface area will influence that
@@ -154,13 +161,6 @@ public:
     // Number of standard deviation (sd) that the water content is moved away from the mean sensors
     // Choose 0.0 to have the mean water content, 1.0 equals to 1SD higher water content
     double wcont_sigma_deviation = 0.0;
-
-
-    // According to the forcing input [W m-2]
-    double sw_rad_max = 1040;
-
-    // Maximum net photosythesis rate [micro mol CO2 m-2 s-1]
-    double anet_max = 5.7;
 
     // Tree density [Trees m-2]
     // Used for output scaling onlny

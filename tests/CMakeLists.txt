@@ -7,6 +7,9 @@ set(source
         general/soil_models_test.cpp
         general/special_functions_test.cpp
 
+        general/phot/test_photo_and_assim_functions_manon.cpp
+        general/phot/test_photo_and_assim_functions_farquar_sureau.cpp
+
         hainich/test_driver_exist.cpp
         hainich/source_hainich_direct_test.cpp
         hainich/source_hainich_from_file_test.cpp

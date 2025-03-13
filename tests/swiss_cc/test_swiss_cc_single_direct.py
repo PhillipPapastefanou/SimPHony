@@ -82,9 +82,7 @@ class Test_Swiss_Single_Direct(unittest.TestCase):
         params.root_area_index = 4.5
         params.jackson_root_beta = 0.96
         params.tree_density = 64.0 / 10000.0
-        params.anet_max = 2.5
         params.soil_water_model_type = Soil_Water_Model_Type.VanGenuchten.name
-        params.sw_rad_max = 1040
 
         cparameters = params.Create_CParameters(soil_layers=soil_layers)
 

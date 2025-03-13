@@ -183,7 +183,7 @@ double Saxton06::calc_A(int is, double B) {
 
 double Saxton06::calc_KS(int is) {
     const double L = 1.0/B[is];
-    return 1930 * std::pow(theta_s[is] - theta_33[is], 3.0 - L);
+    return 1930.0 * std::pow(theta_s[is] - theta_33[is], 3.0 - L);
 }
 
 Saxton06::~Saxton06() {

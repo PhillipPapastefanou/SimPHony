@@ -43,7 +43,6 @@ TEST(Hainich_tests, Apply_model_direct) {
     params.root_area_index = 4.5;
     params.jackson_root_beta = 0.96;
     params.tree_density = 64.0 / 10000.0;
-    params.anet_max = 2.5;
     params.soil_water_type = Soil_water_module_type::VanGenuchten;
 
     params.soil_layers.resize(3);

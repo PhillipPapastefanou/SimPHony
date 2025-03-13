@@ -168,12 +168,12 @@ PYBIND11_MODULE(SimPHony, handle){
             def_readwrite("d_50_close", &Parameters::d_50_close).
             def_readwrite("g0", &Parameters::g0).
             def_readwrite("g1", &Parameters::g1).
+            def_readwrite("vmax25", &Parameters::vmax25).
+            def_readwrite("jmax25", &Parameters::jmax25).
             def_readwrite("g_bark", &Parameters::g_bark).
             def_readwrite("jackson_root_beta", &Parameters::jackson_root_beta).
             def_readwrite("wcont_sigma_deviation", &Parameters::wcont_sigma_deviation).
             def_readwrite("dts_input", &Parameters::dts_input).
-            def_readwrite("sw_rad_max", &Parameters::sw_rad_max).
-            def_readwrite("anet_max", &Parameters::anet_max).
             def_readwrite("tree_density", &Parameters::tree_density).
             def_readwrite("n_stem_segments", &Parameters::n_stem_segments).
             def_readwrite("sustain_xylem_damage", &Parameters::sustain_xylem_damage).

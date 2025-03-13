@@ -16,6 +16,7 @@ public:
     Solver_Indiv_Euler_Imp(const Parameters& params);
     void Init_solver() override;
     void Update_water_potentials() override;
+    double Get_beta() override;
 
     double psi_stem_root(double psi_stem_target);
     double psi_leaf_root(double psi_leaf_target);
@@ -37,8 +38,7 @@ private:
     /// Derivative of the root water potential. Internal function.
     double d_psi_stem_ground(double psi_leaf, double psi_stem);
 
-
-    double update_transpiration(double psi_leaf);
+    double update_transpiration();
 
 };
 

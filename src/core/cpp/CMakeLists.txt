@@ -30,6 +30,9 @@ set(headers
         io/time_series.h
         modules/stem_flow_model.h
         modules/conductivity_model.h
+        modules/phot/assimilation_quincy.h
+        modules/phot/assimilation.h
+        modules/phot/assimi_farquar.h
         modules/soil_layer.h
         auxil/lookup_table.h
         framework/water_potential_solver.h
@@ -56,6 +59,9 @@ set(source
         modules/soil_water/van_genuchten.cpp
         modules/root_distribution_model.cpp
         modules/conductivity_model.cpp
+        modules/phot/assimilation_quincy.cpp
+        modules/phot/assimilation.cpp
+        modules/phot/assimi_farquar.cpp
         modules/soil_layer.cpp
         auxil/csv_reader.cpp
         framework/parameters.cpp

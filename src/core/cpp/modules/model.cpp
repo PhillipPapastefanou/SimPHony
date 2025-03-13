@@ -7,6 +7,8 @@
 #include "soil_water/campbell.h"
 #include "soil_water/van_genuchten.h"
 #include "../framework/solver_indiv_eulerimp.h"
+#include "phot/assimilation.h"
+#include "phot/assimi_farquar.h"
 
 void Model::Set_initial_conditions(double psi_leaf_zero, double psi_stem_zero) {
     water_potential_solver->Init_water_potentials(psi_leaf_zero, psi_stem_zero);
@@ -55,11 +57,8 @@ void Model::Set_derived_parameters() {
     input_k_soil = soil_water_module->Get_ks();
     input_psi_soil = soil_water_module->Get_psi_soil_head();
 
-    // We rescale shortwave radiation to the range if (0, to Anetmax)
-    input_anet.resize(input_module.sw_rad.size());
-    for (int i = 0; i < input_anet.size(); ++i) {
-        input_anet[i] = input_module.sw_rad[i] / params.sw_rad_max * params.anet_max;
-    }
+    input_air_temperature = input_module.temp_air;
+    input_sw_down = input_module.sw_rad;
     input_vpd = input_module.vpd;
 
     water_potential_solver = std::make_unique<Solver_Indiv_Euler_Imp>(params);
@@ -95,31 +94,48 @@ void Model::Run(DateTime begin, DateTime end) {
     // Time difference in seconds to t0
     ts = begin - begin_available ;
 
+    // Initialise assimlation module
+    Assimi_Farquar assimilation(params);
+
     for (int i = 0; i < nsteps; ++i) {
 
-        // Update forcing drivers
+        // Update_photosythesis forcing drivers
         ica = 415.0;
         ipressure = 1.013 * 100000.0;
 
-        ianet = input_anet[time_index(ts)];
+        itemp_air = input_air_temperature[time_index(ts)];
         ivpd = input_vpd[time_index(ts)];
+        isw_down = input_sw_down[time_index(ts)];
 
         ipsi_soil = input_psi_soil[time_index(ts)];
         ik_soil = input_k_soil[time_index(ts)];
 
+
         if (params.verbose){
             std::cout << ts/86400.0 << " ";
         }
-        water_potential_solver->Update_forcing(ipsi_soil, ik_soil, ianet, ivpd, ica, ipressure);
+
+
+        double beta = water_potential_solver->Get_beta();
+
+        const double vpd_kPa = ivpd / 1000.0;
+
+        assimilation.Solve_Anet_gs(isw_down*2.0 * 0.3, ica, vpd_kPa, itemp_air,  beta);
+
+        const double gs = assimilation.Get_Gs();
+
+        water_potential_solver->Update_input(ipsi_soil, ik_soil, gs , ivpd, ipressure);
         water_potential_solver->Update_water_potentials();
+
 
         // Adding variables to up output files
         add_output();
+        output.Add_anet(assimilation.Get_An());
 
-        // Update the output of the solvers aswell
+        // Update_photosythesis the output of the solvers aswell
         water_potential_solver->Update_output(output);
 
-        // Update time step
+        // Update_photosythesis time step
         ts += dts;
     }
 
@@ -141,8 +157,11 @@ void Model::add_output() {
     for (auto& e: ks_soil_f)
         e *= 1.0;
     output.Add_ks_indiv(ks_soil_f);
-    output.Add_anet(ianet);
+
     output.Add_vpd(ivpd);
+
+
+    //Todo add other forcings
 }
 
 const Output& Model::Get_output() const {

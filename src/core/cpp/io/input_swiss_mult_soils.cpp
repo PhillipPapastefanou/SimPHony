@@ -53,7 +53,7 @@ void Input_Swiss_Multi_Soils::Read_N_Parse() {
 
     }
 
-    vector<int> forcing_indexes= {2,8};
+    vector<int> forcing_indexes= {2,8,3};
     forcing_parser->init_regular("dt", format);
     vector<vector<float> > forcing_input = forcing_parser->get_data(forcing_indexes);
 
@@ -77,13 +77,16 @@ void Input_Swiss_Multi_Soils::Read_N_Parse() {
         std::cout << "Number of dates of forcing and soil_water input do not match" << std:: endl;
         exit(99);
     }
-    
+
+    const double KTOC = 273.15;
     // Read in forcing
     for (int i = 0; i < forcing_input.size(); ++i) {
         dates.push_back(forcing_parser->dates[i]);
         this->vpd.push_back(forcing_input[i][1] * 1000.0);
         double rad_d = forcing_input[i][0];
         this->sw_rad.push_back(rad_d);
+        double air_temp_kelv = forcing_input[i][2];
+        this->temp_air.push_back(air_temp_kelv - KTOC );
     }
 
 

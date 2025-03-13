@@ -19,12 +19,17 @@ void Solver_RKF::Init_solver() {
 
 
 double Solver_RKF::d_psi_leaf(double psi_leaf, double psi_stem) {
-    // Update beta parameter that rescales stomatal conductance
+    // Update_photosythesis beta parameter that rescales stomatal conductance
     // beta = 0 -> stomata closed; beta = 1 -> stomata fully open
     // The intial function was a simple logic model
     //beta_stom_cond = 1.0 / (1.0 + std::exp(-params.d_50_close * (psi_leaf - params.psi_leaf_50_close)));
     // Gompertz function
     beta_stom_cond = std::exp(-1.0 * std::exp(-1.0 *params.d_50_close*(psi_leaf - psi_gomp_50)));
+
+    std::cout <<"NOt implemented" ;
+    exit(99);
+    double anet = 0;
+    double ca =0.0;
 
     // Medlyn phoytosynthesis model
     // mol CO2 s-1 m-2
@@ -36,7 +41,7 @@ double Solver_RKF::d_psi_leaf(double psi_leaf, double psi_stem) {
     // Calculate transpiration
     T = gs * params.leaf_area_index * vpd / pressure;
 
-    // Update stem water flow
+    // Update_photosythesis stem water flow
     //J = stem_flow_module->Get_Stem_flow(psi_stem, psi_leaf);
 
     // Return the derivative of the leaf water potential

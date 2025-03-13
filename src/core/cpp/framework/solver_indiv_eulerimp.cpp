@@ -6,6 +6,8 @@
 #include <iostream>
 
 Solver_Indiv_Euler_Imp::Solver_Indiv_Euler_Imp(const Parameters &params) : Water_Potential_Solver(params) {
+    // Initialise with no stress on stomatal conductance
+    beta_stom_cond = 1.0;
 }
 
 void Solver_Indiv_Euler_Imp::Update_water_potentials() {
@@ -41,6 +43,10 @@ void Solver_Indiv_Euler_Imp::Update_water_potentials() {
     psi_leaf_prev_ts = psi_leaf;
     psi_stem_ground_prev_ts = psi_stem_ground;
 
+    // Update_photosythesis beta parameter that rescales stomatal conductance
+    // beta = 0 -> stomata closed; beta = 1 -> stomata fully open
+    beta_stom_cond = std::exp(-1.0 * std::exp(-1.0 *params.d_50_close*(psi_leaf - psi_gomp_50)));
+
     if (params.verbose){
         std::cout << " Psi leaf  " << psi_leaf;
         std::cout << " Psi stem ground  " << psi_stem_ground << std::endl;
@@ -48,7 +54,8 @@ void Solver_Indiv_Euler_Imp::Update_water_potentials() {
         std::cout <<   " J : " << J;
         std::cout << " G: " << G << std::endl;
         std::cout << " T_G: " << T_G << std::endl;
-        std::cout <<   "VPD : " << vpd ;
+        std::cout <<   " VPD : " << vpd ;
+        std::cout <<   " gs : " << gs ;
         std::cout << " psi_soil: " << psi_soil_sl[0]*params.constants.HydraulicHeadInMtoMPa;
         std::cout << " K_soil: " << k_soil_sl[0] << std::endl;
         std::cout << ""<< std::endl;
@@ -86,10 +93,10 @@ double Solver_Indiv_Euler_Imp::psi_leaf_root(double psi_leaf_target) {
 
 double Solver_Indiv_Euler_Imp::d_psi_leaf(double psi_leaf, double psi_stem) {
 
-    // Update transpiration
-    T = update_transpiration(psi_leaf);
+    // Update_photosythesis transpiration
+    T = update_transpiration();
 
-    // Update stem water flow
+    // Update_photosythesis stem water flow
     if (calc_J_leaf){
         J = stem_flow_module->Get_Stem_flow(psi_stem, psi_leaf);
     }
@@ -101,7 +108,7 @@ double Solver_Indiv_Euler_Imp::d_psi_stem_ground(double psi_leaf, double psi_ste
     // The water stem flow could be also updated right here, but this might lead to inconsistent water uptakes/
     // in case it is updated two times.
 
-    // Update stem water flow
+    // Update_photosythesis stem water flow
     if (calc_J_stem){
         J = stem_flow_module->Get_Stem_flow(psi_stem, psi_leaf);
     }
@@ -137,22 +144,9 @@ double Solver_Indiv_Euler_Imp::d_psi_stem_ground(double psi_leaf, double psi_ste
     return ((G - J - T_G) / (params.stem_hydraulic_capacitance_max * params.canopy_height * params.huber_value));
 }
 
-double Solver_Indiv_Euler_Imp::update_transpiration(double psi_leaf) {
-
-    // Update beta parameter that rescales stomatal conductance
-    // beta = 0 -> stomata closed; beta = 1 -> stomata fully open
-    // Gompertz function
-    beta_stom_cond = std::exp(-1.0 * std::exp(-1.0 *params.d_50_close*(psi_leaf - psi_gomp_50)));
-
-    // Medlyn phoytosynthesis model
-    // mol CO2 s-1 m-2
-    gs = params.g0 + beta_stom_cond * (1.0 + params.g1*params.constants.KPaToPa / std::sqrt(vpd)) * anet / ca;
-
-    // Convert from Mol CO2 to Mol H2O diffusivity
-    gs *= params.constants.H2O_TO_CO2_DIFFUSIVITY;
-
-    // Calculate transpiration per unit leaf area (LAI times canopy area)
-    return gs * vpd / pressure;
+double Solver_Indiv_Euler_Imp::update_transpiration() {
+    // Calculate transpiration per unit leaf area
+    return gs * vpd / pressure * params.constants.H2O_TO_CO2_DIFFUSIVITY;
 }
 
 
@@ -202,7 +196,7 @@ void Solver_Indiv_Euler_Imp::update_psi_stem_ground() {
             // Set solution to maximum negative drop
             else{
                 psi_leaf = psi_leaf_prev_ts -  max_psi_leaf_change_per_ts;
-                T = update_transpiration(psi_leaf);
+                T = update_transpiration();
                 calc_J_stem = true;
 
                 // Re-estimate psi_stem AND J
@@ -358,7 +352,7 @@ void Solver_Indiv_Euler_Imp::update_psi_leaf() {
         // Also do not calculate the stem water flow but rather let the stem routine esimate the water flow directly
         else{
             psi_leaf -= max_psi_leaf_change_per_ts;
-            T = update_transpiration(psi_leaf);
+            T = update_transpiration();
             calc_J_stem = true;
         }
 
@@ -387,6 +381,11 @@ void Solver_Indiv_Euler_Imp::update_psi_leaf() {
 
     }
 
+}
+
+
+double Solver_Indiv_Euler_Imp::Get_beta() {
+    return beta_stom_cond;
 }
 
 

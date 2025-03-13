@@ -8,7 +8,7 @@ def std_plot(df : pd.DataFrame, timebegin, timeend, path):
     df_slice = df.loc[timebegin: timeend]
     fig = plt.figure(figsize=(10, 10))
 
-    ax = fig.add_subplot(3, 2, 1)
+    ax = fig.add_subplot(3, 3, 1)
     ax.plot(df_slice['vpd'], label='VPD', c='tab:red')
     ax.legend()
     ax.set_xlabel("Time")
@@ -16,15 +16,15 @@ def std_plot(df : pd.DataFrame, timebegin, timeend, path):
     ax.xaxis.set_major_formatter(formatter)
     ax.set_ylabel("Vapor pressure deficit [kPa]")
 
-    ax = fig.add_subplot(3, 2, 2)
-    ax.plot(df_slice['anet'], label='Anet')
+    ax = fig.add_subplot(3, 3, 2)
+    ax.plot(df_slice['beta'], label='beta')
     ax.legend()
     ax.set_xlabel("Time")
     ax.tick_params(axis='x', labelrotation=45)
-    ax.set_ylabel("Net photosynthesis [mol m-2 s-1]")
+    ax.set_ylabel("Beta factor [-]")
     ax.xaxis.set_major_formatter(formatter)
 
-    ax = fig.add_subplot(3, 2, 3)
+    ax = fig.add_subplot(3, 3, 3)
     ax.semilogy(df_slice['ksSoilUp'], label='ksoil1')
     ax.semilogy(df_slice['ksSoil2'], label='ksoil2')
     ax.semilogy(df_slice['ksSoil3'], label='ksoil3')
@@ -33,7 +33,7 @@ def std_plot(df : pd.DataFrame, timebegin, timeend, path):
     ax.tick_params(axis='x', labelrotation=45)
     ax.xaxis.set_major_formatter(formatter)
 
-    ax = fig.add_subplot(3, 2, 4)
+    ax = fig.add_subplot(3, 3, 4)
     ax.plot(df_slice['psiLeaf'], label='Leaf')
     ax.plot(df_slice['psiStem'], label='Stem')
     ax.plot(df_slice['psiSoilUp'], label='SoilT')
@@ -43,7 +43,7 @@ def std_plot(df : pd.DataFrame, timebegin, timeend, path):
     ax.tick_params(axis='x', labelrotation=45)
     ax.xaxis.set_major_formatter(formatter)
 
-    ax = fig.add_subplot(3, 2, 5)
+    ax = fig.add_subplot(3, 3, 5)
     ax.plot(df_slice['T'], label='T', c='tab:blue')
     ax.plot(df_slice['J'], label='J', c='tab:orange')
     ax.plot(df_slice['G'], label='G', c='black')
@@ -54,10 +54,18 @@ def std_plot(df : pd.DataFrame, timebegin, timeend, path):
     ax.xaxis.set_major_formatter(formatter)
     ax.set_ylabel("Water fluxes [mol m-2 s-1]")
 
-    ax = fig.add_subplot(3, 2, 6)
+    ax = fig.add_subplot(3, 3, 6)
     ax.plot(df_slice['gss'], label='gs', c='tab:blue')
     ax.legend()
     ax.set_ylabel("gs")
+    ax.set_xlabel("Time")
+    ax.tick_params(axis='x', labelrotation=45)
+    ax.xaxis.set_major_formatter(formatter)
+
+    ax = fig.add_subplot(3, 3, 7)
+    ax.plot(df_slice['anet'], label='anet', c='tab:blue')
+    ax.legend()
+    ax.set_ylabel("anet")
     ax.set_xlabel("Time")
     ax.tick_params(axis='x', labelrotation=45)
     ax.xaxis.set_major_formatter(formatter)
