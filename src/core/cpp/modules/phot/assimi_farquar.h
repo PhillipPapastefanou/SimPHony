@@ -25,7 +25,7 @@ public:
      * @param jmax298 - maximum electron transport rate per leaf area at 298 ºK (i.e. 25 ºC) (micromol*s-1*m-2)
      * @param vmax298 - maximum Rubisco carboxylation rate per leaf area at 298 ºK (i.e. 25 ºC) (micromol*s-1*m-2)
      */
-    void Update_photosynthesis(double ppfd, double catm, double gs, double tleaf, bool verbose=false);
+    void Update_photosynthesis(double ppfd, double catm, double gs, double tleaf);
     double Update_gs(double beta, double an, double ca_ppm, double vpd);
 
     void Solve_Anet_gs(double ppfd, double catm, double vpd, double tleaf, double beta);

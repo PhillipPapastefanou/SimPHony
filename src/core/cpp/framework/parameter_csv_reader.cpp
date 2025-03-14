@@ -87,6 +87,8 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
         parse_value(params.d_50_close,  "d_50_close");
         parse_value(params.g0,  "g0");
         parse_value(params.g1,  "g1");
+        parse_value(params.vmax25,  "vmax25");
+        parse_value(params.jmax25,  "jmax25");
         parse_value(params.g_bark, "g_bark");
     
 

@@ -115,8 +115,8 @@ double Assimi_Farquar::rubiscoLimitedPhotosynthesisDerivative(double Ci, double 
 }
 
 
-void Assimi_Farquar::Update_photosynthesis(double ppfd, double catm, double gs, double tleaf,
-                                           bool verbose) {
+void Assimi_Farquar::Update_photosynthesis(double ppfd, double catm, double gs, double tleaf)
+                                            {
     double GT = gammaTemp(tleaf);
     double Km = KmTemp(tleaf, O2_conc);
     double Vmax = VmaxTemp(parameters.vmax25, tleaf);

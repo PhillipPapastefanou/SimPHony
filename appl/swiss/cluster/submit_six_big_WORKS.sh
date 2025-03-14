@@ -25,4 +25,4 @@ which python
 
 export FI_PROVIDER=tcp
 
-mpiexec -n 768 python3 -u swiss_cc_mpi_cluster_LHS.py
+mpiexec -n 768 python3 -u swiss_cc_mpi_cluster_EX_CON.py

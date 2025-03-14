@@ -41,13 +41,13 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
     sel_cols = []
     slicer = Subslicer(array=sample)
 
-    k_soil_sats_logs = rescale(slicer.get(), min=-8.0, max = -7.5)
+    k_soil_sats_logs = rescale(slicer.get(), min=-8.5, max = -6.5)
     psi_soil_sats = rescale(slicer.get(), min=-0.025, max = -0.011) # 1 sigma
     #psi_soil_sats = rescale(slicer.get(), min=-0.035, max = -0.007)  # 2 sigmas
     psi_soil_sats *= MPA_TO_HHEAD
     pore_size_ind = rescale(slicer.get(), min=0.238, max = 0.291) # 1 sigma
     #pore_size_ind = rescale(slicer.get(), min=0.216, max = 0.325)  # 2 sigmas
-    sigma_wcont    = rescale(slicer.get(), min = -0.5, max = 0.5)
+    sigma_wcont    = rescale(slicer.get(), min = -1.0, max = 1.0)
 
     soil_collection = []
     for i in range(ncombs):
@@ -70,12 +70,15 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
 
     g1_s            = rescale_mean(slicer.get(), mean = parameters.g1, percent=alpha)
     sel_cols.append("g1")
+    
+    vmax25_s            = rescale_mean(slicer.get(), mean = parameters.vmax25, percent=alpha)
+    sel_cols.append("vmax25")
+    
+    jmax25_s            = rescale_mean(slicer.get(), mean = parameters.jmax25, percent=alpha)
+    sel_cols.append("jmax25")
 
     g_barks =  rescale_mean(slicer.get(), mean = parameters.g_bark, percent=alpha)
     sel_cols.append("g_barks")
-
-    anet_max     = rescale_mean(slicer.get(), mean = parameters.anet_max, percent=alpha)
-    sel_cols.append("anet_max")
 
     k_xylems_sats   = rescale_mean(slicer.get(), mean = parameters.k_xylem_sat, percent=alpha)
     #k_xylems_sats *= KG_TO_MOL
@@ -146,8 +149,10 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
         params.g0 = g0_s[i]
         params.g_bark = g_barks[i]
         params.g1 = g1_s[i]
-        params.anet_max = anet_max[i]
-
+        
+        params.vmax25 = vmax25_s[i]
+        params.jmax25 = jmax25_s[i]
+         
         params.psi50_xylem = psi50_xylems[i]
         params.psi88_xylem = psi50_xylems[i] - psi88_xylems_offset[i]
 
@@ -179,7 +184,6 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
         #params.conductivity_fraction_type = Conductivity_Fraction_Module_Type.Logit
 
         params.sustain_xylem_damage = False
-        params.sw_rad_max = 972.935
 
         # if i % 5000 == 0:
         #     print(f"{i/ncombs * 100.0}% completed")

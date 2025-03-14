@@ -43,14 +43,17 @@ def Calculate_parameter_list(rank, ncombs):
     for i in range(ncombs):
         soil_collection.append(SoilLayer())
 
-    g0_s            = rescale(slicer.get(), min=0.0045, max = 0.055)
-    g1_s            = rescale(slicer.get(), min = 0.95, max = 1.05)
-    g_barks_factor    = rescale(slicer.get(), min = 3.2, max = 3.8)
-    anet_max        = rescale(slicer.get(), min = 0.75, max = 1.235)
-    k_xylems_sats   = rescale(slicer.get(), min = 10, max= 100.0)
+    g0_s            = rescale(slicer.get(), min=0.001, max = 0.002)
+    g1_s            = rescale(slicer.get(), min =1.0, max = 10.0)
+    g_barks_factor    = rescale(slicer.get(), min = 0.0, max = 1)
+    k_xylems_sats   = rescale(slicer.get(), min = 0.5, max= 10.0)
+    k_xylems_sats *= KG_TO_MOL
     huber_values    = rescale(slicer.get(), min = 1/4500, max= 1/1200)
     cstem_s         = rescale(slicer.get(), min = 10, max=600)
     cstem_s *= KG_TO_MOL
+    
+    vmax25s         = rescale(slicer.get(), min = 30, max = 50)
+    jmax25s         = rescale(slicer.get(), min = 60, max = 80)
 
     # lai_s           = rescale(slicer.get(), min= 4.6, max = 5.0)
     cleaf_s_log        = rescale(slicer.get(), min=np.log10(0.001), max=np.log10(0.02))
@@ -83,7 +86,8 @@ def Calculate_parameter_list(rank, ncombs):
         params.g0 = g0_s[i]
         params.g_bark = g0_s[i]* g_barks_factor[i]
         params.g1 = g1_s[i]
-        params.anet_max = anet_max[i]
+        params.vmax25 = vmax25s[i]
+        params.jmax25 = jmax25s[i]
 
         # params.psi50_xylem = psi50_xylems[i]
         # params.psi88_xylem = psi50_xylems[i] - psi88_xylems_offset[i]
@@ -103,7 +107,7 @@ def Calculate_parameter_list(rank, ncombs):
         params.stem_flow_type = Stem_Flow_Model_Type.Linear.name
         #params.conductivity_fraction_type = Conductivity_Fraction_Module_Type.Logit
         params.sustain_xylem_damage = True
-        params.sw_rad_max = 972.935
+
 
         plist.Add(params)
     return plist

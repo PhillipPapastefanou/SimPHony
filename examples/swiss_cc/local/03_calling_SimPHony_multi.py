@@ -18,14 +18,13 @@ import numpy as np
 import pandas as pd
 import datetime
 
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(THIS_DIR, os.pardir, os.pardir, os.pardir))
+
 from src.core.py.Parameters import Parameters
 from src.core.py.Parameters import SoilLayer
 from src.core.py.Parameters import Soil_Water_Model_Type
 from src.core.py.Parameters import Convert_Soil_Parameters
-
-THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(THIS_DIR, os.pardir, os.pardir, os.pardir))
-
 from src.contrib.auxil.files import get_SimPHony_build_path
 from src.contrib.auxil.files import get_forcing_filepath_swiss_cc
 from src.contrib.auxil.files import get_trees_psi_leaf_folder_path_cc
@@ -200,6 +199,7 @@ for i in range_dead:
     ax.set_ylabel('RMSE')
     x += 1
 
+os.makedirs(os.path.join(THIS_DIR, 'plt'),exist_ok=True)
 plt.savefig(os.path.join(THIS_DIR, 'plt', "03_FIT.png"))
 
 

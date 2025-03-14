@@ -36,7 +36,7 @@ TEST(General_tests, Assimilation_Farquar_phot)
     double vmax25 = 43;
     double jmax = 71;
 
-    assimilation.Update_photosynthesis(ppfd, ca_ppm, gs, tair, vmax25, jmax);
+    assimilation.Update_photosynthesis(ppfd, ca_ppm, gs, tair);
 
 }
 
@@ -74,7 +74,7 @@ TEST(General_tests, Assimilation_Farquar_gs_phot)
 
     for (int i = 0; i < 500; i=i+10) {
         ppfd = i * SW_2_PAR;
-        assimilation.Solve_Anet_gs(ppfd,ca_ppm,vpd,tair,vmax25, jmax,beta);
+        assimilation.Solve_Anet_gs(ppfd, ca_ppm, vpd, tair, beta);
 
         std::cout << i <<  " " << assimilation.Get_Gs() << std::endl;
 
