@@ -41,7 +41,7 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
     sel_cols = []
     slicer = Subslicer(array=sample)
 
-    k_soil_sats_logs = rescale(slicer.get(), min=-8.5, max = -6.5)
+    k_soil_sats_logs = rescale(slicer.get(), min=-8.5, max = -7.3)
     psi_soil_sats = rescale(slicer.get(), min=-0.025, max = -0.011) # 1 sigma
     #psi_soil_sats = rescale(slicer.get(), min=-0.035, max = -0.007)  # 2 sigmas
     psi_soil_sats *= MPA_TO_HHEAD

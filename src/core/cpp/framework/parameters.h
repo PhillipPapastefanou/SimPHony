@@ -184,7 +184,7 @@ public:
     double max_psi_leaf_change_per_hour = 5.0;
     // Multiplier to estimate the minimum leaf water potential
     // psi_leaf_min = muliplier x psi_88
-    double minimum_psi_leaf_multiplier = 2.0;
+    double minimum_psi_leaf_multiplier = 1.5;
 
     // Todo connect to solvers
     double solver_precision = 1E-10;

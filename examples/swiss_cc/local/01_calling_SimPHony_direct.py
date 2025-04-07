@@ -56,7 +56,7 @@ params = Parameters()
 
 nsoil_layers = 3
 layer = SoilLayer()
-layer.k_soil_sat = 0.1 / 100.0 / 86400.0
+layer.k_soil_sat =7.2* 0.1 / 100.0 / 86400.0
 layer.psi_soil_sat = -0.022 * 1000/9.81
 # layer.camp_b  = 10.4
 layer.theta_s = 0.6
@@ -77,9 +77,9 @@ Convert_Soil_Parameters(soil_layers=soil_layers, parameters=params)
 
 params.canopy_height = 35
 params.huber_value = 1.0 / 3000.0
-params.k_xylem_sat = 3.0 * 1000/18.0
+params.k_xylem_sat = 6.0 * 1000/18.0
 params.stem_hydraulic_capacitance = 100.0 * 1000 / 18
-params.leaf_hydraulic_capacitance = 0.01 * 1000 / 18
+params.leaf_hydraulic_capacitance = 0.1 * 1000 / 18
 params.g_bark = 0.001
 params.g0 = 0.01
 params.g1 = 1.5
@@ -143,6 +143,6 @@ std_plot(df = df,
          path = os.path.join(THIS_DIR, 'plt','01_std_plot.png'))
 
 std_plot(df = df,
-         timebegin="2018-07-01 00:00:00",
-         timeend="2018-07-02 00:00:00",
+         timebegin="2018-07-30 00:00:00",
+         timeend="2018-08-06  00:00:00",
          path = os.path.join(THIS_DIR, 'plt','01_std_plot_jul.png'))

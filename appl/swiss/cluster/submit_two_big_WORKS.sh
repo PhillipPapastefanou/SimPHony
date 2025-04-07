@@ -7,7 +7,7 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=papa@tum.de
 #SBATCH --export=NONE
-#SBATCH --time=24:00:00
+#SBATCH --time=128:00:00
 #SBATCH --nodes=2
 #SBATCH --ntasks=256
 #SBATCH --partition='big'
@@ -25,4 +25,4 @@ which python
 
 export FI_PROVIDER=tcp
 
-mpiexec -n 256 python3 -u swiss_cc_mpi_cluster_LHS.py
+mpiexec -n 256 python3 -u swiss_cc_mpi_cluster_EX_CON.py

@@ -57,7 +57,7 @@ class Parameters:
         self.max_psi_leaf_change_per_hour = 1.0;
         # Multiplier to estimate the minimum leaf water potential
         # psi_leaf_min = minimum_psi_leaf_multiplier x psi_88 [-]
-        self.minimum_psi_leaf_multiplier = 4.0;
+        self.minimum_psi_leaf_multiplier = 1.75;
         # Mathematical shape how the loss of conductivity function is calculated
         self.conductivity_fraction_type = Conductivity_Fraction_Module_Type.Weibull.name
 

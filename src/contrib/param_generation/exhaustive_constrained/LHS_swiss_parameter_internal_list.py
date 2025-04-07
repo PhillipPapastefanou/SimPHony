@@ -46,10 +46,10 @@ def Calculate_parameter_list(rank, ncombs):
     g0_s            = rescale(slicer.get(), min=0.001, max = 0.002)
     g1_s            = rescale(slicer.get(), min =1.0, max = 10.0)
     g_barks_factor    = rescale(slicer.get(), min = 0.0, max = 1)
-    k_xylems_sats   = rescale(slicer.get(), min = 0.5, max= 10.0)
+    k_xylems_sats   = rescale(slicer.get(), min = 3, max= 8.0)
     k_xylems_sats *= KG_TO_MOL
     huber_values    = rescale(slicer.get(), min = 1/4500, max= 1/1200)
-    cstem_s         = rescale(slicer.get(), min = 10, max=600)
+    cstem_s         = rescale(slicer.get(), min = 10, max=120)
     cstem_s *= KG_TO_MOL
     
     vmax25s         = rescale(slicer.get(), min = 30, max = 50)

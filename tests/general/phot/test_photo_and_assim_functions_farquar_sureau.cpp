@@ -1,9 +1,6 @@
 //
 // Created by Phillip on 11/03/2025.
 //
-//
-// Created by Phillip on 04/09/2024.
-//
 #include <iostream>
 #include "gtest/gtest.h"
 #include "../../../src/core/cpp/framework/parameters.h"

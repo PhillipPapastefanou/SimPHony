@@ -34,9 +34,9 @@ def std_plot(df : pd.DataFrame, timebegin, timeend, path):
     ax.xaxis.set_major_formatter(formatter)
 
     ax = fig.add_subplot(3, 3, 4)
-    ax.plot(df_slice['psiLeaf'], label='Leaf')
-    ax.plot(df_slice['psiStem'], label='Stem')
-    ax.plot(df_slice['psiSoilUp'], label='SoilT')
+    ax.plot(df_slice['psiLeaf'], label='Leaf', c ='tab:green')
+    ax.plot(df_slice['psiStem'], label='Stem', c ='tab:orange')
+    ax.plot(df_slice['psiSoilUp'], label='SoilT', c ='tab:brown')
     ax.legend()
     ax.set_ylabel("Water potential [MPa]")
     ax.set_xlabel("Time")

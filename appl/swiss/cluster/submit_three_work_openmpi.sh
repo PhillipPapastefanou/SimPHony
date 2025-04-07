@@ -29,4 +29,4 @@ export FI_PROVIDER=tcp
 
 #mpiexec -n 00 -mca btl openib,self python3 swiss_cc_mpi_cluster_LHS.py
 #mpiexec -n 100 -mca btl self,tcp python3 swiss_cc_mpi_cluster_LHS.py
-mpiexec -n 192 /Net/Groups/BSI/work_scratch/ppapastefanou/envs/SimPHony_intel_openmpi/bin/python swiss_cc_mpi_cluster_LHS.py
+mpiexec -n 192 /Net/Groups/BSI/work_scratch/ppapastefanou/envs/SimPHony_intel_openmpi/bin/python swiss_cc_mpi_cluster_EX_CON.py

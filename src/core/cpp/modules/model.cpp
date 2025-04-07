@@ -120,7 +120,7 @@ void Model::Run(DateTime begin, DateTime end) {
 
         const double vpd_kPa = ivpd / 1000.0;
 
-        assimilation.Solve_Anet_gs(isw_down*2.0 * 0.3, ica, vpd_kPa, itemp_air,  beta);
+        assimilation.Solve_Anet_gs(isw_down * 2.0 * 0.2, ica, vpd_kPa, itemp_air,  beta);
 
         const double gs = assimilation.Get_Gs();
 
