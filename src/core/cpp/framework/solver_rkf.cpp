@@ -80,7 +80,7 @@ double Solver_RKF::d_psi_stem_ground(double psi_leaf, double psi_stem) {
     return ((G - J) / (params.stem_hydraulic_capacitance_max * params.canopy_height * params.huber_value));
 }
 
-void Solver_RKF::Update_water_potentials() {
+void Solver_RKF::Update_water_potentials(DateTime time) {
 
     dts_remain = dts;
     h = (int)dts/10.0;

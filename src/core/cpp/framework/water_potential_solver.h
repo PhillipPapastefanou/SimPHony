@@ -26,7 +26,7 @@ public:
 
 
     virtual void Init_solver() = 0;
-    virtual void Update_water_potentials() = 0;
+    virtual void Update_water_potentials(DateTime dt) = 0;
     virtual double Get_beta() = 0;
 
     void Update_output(Output& output);

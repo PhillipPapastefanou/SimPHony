@@ -6,7 +6,7 @@
 #include <iostream>
 
 
-void Solver_2D::Update_water_potentials() {
+void Solver_2D::Update_water_potentials(DateTime time) {
 
     // If we have an extremely unrealistic leaf water potential, stop the solver
     // Plant is assumed to be dead

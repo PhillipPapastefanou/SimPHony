@@ -15,7 +15,7 @@ class Solver_Indiv_Euler_Imp: public Water_Potential_Solver{
 public:
     Solver_Indiv_Euler_Imp(const Parameters& params);
     void Init_solver() override;
-    void Update_water_potentials() override;
+    void Update_water_potentials(DateTime time) override;
     double Get_beta() override;
 
     double psi_stem_root(double psi_stem_target);

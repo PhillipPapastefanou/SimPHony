@@ -10,7 +10,7 @@ Solver_Indiv_Euler_Imp::Solver_Indiv_Euler_Imp(const Parameters &params) : Water
     beta_stom_cond = 1.0;
 }
 
-void Solver_Indiv_Euler_Imp::Update_water_potentials() {
+void Solver_Indiv_Euler_Imp::Update_water_potentials(DateTime time) {
 
     // Within the standard routine, we calculate J based on leaf water potential and then
     // use the fixed J for the stem water potential routine
@@ -45,7 +45,16 @@ void Solver_Indiv_Euler_Imp::Update_water_potentials() {
 
     // Update_photosythesis beta parameter that rescales stomatal conductance
     // beta = 0 -> stomata closed; beta = 1 -> stomata fully open
-    beta_stom_cond = std::exp(-1.0 * std::exp(-1.0 *params.d_50_close*(psi_leaf - psi_gomp_50)));
+
+    const int hour = time.hour;
+    const int min = time.min;
+    
+    if ((hour == 4) &&(min < 10)){
+        beta_stom_cond = std::exp(-1.0 * std::exp(-1.0 *params.d_50_close*(psi_leaf - psi_gomp_50)));
+    }
+    if ((hour == 12) &&(min < 10)){
+        beta_stom_cond = std::exp(-1.0 * std::exp(-1.0 *params.d_50_close*(psi_leaf - psi_gomp_50)));
+    }
 
     if (params.verbose){
         std::cout << " Psi leaf  " << psi_leaf;

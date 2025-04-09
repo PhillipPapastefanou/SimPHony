@@ -14,7 +14,7 @@ public:
     ~Solver_RKF();
 
     void Init_solver() override;
-    void Update_water_potentials() override;
+    void Update_water_potentials(DateTime time) override;
 
 
     /// Derivative of the leaf water potential. Internal function [MPa s-1]

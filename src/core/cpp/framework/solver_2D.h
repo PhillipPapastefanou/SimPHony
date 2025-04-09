@@ -12,7 +12,7 @@ class Solver_2D: public Water_Potential_Solver {
 public:
     Solver_2D(const Parameters& params);
     void Init_solver() override;
-    void Update_water_potentials() override;
+    void Update_water_potentials(DateTime time) override;
 
 protected:
 

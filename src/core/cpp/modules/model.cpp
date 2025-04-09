@@ -99,6 +99,8 @@ void Model::Run(DateTime begin, DateTime end) {
 
     for (int i = 0; i < nsteps; ++i) {
 
+        DateTime time_current = time_start.AddSeconds(ts);
+
         // Update_photosythesis forcing drivers
         ica = 415.0;
         ipressure = 1.013 * 100000.0;
@@ -125,7 +127,7 @@ void Model::Run(DateTime begin, DateTime end) {
         const double gs = assimilation.Get_Gs();
 
         water_potential_solver->Update_input(ipsi_soil, ik_soil, gs , ivpd, ipressure);
-        water_potential_solver->Update_water_potentials();
+        water_potential_solver->Update_water_potentials(time_current);
 
 
         // Adding variables to up output files
