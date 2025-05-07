@@ -30,7 +30,7 @@ root_path = "/Users/pp/data/Simulations/A08_SimPHony/swiss"
 scenario = ""
 
 setup = Setup()
-setup.Apply_default_swiss(Swiss_soil_water_input_type.NLayers_Indiv)
+setup.Apply_default_swiss(Swiss_soil_water_input_type.NLayers_Mean_One_Std)
 setup.Apply_default_paths(root_path, scenario)
 #setup.config.parameters_list_file = os.path.join(setup.config.post_path, "parameters_best_mean_alive.csv")
 setup.config.config_file = os.path.join(THIS_DIR, "config_py.txt")
@@ -56,12 +56,12 @@ params = Parameters()
 
 nsoil_layers = 3
 layer = SoilLayer()
-layer.k_soil_sat =7.2* 0.1 / 100.0 / 86400.0
+layer.k_soil_sat =60.0* 0.1 / 100.0 / 86400.0
 layer.psi_soil_sat = -0.022 * 1000/9.81
 # layer.camp_b  = 10.4
 layer.theta_s = 0.6
-layer.theta_r = 0.15
-layer.pore_size_ind = 0.35
+layer.theta_r = 0.0
+layer.pore_size_ind = 0.5
 
 # Copy the soil layer and assume all layers have the same properties...
 soil_layers = []
@@ -76,15 +76,16 @@ soil_layers[2].depth = 0.4
 Convert_Soil_Parameters(soil_layers=soil_layers, parameters=params)
 
 params.canopy_height = 35
-params.huber_value = 1.0 / 3000.0
-params.k_xylem_sat = 6.0 * 1000/18.0
-params.stem_hydraulic_capacitance = 100.0 * 1000 / 18
-params.leaf_hydraulic_capacitance = 0.1 * 1000 / 18
-params.g_bark = 0.001
-params.g0 = 0.01
-params.g1 = 1.5
+#params.canopy_height = 15
+params.huber_value = 1.0 / 4000.0
+params.k_xylem_sat = 15.0 * 1000/18.0
+params.stem_hydraulic_capacitance = 15.0 * 1000 / 18
+params.leaf_hydraulic_capacitance = 0.25 * 1000 / 18
+params.g_bark = 0.0
+params.g0 = 0.007
+params.g1 = 4.0
 params.leaf_area_index = 4.8
-params.psi_leaf_50_close = -2.1
+params.psi_leaf_50_close = -1.0
 params.d_50_close = 2.0
 params.psi50_xylem = -3.5;
 params.psi88_xylem = -5.5;
@@ -93,10 +94,11 @@ params.jackson_root_beta = 0.96
 params.tree_density = 34.0 / 10000.0
 params.jmax25 = 71
 params.vmax25 = 42
+params.permanent_xylem_fraction_threshold=True
 params.soil_water_model_type = Soil_Water_Model_Type.VanGenuchten.name
 
 #params.wcont_sigma_deviation = 1.2
-params.wcont_sigma_deviation = 0
+params.wcont_sigma_deviation = 0.0
 params.soil_profile_index = 2
 
 cparameters = params.Create_CParameters(soil_layers=soil_layers)
@@ -143,6 +145,6 @@ std_plot(df = df,
          path = os.path.join(THIS_DIR, 'plt','01_std_plot.png'))
 
 std_plot(df = df,
-         timebegin="2018-07-30 00:00:00",
-         timeend="2018-08-06  00:00:00",
+         timebegin="2018-06-20 00:00:00",
+         timeend="2018-07-01  00:00:00",
          path = os.path.join(THIS_DIR, 'plt','01_std_plot_jul.png'))

@@ -49,12 +49,12 @@ void Solver_Indiv_Euler_Imp::Update_water_potentials(DateTime time) {
     const int hour = time.hour;
     const int min = time.min;
     
-    if ((hour == 4) &&(min < 10)){
+    if ((hour == 5) &&(min < 10)){
         beta_stom_cond = std::exp(-1.0 * std::exp(-1.0 *params.d_50_close*(psi_leaf - psi_gomp_50)));
     }
-    if ((hour == 12) &&(min < 10)){
-        beta_stom_cond = std::exp(-1.0 * std::exp(-1.0 *params.d_50_close*(psi_leaf - psi_gomp_50)));
-    }
+    // if ((hour == 12) &&(min < 10)){
+    //     beta_stom_cond = std::exp(-1.0 * std::exp(-1.0 *params.d_50_close*(psi_leaf - psi_gomp_50)));
+    // }
 
     if (params.verbose){
         std::cout << " Psi leaf  " << psi_leaf;

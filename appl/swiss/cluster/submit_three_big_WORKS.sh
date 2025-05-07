@@ -7,7 +7,7 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=papa@tum.de
 #SBATCH --export=NONE
-#SBATCH --time=72:00:00
+#SBATCH --time=120:00:00
 #SBATCH --nodes=3
 #SBATCH --ntasks=384
 #SBATCH --partition='big'
