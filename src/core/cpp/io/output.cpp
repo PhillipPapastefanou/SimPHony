@@ -25,6 +25,10 @@ void Output::Add_G(double G) {
     Ga.push_back(G);
 }
 
+void Output::Add_O(double O) {
+    Oa.push_back(O);
+}
+
 void Output::Add_G_indiv(vector<float> G_indiv) {
     Gaa.push_back(G_indiv);
 }
@@ -43,8 +47,12 @@ void Output::Add_J_adapted_density(double J) {
     Ja_adapted.push_back(J_adapted);
 }
 
-void Output::Add_psi_stem_ground(float psi_root) {
-    psi_stem_ground_a.push_back(psi_root);
+void Output::Add_psi_sap_ground(float psi_root) {
+    psi_sap_ground_a.push_back(psi_root);
+}
+
+void Output::Add_psi_heart_ground(float psi_root) {
+    psi_heart_ground_a.push_back(psi_root);
 }
 
 void Output::Add_psi_stems_seg(vector<float> psi_stem_seg) {
@@ -99,11 +107,14 @@ const vector<float> &Output::Get_J() const {
     return Ja;
 }
 
-
-
 const vector<float> &Output::Get_G() const {
     return Ga;
 }
+
+const vector<float> &Output::Get_O() const {
+    return Oa;
+}
+
 
 const vector<vector<float>> &Output::Get_G_indiv() const {
     return Gaa;
@@ -113,8 +124,12 @@ const vector<float> &Output::Get_psi_leaf() const {
     return psi_leaf_a;
 }
 
-const vector<float> &Output::Get_psi_stem() const {
-    return psi_stem_ground_a;
+const vector<float> &Output::Get_psi_sap() const {
+    return psi_sap_ground_a;
+}
+
+const vector<float> &Output::Get_psi_heart() const {
+    return psi_heart_ground_a;
 }
 
 const vector<vector<float> > &Output::Get_psi_soil_indiv() const {
@@ -198,8 +213,10 @@ void Output::Clear() {
     Ja_adapted.clear();
     Ga.clear();
     Gaa.clear();
+    Oa.clear();
     psi_leaf_a.clear();
-    psi_stem_ground_a.clear();
+    psi_sap_ground_a.clear();
+    psi_heart_ground_a.clear();
     psi_stem_a.clear();
     psi_soil_aa.clear();
     gs_a.clear();

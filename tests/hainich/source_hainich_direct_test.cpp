@@ -32,7 +32,7 @@ TEST(Hainich_tests, Apply_model_direct) {
     params.k_xylem_sat = 5 * 1000 / 18.0;
     params.stem_hydraulic_capacitance_max = 150 * 1000 / 18.0;
     params.leaf_hydraulic_capacitance = 0.01 *1000/18.0;
-    params.g_bark = 0.01;
+    params.g_stem_res = 0.01;
     params.g0 = 0.005;
     params.g1 = 1.5;
     params.leaf_area_index = 4.8;

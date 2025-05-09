@@ -130,7 +130,13 @@ class Parameters:
 
         # Minimum bark conductance
         # Todo add unit
-        self.g_bark = 0.0
+        self.g_stem_res = 0.0
+        
+        # Conductivity/Diffusivity of the heart to sapwood 
+        self.k_heart_sap = 0.0
+        
+        # Ratio of heartwood to sapwood area
+        self.ratio_heart_sap_area = 3.0
 
         # Soil depths
         self.soil_depths = np.repeat(0.1, 3);
@@ -284,7 +290,7 @@ class Parameters:
         cparameters.d_50_close = self.d_50_close
         cparameters.g0 = self.g0
         cparameters.g1 = self.g1
-        cparameters.g_bark = self.g_bark
+        cparameters.g_stem_res = self.g_stem_res
         cparameters.jackson_root_beta = self.jackson_root_beta
         cparameters.wcont_sigma_deviation = self.wcont_sigma_deviation
         cparameters.dts_input = self.dts_input
@@ -301,6 +307,8 @@ class Parameters:
         cparameters.soil_profile_index = self.soil_profile_index
         cparameters.vmax25 = self.vmax25
         cparameters.jmax25 = self.jmax25
+        cparameters.k_heart_sap = self.k_heart_sap
+        cparameters.ratio_heart_sap_area = self.ratio_heart_sap_area
 
         return cparameters
 

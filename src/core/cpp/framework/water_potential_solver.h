@@ -53,10 +53,16 @@ protected:
     /// Main states
     /// Leaf water potential at average canopy height [MPa]
     double psi_leaf;
-    /// Root water potential at the bottom of the stem [MPa]
-    double psi_stem_ground;
+    /// Sapwood stem water potential at the bottom of the stem [MPa]
+    double psi_sap_ground;
+    /// Heartwood stem water potential at the bottom of the stem [MPa]
+    double psi_heart_ground;
 
+    
+    
+    /// Leaf water potential of previous timeste [MPa]
     double psi_leaf_prev_ts;
+    /// Stem water potential at the bottom of the stem previous timestep [MPa]
     double psi_stem_ground_prev_ts;
 
     /// Stem water potential segments between stem ground and canopy [MPa]
@@ -65,14 +71,16 @@ protected:
 
     /// Transpirational water flow [mol H2O m-2 s-1]
     double T;
-    /// Stem water flow [mol H2O m-2 s-1]
+    /// Sap water flow [mol H2O m-2 s-1]
     double J;
+    /// Lateral water flow between sapwood and heartwood [mol H2O m-2 s-1]
+    double O;
     /// Total Soil water uptake flow [mol H2O m-2 s-1]
     double G;
-    ///  soil water uptake per layer [mol H2O m-2 s-1]
+    /// Soil water uptake per layer [mol H2O m-2 s-1]
     std::vector<double> Gi;
-    /// Bark water loss [mol H2O m-2 s-1]
-    double T_G;
+    /// Residual water loss [mol H2O m-2 s-1]
+    double T_res;
 
 
     /// Model input

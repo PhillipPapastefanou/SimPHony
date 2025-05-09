@@ -78,17 +78,21 @@ Convert_Soil_Parameters(soil_layers=soil_layers, parameters=params)
 params.canopy_height = 35
 #params.canopy_height = 15
 params.huber_value = 1.0 / 4000.0
-params.k_xylem_sat = 15.0 * 1000/18.0
-params.stem_hydraulic_capacitance = 15.0 * 1000 / 18
+params.k_xylem_sat = 2.0 * 1000/18.0
+params.stem_hydraulic_capacitance =60.0 * 1000 / 18
 params.leaf_hydraulic_capacitance = 0.25 * 1000 / 18
-params.g_bark = 0.0
-params.g0 = 0.007
+params.g_stem_res = 0.0
+params.ratio_heart_sap_area = 3.0
+params.k_heart_sap = 0.0001
+#params.k_heart_sap = 0.001
+
+params.g0 = 0.0025
 params.g1 = 4.0
 params.leaf_area_index = 4.8
-params.psi_leaf_50_close = -1.0
+params.psi_leaf_50_close = -1.5
 params.d_50_close = 2.0
-params.psi50_xylem = -3.5;
-params.psi88_xylem = -5.5;
+params.psi50_xylem = -3.5
+params.psi88_xylem = -5.5
 params.root_area_index = 4.5
 params.jackson_root_beta = 0.96
 params.tree_density = 34.0 / 10000.0
@@ -96,6 +100,8 @@ params.jmax25 = 71
 params.vmax25 = 42
 params.permanent_xylem_fraction_threshold=True
 params.soil_water_model_type = Soil_Water_Model_Type.VanGenuchten.name
+
+#params.verbose = True
 
 #params.wcont_sigma_deviation = 1.2
 params.wcont_sigma_deviation = 0.0

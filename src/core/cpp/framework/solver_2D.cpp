@@ -18,7 +18,7 @@ void Solver_2D::Update_water_potentials(DateTime time) {
 
         if (params.verbose){
             std::cout << "Psi leaf  " << psi_leaf;
-            std::cout << " Psi stem ground  " << psi_stem_ground  << std::endl;
+            std::cout << " Psi stem ground  " << psi_sap_ground  << std::endl;
 
             std::cout <<   "T: " << T;
             std::cout << "  J: " << J;
@@ -44,7 +44,7 @@ void Solver_2D::Update_water_potentials(DateTime time) {
 
     if (params.verbose) {
         std::cout << "Psi leaf  " << psi_leaf;
-        std::cout << " Psi stem ground  " << psi_stem_ground << std::endl;
+        std::cout << " Psi stem ground  " << psi_sap_ground << std::endl;
 
         std::cout <<   "T: " << T;
         std::cout << "  J: " << J;
@@ -84,7 +84,7 @@ double Solver_2D::d_psi_leaf(double psi_leaf, double psi_stem) {
     // Calculate transpiration
     T = gs * params.leaf_area_index * vpd / pressure;
 
-    std::cout << this->psi_leaf << " " << psi_stem_ground << std::endl;
+    std::cout << this->psi_leaf << " " << psi_sap_ground << std::endl;
     std::cout << T << " " << J << " " << G << std::endl;
 
     // Return the derivative of the leaf water potential

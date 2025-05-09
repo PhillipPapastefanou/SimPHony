@@ -69,6 +69,7 @@ PYBIND11_MODULE(SimPHony, handle){
             def("Get_J", &Output::Get_J).
             def("Get_G", &Output::Get_G).
             def("Get_G_indiv", &Output::Get_G_indiv).
+            def("Get_O", &Output::Get_O).
 
             def("Get_G_per_sap", &Output::Get_G_per_sap).
             def("Get_J_per_sap", &Output::Get_J_per_sap).
@@ -76,7 +77,8 @@ PYBIND11_MODULE(SimPHony, handle){
             def("Get_J_per_area", &Output::Get_J_per_area).
 
             def("Get_psi_leaf", &Output::Get_psi_leaf).
-            def("Get_psi_stem", &Output::Get_psi_stem).
+            def("Get_psi_sap", &Output::Get_psi_sap).
+            def("Get_psi_heart", &Output::Get_psi_heart).
             def("Get_psi_soil_indiv", &Output::Get_psi_soil_indiv).
 
             def("Get_gs", &Output::Get_gs).
@@ -170,7 +172,7 @@ PYBIND11_MODULE(SimPHony, handle){
             def_readwrite("g1", &Parameters::g1).
             def_readwrite("vmax25", &Parameters::vmax25).
             def_readwrite("jmax25", &Parameters::jmax25).
-            def_readwrite("g_bark", &Parameters::g_bark).
+            def_readwrite("g_stem_res", &Parameters::g_stem_res).
             def_readwrite("jackson_root_beta", &Parameters::jackson_root_beta).
             def_readwrite("wcont_sigma_deviation", &Parameters::wcont_sigma_deviation).
             def_readwrite("dts_input", &Parameters::dts_input).
@@ -183,6 +185,8 @@ PYBIND11_MODULE(SimPHony, handle){
             def_readwrite("minimum_psi_leaf_multiplier", &Parameters::minimum_psi_leaf_multiplier).
             def_readwrite("solver_precision", &Parameters::solver_precision).
             def_readwrite("verbose", &Parameters::verbose).
+            def_readwrite("k_heart_sap", &Parameters::k_heart_sap).
+            def_readwrite("ratio_heart_sap_area", &Parameters::ratio_heart_sap_area).
             def_readwrite("dts", &Parameters::dts).
             def(py::init<>());
 

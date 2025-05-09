@@ -35,7 +35,8 @@ def std_plot(df : pd.DataFrame, timebegin, timeend, path):
 
     ax = fig.add_subplot(3, 3, 4)
     ax.plot(df_slice['psiLeaf'], label='Leaf', c ='tab:green')
-    ax.plot(df_slice['psiStem'], label='Stem', c ='tab:orange')
+    ax.plot(df_slice['psiSap'], label='Sap', c ='tab:orange')
+    ax.plot(df_slice['psiHeart'], label='Heart', c ='tab:red')
     ax.plot(df_slice['psiSoilUp'], label='SoilT', c ='tab:brown')
     ax.legend()
     ax.set_ylabel("Water potential [MPa]")
@@ -46,6 +47,7 @@ def std_plot(df : pd.DataFrame, timebegin, timeend, path):
     ax = fig.add_subplot(3, 3, 5)
     ax.plot(df_slice['T'], label='T', c='tab:blue')
     ax.plot(df_slice['J'], label='J', c='tab:orange')
+    ax.plot(df_slice['O'], label='O', c='tab:red')
     ax.plot(df_slice['G'], label='G', c='black')
     ax.legend()
     ax.set_ylabel("Water flows")

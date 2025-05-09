@@ -26,14 +26,15 @@ void Solver_Indiv_Euler_Imp::Update_water_potentials(DateTime time) {
         T = 0.0;
         J = 0.0;
         G = 0.0;
+        O = 0.0;
     }
 
     // Regular solver solver routine
     else {
         update_psi_leaf();
-
         if (psi_leaf > min_leaf_water_potential + 0.5){
             update_psi_stem_ground();
+            update_psi_heart();
         }
 
     }
@@ -41,28 +42,28 @@ void Solver_Indiv_Euler_Imp::Update_water_potentials(DateTime time) {
     stem_flow_module->Update_min_conductivity_fractions();
 
     psi_leaf_prev_ts = psi_leaf;
-    psi_stem_ground_prev_ts = psi_stem_ground;
+    psi_stem_ground_prev_ts = psi_sap_ground;
 
-    // Update_photosythesis beta parameter that rescales stomatal conductance
-    // beta = 0 -> stomata closed; beta = 1 -> stomata fully open
-
+    // Obtain local time of the day
     const int hour = time.hour;
     const int min = time.min;
     
+    // Update_photosythesis beta parameter that rescales stomatal conductance
+    // beta = 0 -> stomata closed; beta = 1 -> stomata fully open
+    // We're only calling the stom opening hour once per day in the morning to avoid
+    // double accounting effects of VPD on gs
     if ((hour == 5) &&(min < 10)){
         beta_stom_cond = std::exp(-1.0 * std::exp(-1.0 *params.d_50_close*(psi_leaf - psi_gomp_50)));
     }
-    // if ((hour == 12) &&(min < 10)){
-    //     beta_stom_cond = std::exp(-1.0 * std::exp(-1.0 *params.d_50_close*(psi_leaf - psi_gomp_50)));
-    // }
 
     if (params.verbose){
         std::cout << " Psi leaf  " << psi_leaf;
-        std::cout << " Psi stem ground  " << psi_stem_ground << std::endl;
+        std::cout << " Psi sap ground  " << psi_sap_ground << std::endl;
+        std::cout << " Psi heart ground  " << psi_heart_ground << std::endl;
         std::cout <<   "T : " << T;
         std::cout <<   " J : " << J;
         std::cout << " G: " << G << std::endl;
-        std::cout << " T_G: " << T_G << std::endl;
+        std::cout << " T_G: " << T_res << std::endl;
         std::cout <<   " VPD : " << vpd ;
         std::cout <<   " gs : " << gs ;
         std::cout << " psi_soil: " << psi_soil_sl[0]*params.constants.HydraulicHeadInMtoMPa;
@@ -91,11 +92,11 @@ void Solver_Indiv_Euler_Imp::Init_solver() {
 
 double Solver_Indiv_Euler_Imp::psi_stem_root(double psi_stem_target) {
     double d_psi_stem_rec = d_psi_stem_ground(psi_leaf, psi_stem_target);
-    return psi_stem_ground + d_psi_stem_rec * dts - psi_stem_target;
+    return psi_sap_ground + d_psi_stem_rec * dts - psi_stem_target;
 }
 
 double Solver_Indiv_Euler_Imp::psi_leaf_root(double psi_leaf_target) {
-    double d_psi_leaf_rec = d_psi_leaf(psi_leaf_target, psi_stem_ground);
+    double d_psi_leaf_rec = d_psi_leaf(psi_leaf_target, psi_sap_ground);
     return psi_leaf + d_psi_leaf_rec * dts - psi_leaf_target;
 }
 
@@ -146,11 +147,14 @@ double Solver_Indiv_Euler_Imp::d_psi_stem_ground(double psi_leaf, double psi_ste
         G += Gi[s];
     }
 
-    // Bark water loss
-    T_G = params.g_bark * vpd / pressure;
+    // Residual water loss
+    T_res = params.g_stem_res * vpd / pressure;
+
+    // Lateral water flow
+    O = (psi_heart_ground - psi_stem) * params.k_heart_sap;
 
     // Return the derivative of the stem water potential
-    return ((G - J - T_G) / (params.stem_hydraulic_capacitance_max * params.canopy_height * params.huber_value));
+    return ((G - J + O - T_res)  / (params.stem_hydraulic_capacitance_max * params.canopy_height * params.huber_value));
 }
 
 double Solver_Indiv_Euler_Imp::update_transpiration() {
@@ -173,7 +177,7 @@ void Solver_Indiv_Euler_Imp::update_psi_stem_ground() {
 
     // Normal routine: Stem water potential found in rang
     if (converged){
-        psi_stem_ground = solver_psi_stem_ground->Get_solution();
+        psi_sap_ground = solver_psi_stem_ground->Get_solution();
     }
 
 
@@ -190,7 +194,7 @@ void Solver_Indiv_Euler_Imp::update_psi_stem_ground() {
 
         // We found a solution of stem water flow
         if (converged) {
-            psi_stem_ground = solver_psi_stem_ground->Get_solution();
+            psi_sap_ground = solver_psi_stem_ground->Get_solution();
 
             //  Calculate leaf water potential based on J estimated by the stem water potential model
             calc_J_leaf = false;
@@ -210,7 +214,7 @@ void Solver_Indiv_Euler_Imp::update_psi_stem_ground() {
 
                 // Re-estimate psi_stem AND J
                 converged = solver_psi_stem_ground->Solve(psi_leaf, params.constants.MAX_STEM_WATER_POTENTIAL);
-                psi_stem_ground = solver_psi_stem_ground->Get_solution();
+                psi_sap_ground = solver_psi_stem_ground->Get_solution();
 
                 if (!converged) {
                     std::cout << "Could not determine stem water potential between " << psi_leaf << " and ";
@@ -229,7 +233,7 @@ void Solver_Indiv_Euler_Imp::update_psi_stem_ground() {
                         std::cout << "Leaf water potential and stem water potential are very close" << std::endl;
                         std::cout << "Do not update T and G and leave leaf water potential as is" << std::endl;
                         std::cout << "Set J to zero" << std::endl;
-                        psi_stem_ground = psi_stem_ground_prev_ts;
+                        psi_sap_ground = psi_stem_ground_prev_ts;
                         J = 0.0;
                     }
 
@@ -310,6 +314,17 @@ void Solver_Indiv_Euler_Imp::update_psi_stem_ground() {
             }
         }
     }
+
+}
+
+void Solver_Indiv_Euler_Imp::update_psi_heart(){
+
+    const double total_storage = params.stem_hydraulic_capacitance_max *
+     params.huber_value * params.ratio_heart_sap_area * params.canopy_height;
+    
+    // Solution of the differential equation for heartwood (total_storage * dpsi_heart/dt = -  k_heart_sap * (psi_heart - psi_sap))
+    psi_heart_ground = std::exp(-1.0 * params.k_heart_sap * params.dts / total_storage) 
+    * (psi_heart_ground - psi_sap_ground) + psi_sap_ground;
 
 }
 

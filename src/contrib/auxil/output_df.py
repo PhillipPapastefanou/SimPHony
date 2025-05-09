@@ -19,12 +19,14 @@ def create_output_df(output, date_start_str):
     df['ksSoil3'] = np.array(output.Get_ks_soil())[:, 2];
 
     df['psiSoilUp'] = np.array(output.Get_psi_soil_indiv())[:, 0];
-    df['psiStem'] = output.Get_psi_stem()
+    df['psiSap'] = output.Get_psi_sap()
+    df['psiHeart'] = output.Get_psi_heart()
     df['psiLeaf'] = output.Get_psi_leaf()
 
     df['T'] = output.Get_T()
     df['G'] = output.Get_G()
     df['J'] = output.Get_J()
+    df['O'] = output.Get_O()
     df['J_apdated'] = output.Get_J_per_area()
 
     df['Gs'] = output.Get_G_per_sap()

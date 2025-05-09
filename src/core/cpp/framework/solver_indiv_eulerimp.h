@@ -25,6 +25,7 @@ private:
 
     void update_psi_leaf();
     void update_psi_stem_ground();
+    void update_psi_heart();
 
     bool calc_J_leaf;
     bool calc_J_stem;

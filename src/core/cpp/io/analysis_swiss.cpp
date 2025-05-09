@@ -69,7 +69,7 @@ void Analysis_Swiss::run_peak_analysis() {
         slices.push_back(slice);
 
         slice = TimeSlice();
-        slice.Init("psi_stem_" + s, output.Get_psi_stem(), timestart_local,  timeend_local, dts);
+        slice.Init("psi_stem_" + s, output.Get_psi_sap(), timestart_local,  timeend_local, dts);
         slices.push_back(slice);
 
         slice = TimeSlice();

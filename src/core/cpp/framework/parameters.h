@@ -104,6 +104,13 @@ public:
     // Typical ranges cover 1/20000 to 1/2000
     double huber_value = 1.0/3600.0;
 
+    // Heartwood area to sapwoo area ratio [1]
+    double ratio_heart_sap_area = 3.0;
+    // Conductivity or diffusivity between sap and heartwood [mol m-1 s-1 MPa-1]
+    // Todo ensure if its bulk water transport or a diffusive process or both?
+    // Futhermore also take care of all the units and areas this water is flowing through
+    double k_heart_sap = 10.0;
+
     // Xylem water potential at loss of 50% conductivity [MPa]
     double psi50_xylem = -3.5;
     // Xylem water potential at loss of 88% conductivity [MPa]
@@ -123,7 +130,9 @@ public:
     double leaf_area_index = 4.8;
 
     // Leaf water potential at which plants close stomates to 50 % [MPa]
-    double psi_leaf_50_close = -2.1;
+    // Note: This is only evaluated once at typically 5 am. 
+    double psi_leaf_50_close = -1.5;
+
     // Slope parameter of stomatal closure
     // No reference here yet, be careful with the sign
     // Has to be positive
@@ -143,9 +152,9 @@ public:
     double jmax25 = 71;
 
 
-    // Bark condutance [mol m-2 s-1]
+    // Stem residucal condutance [mol m-2 s-1]
     // We have to check how the diameter and the stem surface area will influence that
-    double g_bark = 0.0;
+    double g_stem_res = 0.0;
 
     // Soil water module type [enum]
     Soil_water_module_type soil_water_type = Soil_water_module_type::VanGenuchten;

@@ -23,13 +23,15 @@ public:
     void Add_T(double t);
     void Add_J(double J);
     void Add_G(double G);
+    void Add_O(double O);
 
     void Add_J_adapted_density(double J);
 
     void Add_G_indiv(vector<float> G_indiv);
 
     void Add_psi_leaf(float psi_leaf);
-    void Add_psi_stem_ground(float psi_stem_ground);
+    void Add_psi_sap_ground(float psi_stem_ground);
+    void Add_psi_heart_ground(float psi_stem_ground);
     void Add_psi_stems_seg(vector<float> psi_stem_seg);
     void Add_psi_soil_indiv(vector<float> psi_soil_indiv);
 
@@ -49,6 +51,7 @@ public:
     const vector<float> &Get_T() const;
     const vector<float> &Get_J() const;
     const vector<float> &Get_G() const;
+    const vector<float> &Get_O() const;
 
     vector<float> Get_J_per_sap() const;
     vector<float> Get_G_per_sap() const;
@@ -59,7 +62,9 @@ public:
 
     const vector<float> &Get_psi_leaf() const;
 
-    const vector<float> &Get_psi_stem() const;
+    const vector<float> &Get_psi_sap() const;
+
+    const vector<float> &Get_psi_heart() const;
 
     const vector<vector<float> > &Get_psi_soil_indiv() const;
 
@@ -91,11 +96,13 @@ private:
     vector<float> Ja;
     vector<float> Ja_adapted;
     vector<float> Ga;
+    vector<float> Oa;
 
     vector<vector<float> > Gaa;
 
     vector<float> psi_leaf_a;
-    vector<float> psi_stem_ground_a;
+    vector<float> psi_sap_ground_a;
+    vector<float> psi_heart_ground_a;
     vector<vector<float> > psi_stem_a;
     vector<vector<float> > psi_soil_aa;
 

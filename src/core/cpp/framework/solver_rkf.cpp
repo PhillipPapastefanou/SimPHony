@@ -108,7 +108,7 @@ void Solver_RKF::Update_water_potentials(DateTime time) {
         }
 
         update_psi_leaf();
-        if (psi_leaf_4 > psi_stem_ground){
+        if (psi_leaf_4 > psi_sap_ground){
 
 //            psi_leaf = psi_stem_ground;
 //            update_psi_leaf();
@@ -130,19 +130,19 @@ void Solver_RKF::Update_water_potentials(DateTime time) {
         update_psi_stem_ground();
 
         if (psi_stem_4 > 0.0){
-            psi_stem_ground = psi_leaf_4;
+            psi_sap_ground = psi_leaf_4;
             update_psi_stem_ground();
 
             if (psi_stem_4 > 0.0){
                 // Do not update last vlaue
-                psi_stem_ground = -1E-10;
+                psi_sap_ground = -1E-10;
             }
             else{
-                psi_stem_ground = psi_stem_4;
+                psi_sap_ground = psi_stem_4;
             }
         }
         else{
-            psi_stem_ground = psi_stem_4;
+            psi_sap_ground = psi_stem_4;
         }
 
         dts_remain-= h;
@@ -153,7 +153,7 @@ void Solver_RKF::Update_water_potentials(DateTime time) {
             double x = 3;
         }
         std::cout << "Psi leaf  " << psi_leaf;
-        std::cout << " Psi stem ground  " << psi_stem_ground << std::endl;
+        std::cout << " Psi stem ground  " << psi_sap_ground << std::endl;
     }
 
 }
@@ -163,17 +163,17 @@ void Solver_RKF::Update_water_potentials(DateTime time) {
 double Solver_RKF::update_psi_leaf() {
 
     double dpsi = psi_leaf;
-    const double k1 = h * d_psi_leaf(dpsi, psi_stem_ground);
+    const double k1 = h * d_psi_leaf(dpsi, psi_sap_ground);
     dpsi = psi_leaf + a21 * k1;
-    const double k2 = h * d_psi_leaf(dpsi, psi_stem_ground);
+    const double k2 = h * d_psi_leaf(dpsi, psi_sap_ground);
     dpsi = psi_leaf + a31 * k1 + a32*k2;
-    const double k3 = h * d_psi_leaf(dpsi, psi_stem_ground);
+    const double k3 = h * d_psi_leaf(dpsi, psi_sap_ground);
     dpsi = psi_leaf + a41 * k1 + a42*k2 + a43* k3;
-    const double k4 = h * d_psi_leaf(dpsi, psi_stem_ground);
+    const double k4 = h * d_psi_leaf(dpsi, psi_sap_ground);
     dpsi = psi_leaf + a51* k1 + a52*k2 +a53 * k3 + a54 * k4;
-    const double k5 = h * d_psi_leaf(dpsi, psi_stem_ground);
+    const double k5 = h * d_psi_leaf(dpsi, psi_sap_ground);
     dpsi = psi_leaf + a61 * k1 + a62* k2 + a63 * k3 + a64 * k4 + a65 * k5;
-    const double k6 = h * d_psi_leaf(dpsi, psi_stem_ground);
+    const double k6 = h * d_psi_leaf(dpsi, psi_sap_ground);
 
     psi_leaf_4 = psi_leaf
                               + d1 * k1
@@ -194,26 +194,26 @@ double Solver_RKF::update_psi_leaf() {
 }
 
 double Solver_RKF::update_psi_stem_ground() {
-    double dpsi = psi_stem_ground;
+    double dpsi = psi_sap_ground;
     const double k1 = h * d_psi_stem_ground(psi_leaf, dpsi);
-    dpsi = psi_stem_ground + a21 * k1;
+    dpsi = psi_sap_ground + a21 * k1;
     const double k2 = h * d_psi_stem_ground(psi_leaf, dpsi);
-    dpsi = psi_stem_ground + a31 * k1 + a32*k2;
+    dpsi = psi_sap_ground + a31 * k1 + a32*k2;
     const double k3 = h * d_psi_stem_ground(psi_leaf, dpsi);
-    dpsi = psi_stem_ground + a41 * k1 + a42*k2 + a43* k3;
+    dpsi = psi_sap_ground + a41 * k1 + a42*k2 + a43* k3;
     const double k4 = h * d_psi_stem_ground(psi_leaf, dpsi);
-    dpsi = psi_stem_ground + a51* k1 + a52*k2 +a53 * k3 + a54 * k4;
+    dpsi = psi_sap_ground + a51* k1 + a52*k2 +a53 * k3 + a54 * k4;
     const double k5 = h * d_psi_stem_ground(psi_leaf, dpsi);
-    dpsi = psi_stem_ground + a61 * k1 + a62* k2 + a63 * k3 + a64 * k4 + a65 * k5;
+    dpsi = psi_sap_ground + a61 * k1 + a62* k2 + a63 * k3 + a64 * k4 + a65 * k5;
     const double k6 = h * d_psi_stem_ground(psi_leaf, dpsi);
 
-    psi_stem_4 = psi_stem_ground
+    psi_stem_4 = psi_sap_ground
                               + d1 * k1
                               + d3 * k3
                               + d4 * k4
                               + d5 * k5;
 
-    const double psi_stem_5 = psi_stem_ground
+    const double psi_stem_5 = psi_sap_ground
                               + e1 * k1
                               + e3 * k3
                               + e4 * k4

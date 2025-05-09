@@ -111,7 +111,7 @@ double AnalysisHainich::normal_pdf(double mu, double x) {
 
 void AnalysisHainich::ComparePsiStem(const TimeSeries &time_series) {
 
-    const std::vector<float> psi_stem_raw = output.Get_psi_stem();
+    const std::vector<float> psi_stem_raw = output.Get_psi_sap();
 
     std::vector<double> psi_stem_mod_arr;
     std::vector<double> psi_stem_obs_arr;

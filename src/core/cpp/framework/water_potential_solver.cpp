@@ -18,7 +18,8 @@ Water_Potential_Solver::Water_Potential_Solver(const Parameters& params): params
 void Water_Potential_Solver::Init_water_potentials(double psi_leaf_init, double psi_stem_base_init) {
 
     psi_leaf = psi_leaf_init;
-    psi_stem_ground = psi_stem_base_init;
+    psi_sap_ground = psi_stem_base_init;
+    psi_heart_ground = psi_sap_ground;
 
     psi_leaf_prev_ts = psi_leaf_init;
     psi_stem_ground_prev_ts = psi_stem_base_init;
@@ -80,12 +81,12 @@ void Water_Potential_Solver::Update_input(std::vector<double> psi_soil_sl, std::
 void Water_Potential_Solver::calc_psi_stems() {
 
     // Water potential drop per stem segment
-    double delta_psi_per_segment = (psi_stem_ground - psi_leaf) / params.n_stem_segments;
+    double delta_psi_per_segment = (psi_sap_ground - psi_leaf) / params.n_stem_segments;
 
     for (int n = 0; n < params.n_stem_segments; ++n) {
         // Calculate lower and upper water potential of each segment
-        const double psi_lower_seg = psi_stem_ground - n * delta_psi_per_segment;
-        const double psi_upper_seg = psi_stem_ground - (n + 1) * delta_psi_per_segment;
+        const double psi_lower_seg = psi_sap_ground - n * delta_psi_per_segment;
+        const double psi_upper_seg = psi_sap_ground - (n + 1) * delta_psi_per_segment;
 
         // Calculate the average water potential between segments [MPa]
         double psi_avg_seg = (psi_lower_seg + psi_upper_seg) / 2.0;
@@ -100,6 +101,7 @@ void Water_Potential_Solver::Update_output(Output &output) {
     output.Add_J(J);
     output.Add_J_adapted_density(J);
     output.Add_G(G);
+    output.Add_O(O);
 
     vector<float> Gi_f(Gi.begin(), Gi.end());
     for (auto& e: Gi_f)
@@ -107,7 +109,8 @@ void Water_Potential_Solver::Update_output(Output &output) {
 
     output.Add_G_indiv(Gi_f);
     output.Add_psi_leaf(psi_leaf);
-    output.Add_psi_stem_ground(psi_stem_ground);
+    output.Add_psi_sap_ground(psi_sap_ground);
+    output.Add_psi_heart_ground(psi_heart_ground);
 
     vector<float> psi_stems_f(psi_stem_segments.begin(), psi_stem_segments.end());
     output.Add_psi_stems_seg(psi_stems_f);
