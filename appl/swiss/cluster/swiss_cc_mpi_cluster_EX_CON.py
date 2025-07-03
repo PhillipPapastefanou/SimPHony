@@ -13,17 +13,18 @@ from src.contrib.auxil.output_df import create_output_df
 from src.contrib.config import Config, Swiss_soil_water_input_type
 
 root_path = "/Net/Groups/BSI/scratch/ppapastefanou/simulations/SimPHony/swiss_cc"
-scenario = "02_ex_con_2025_full_wide_ltor_beta_2times"
+scenario = "09_ex_con_2025_full_logit_mean_one"
 
 setup = Setup()
-setup.Apply_default_swiss(Swiss_soil_water_input_type.NLayers_Mean_N_Std)
+setup.Apply_default_swiss(Swiss_soil_water_input_type.OneLayer_Mean_One_Std)
 setup.Apply_default_paths(root_path, scenario)
 setup.config.parameters_list_file = os.path.join(setup.config.input_path, "parameters.csv")
 os.makedirs(setup.config.input_path, exist_ok=True)
 setup.config.config_file = os.path.join(setup.config.input_path, "config_py.txt")
 setup.config.write_individual_parameter_list_progress = False
-setup.config.nsims = 10000
 setup.config.nbest = 100
+
+setup.config.nsims = 60000
 setup.Export()
 
 ncombs_per_parameter = 10000

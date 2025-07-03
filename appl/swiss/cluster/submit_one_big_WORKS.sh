@@ -8,7 +8,7 @@
 #SBATCH --mail-user=papa@tum.de
 #SBATCH --export=NONE
 #SBATCH --time=24:00:00
-#SBATCH --nodes=1
+#SBATCH --nodes=4
 #SBATCH --ntasks=128
 #SBATCH --partition='big'
 #SBATCH --mem='1600G'
@@ -21,8 +21,5 @@ ml all/Miniconda3
 source /User/homes/ppapastefanou/miniconda3/etc/profile.d/conda.sh
 #conda info --envs
 conda activate /Net/Groups/BSI/work_scratch/ppapastefanou/envs/SimPHony_intel_oneapi
-which python
 
-export FI_PROVIDER=tcp
-
-mpiexec -n 128 python3 -u swiss_cc_mpi_cluster_EX_CON.py
+mpiexec -n 512 --mca btl_tcp_if_exclude lo,docker0,virbr0  python3 -u swiss_cc_mpi_cluster_EX_CON.py

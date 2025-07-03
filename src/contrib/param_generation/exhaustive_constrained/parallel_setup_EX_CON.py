@@ -10,7 +10,8 @@ from SimPHony import DateTime
 from src.core.py.auxil import format_duration, remaining_str
 from src.contrib.config import Config, Location, Swiss_soil_water_input_type
 from src.contrib.param_generation.exhaustive_constrained.LHS_swiss_soil_range_alpha import Calculate_LHS_alpha
-from src.contrib.param_generation.exhaustive_constrained.LHS_swiss_parameter_internal_list import Calculate_parameter_list
+#from src.contrib.param_generation.exhaustive_constrained.LHS_swiss_parameter_internal_list import Calculate_parameter_list_nlayers, Calculate_parameter_list_one_layer
+from src.contrib.param_generation.exhaustive_constrained.LHS_swiss_parameter_internal_list import Calculate_parameter_list_one_layer
 #from src.contrib.param_generation.LHS.LHS_Multi_Swiss_Application_automation_vangenuchten import Calculate_LHS_per_process_swiss_cc_n_std_n
 
 class ParallelSetupEXCON:
@@ -40,7 +41,7 @@ class ParallelSetupEXCON:
         min_np = int(n / self.size)
         remaining = n - min_np * self.size
         n_per_process = np.zeros(self.size) + min_np
-
+        
         offsets = np.zeros(self.size)
         for i in range(0, remaining):
             offsets[i] = 1
@@ -49,32 +50,35 @@ class ParallelSetupEXCON:
         # Initialise inter with array as send an int is not possible atm
         self.n_sims_total = np.arange(1).astype(int)
         self.n_sims_total[0] = n
-
-        self.n_array_per_process = n_per_process.astype(int)
-
+        self.n_array_per_process = n_per_process.astype(np.int32)
+        
         ri = 0
         self.displ = np.zeros(self.size)
 
     def _initialise_counts(self):
         self.sendbuf = None
         # initialize count on worker processes
-        self.n_array_per_process = np.zeros(self.size, dtype=int)
+        self.n_array_per_process = np.empty(self.size, dtype=np.int32) 
         self.n_sims_total =  np.zeros(1, dtype=int)
         self.displ = None
-
+        
     def send_parameter_indexes(self):
 
         if self.is_root:
             print("Broadcasting parameter indices...", end = '')
-            t1 = perf_counter()
+            t1 = perf_counter()            
+        
 
         # broadcast The number of parameter files each process will get
         self.comm.Bcast(self.n_sims_total, root=0)
-        self.comm.Bcast(self.n_array_per_process, root=0)
+        self.comm.Bcast([self.n_array_per_process, MPI.INT], root=0)        
+        
         self.n_sims_per_process = self.n_array_per_process[self.rank]
-
+        #self.n_sims_per_process = 79
+        
         self.max_rank_digits = int(np.log10(self.size)) + 1
         self.max_id_digits = int(np.log10(np.max(self.n_array_per_process))) + 1
+        #self.max_id_digits = 80
 
         # Print the chunk that was received by this process
         print("Process {} received chunk {}".format(self.rank, self.n_sims_per_process))
@@ -99,7 +103,10 @@ class ParallelSetupEXCON:
                 print("Not implemented yet...  Exiting...")
                 exit(99)
             elif self.config.swiss_soil_water_input_type == Swiss_soil_water_input_type.NLayers_Mean_N_Std:
-                self.parameter_parser = Calculate_parameter_list(self.rank, self.config.nsims)
+                #self.parameter_parser = Calculate_parameter_list_nlayers(self.rank, self.config.nsims)
+                dummy = 3
+            elif self.config.swiss_soil_water_input_type == Swiss_soil_water_input_type.OneLayer_Mean_One_Std:
+                self.parameter_parser = Calculate_parameter_list_one_layer(self.rank, self.config.nsims)
             else:
                 print("Invalid soil water input type specified. Exiting...")
                 exit(99)
@@ -180,12 +187,21 @@ class ParallelSetupEXCON:
                 df_rmse['alive_mean'] = data_alive_mean
 
                 df_input = pd.read_csv(f"{self.config.parameters_list_file}{self.rank}")
-                df_input['psi_soil_sat0'] = df_input['psi_soil_sats'].str.split(';', expand=True).values[:, 0].astype(
-                    float)
-                df_input['k_soil_sat0'] = df_input['k_soil_sats'].str.split(';', expand=True).values[:, 0].astype(float)
-                df_input['theta_s0'] = df_input['theta_s'].str.split(';', expand=True).values[:, 0].astype(float)
-                df_input['theta_r0'] = df_input['theta_r'].str.split(';', expand=True).values[:, 0].astype(float)
-                df_input['pore_0'] = df_input['pore_size_ind'].str.split(';', expand=True).values[:, 0].astype(float)
+                
+                if isinstance(df_input['psi_soil_sats'], str):
+                    df_input['psi_soil_sat0'] = df_input['psi_soil_sats'].str.split(';', expand=True).values[:, 0].astype(
+                        float)
+                    df_input['k_soil_sat0'] = df_input['k_soil_sats'].str.split(';', expand=True).values[:, 0].astype(float)
+                    df_input['theta_s0'] = df_input['theta_s'].str.split(';', expand=True).values[:, 0].astype(float)
+                    df_input['theta_r0'] = df_input['theta_r'].str.split(';', expand=True).values[:, 0].astype(float)
+                    df_input['pore_0'] = df_input['pore_size_ind'].str.split(';', expand=True).values[:, 0].astype(float)
+                else:
+                    df_input['psi_soil_sat0'] = df_input['psi_soil_sats']
+                    df_input['k_soil_sat0'] = df_input['k_soil_sats']
+                    df_input['theta_s0'] = df_input['theta_s']
+                    df_input['theta_r0'] = df_input['theta_r']
+                    df_input['pore_0'] = df_input['pore_size_ind']
+                
 
                 df_c = pd.concat([df_input, df_rmse], axis=1)
 
@@ -209,8 +225,10 @@ class ParallelSetupEXCON:
                 target_rmse *= 1.0/8.0
                 df_w['target_rmse'] = target_rmse
                 output_path = self.config.output_path
-                if target_rmse.values < 1.2:
+                if target_rmse.values < 1.5:
                     df_w.to_csv(f"{output_path}/parameters_f{id}.csv{self.rank}")
+                else:
+                    print(f"Skipping: parameters_f{id} of {self.rank}. Error: {target_rmse}.")
 
 
     def receive_analysis_data(self):
@@ -231,7 +249,7 @@ class ParallelSetupEXCON:
                     df.loc[0, 'alive_mean'] / 0.48,
                     df.loc[1, 't0'] / 0.72,
                     df.loc[2, 't3'] / 0.83,
-                    df.loc[3, 't6'] / 1.28,
+                    df.loc[3, 't6'] / 1.16,
                     df.loc[4, 't7'] / 1.16]
                 )
                 df['RMSE_MAX'] = rmse_max

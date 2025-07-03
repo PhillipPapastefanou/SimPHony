@@ -45,6 +45,12 @@ void Input_Swiss_Multi_Soils::Read_N_Parse() {
             soil_water_input = theta_parser->get_data(theta_indexes);
             break;
         }
+        case Swiss_soil_water_input_type::OneLayer_Mean_One_Std:{
+            vector<string> soil_water_indexes({"mean soil water content (m3/m3)", "sd"});
+            theta_parser->init_regular("dt", format);
+            soil_water_input = theta_parser->get_data(soil_water_indexes);
+            break;
+        }
         default:{
             std::cout << "Invalid soil water input type specified";
             exit(99);
@@ -95,7 +101,6 @@ void Input_Swiss_Multi_Soils::Read_N_Parse() {
         case Swiss_soil_water_input_type::NLayersMean:
             break;
         case Swiss_soil_water_input_type::NLayersMeanOneStd:{
-
             // Each soil location has three soil layer depths
             for (int i = 0; i < soil_water_input.size(); ++i) {
                 vector<float> sl(3);
@@ -137,6 +142,26 @@ void Input_Swiss_Multi_Soils::Read_N_Parse() {
                     sl[s] = soil_water_input[i][s];
                 }
                 theta_per_layer.push_back(sl);
+            }
+            break;
+        }
+
+        case Swiss_soil_water_input_type::OneLayer_Mean_One_Std:{
+            // Each soil location has one soil layer...
+            for (int i = 0; i < soil_water_input.size(); ++i) {
+                vector<float> sl(1);
+                for (int s = 0; s < 1; ++s) {
+                    sl[s] = soil_water_input[i][s];
+                }
+                theta_per_layer.push_back(sl);
+
+                // Copy std to each layer
+                // and one std
+                vector<float> sl_std(1);
+                for (int s = 0; s < 1; ++s) {
+                    sl_std[s] = soil_water_input[i][1];
+                }
+                theta_sd_per_layer.push_back(sl_std);
             }
             break;
         }

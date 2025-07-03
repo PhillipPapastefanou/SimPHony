@@ -30,17 +30,44 @@ root_path = "/Users/pp/data/Simulations/A08_SimPHony/swiss"
 scenario = ""
 
 setup = Setup()
-setup.Apply_default_swiss(Swiss_soil_water_input_type.NLayers_Mean_One_Std)
+setup.Apply_default_swiss(Swiss_soil_water_input_type.OneLayer_Mean_One_Std)
 setup.Apply_default_paths(root_path, scenario)
 #setup.config.parameters_list_file = os.path.join(setup.config.post_path, "parameters_best_mean_alive.csv")
 setup.config.config_file = os.path.join(THIS_DIR, "config_py.txt")
 setup.Export()
+# Specify Start and End of the Simulation
+format = "%Y-%m-%d %H:%M:%S"
+date_start_str = "2018-05-01 00:00:00"
+date_end_str = "2018-12-15 00:00:00"
 
 sys.path.append(setup.config.build_folder)
 
 # Importing local libraries and paths
 from SimPHony import Simulation_Single_Swiss
 from SimPHony import DateTime
+
+# Create parameters
+params = Parameters()
+
+params.canopy_height = 35
+
+cparameters = params.Create_CParameters()
+
+# Setting up the simulation
+sim = Simulation_Single_Swiss()
+sim.Read_config(setup.config.config_file)
+sim.Init_parameters(cparameters)
+sim.Init_input()
+sim.Set_water_pot_initials(-1.0, -0.2)
+
+timestart = DateTime(date_start_str, format)
+timeend = DateTime(date_end_str, format)
+
+sim.Init_eval(timestart, timeend)
+# Run the simulation
+sim.Run(timestart, timeend)
+
+
 from src.core.py.Parameters import Parameters
 from src.core.py.Parameters import SoilLayer
 from src.core.py.Parameters import Soil_Water_Model_Type
@@ -54,7 +81,8 @@ from src.contrib.auxil.output_plotter import std_plot
 # Create parameters
 params = Parameters()
 
-nsoil_layers = 3
+
+nsoil_layers = 1
 layer = SoilLayer()
 layer.k_soil_sat =60.0* 0.1 / 100.0 / 86400.0
 layer.psi_soil_sat = -0.022 * 1000/9.81
@@ -69,9 +97,9 @@ for s in range(nsoil_layers):
     soil_layers.append(copy.deepcopy(layer))
 
 # ... but not the depth
-soil_layers[0].depth = 0.1
-soil_layers[1].depth = 0.3
-soil_layers[2].depth = 0.4
+soil_layers[0].depth = 0.2
+# soil_layers[1].depth = 0.3
+# soil_layers[2].depth = 0.4
 
 Convert_Soil_Parameters(soil_layers=soil_layers, parameters=params)
 
@@ -79,11 +107,11 @@ params.canopy_height = 35
 #params.canopy_height = 15
 params.huber_value = 1.0 / 4000.0
 params.k_xylem_sat = 2.0 * 1000/18.0
-params.stem_hydraulic_capacitance =60.0 * 1000 / 18
+params.stem_hydraulic_capacitance = 180.0 * 1000 / 18
 params.leaf_hydraulic_capacitance = 0.25 * 1000 / 18
 params.g_stem_res = 0.0
 params.ratio_heart_sap_area = 3.0
-params.k_heart_sap = 0.0001
+params.k_heart_sap = 0.00003
 #params.k_heart_sap = 0.001
 
 params.g0 = 0.0025
@@ -104,7 +132,7 @@ params.soil_water_model_type = Soil_Water_Model_Type.VanGenuchten.name
 #params.verbose = True
 
 #params.wcont_sigma_deviation = 1.2
-params.wcont_sigma_deviation = 0.0
+params.wcont_sigma_deviation = -1.0
 params.soil_profile_index = 2
 
 cparameters = params.Create_CParameters(soil_layers=soil_layers)

@@ -10,6 +10,7 @@ class Swiss_soil_water_input_type(Enum):
     NLayers_Mean_One_Std = 1
     NLayers_Mean_N_Std = 2
     NLayers_Indiv = 3
+    OneLayer_Mean_One_Std = 4
 
 
 

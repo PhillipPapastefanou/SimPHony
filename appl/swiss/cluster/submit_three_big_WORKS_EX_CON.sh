@@ -7,7 +7,7 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=papa@tum.de
 #SBATCH --export=NONE
-#SBATCH --time=24:00:00
+#SBATCH --time=100:00:00
 #SBATCH --nodes=3
 #SBATCH --ntasks=384
 #SBATCH --partition='big'
@@ -20,7 +20,7 @@ ml all/Miniconda3
 
 source /User/homes/ppapastefanou/miniconda3/etc/profile.d/conda.sh
 #conda info --envs
-conda activate /Net/Groups/BSI/work_scratch/ppapastefanou/envs/SimPHony_intel_oneapi
+conda activate /Net/Groups/BSI/work_scratch/ppapastefanou/envs/SimPHony_intel_mpich
 which python
 
 export FI_PROVIDER=tcp

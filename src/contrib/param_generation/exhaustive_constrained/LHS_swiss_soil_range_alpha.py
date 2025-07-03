@@ -41,13 +41,14 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
     sel_cols = []
     slicer = Subslicer(array=sample)
 
-    k_soil_sats_logs = rescale(slicer.get(), min=-8.5, max = -7.1)
+    # Values according to David steger ( 50-200 mm day-1)
+    k_soil_sats_logs = rescale(slicer.get(), min=-5.3, max = -4.6)
     psi_soil_sats = rescale(slicer.get(), min=-0.025, max = -0.011) # 1 sigma
     #psi_soil_sats = rescale(slicer.get(), min=-0.035, max = -0.007)  # 2 sigmas
     psi_soil_sats *= MPA_TO_HHEAD
     pore_size_ind = rescale(slicer.get(), min=0.238, max = 0.291) # 1 sigma
     #pore_size_ind = rescale(slicer.get(), min=0.216, max = 0.325)  # 2 sigmas
-    sigma_wcont    = rescale(slicer.get(), min = -1.0, max = 1.0)
+    sigma_wcont    = rescale(slicer.get(), min = -1.5, max = 1.5)
 
     soil_collection = []
     for i in range(ncombs):
@@ -77,8 +78,8 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
     jmax25_s            = rescale_mean(slicer.get(), mean = parameters.jmax25, percent=alpha)
     sel_cols.append("jmax25")
 
-    g_barks =  rescale_mean(slicer.get(), mean = parameters.g_bark, percent=alpha)
-    sel_cols.append("g_barks")
+    g_stem_res =  rescale_mean(slicer.get(), mean = parameters.g_stem_res, percent=alpha)
+    sel_cols.append("g_stem_res")
 
     k_xylems_sats   = rescale_mean(slicer.get(), mean = parameters.k_xylem_sat, percent=alpha)
     #k_xylems_sats *= KG_TO_MOL
@@ -100,7 +101,7 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
     d_50close_s     = rescale_mean(slicer.get(), mean = parameters.d_50_close, percent=alpha)
     sel_cols.append("d50_close")
 
-    psi_50_close_s  = rescale(slicer.get(), min = -2.3, max = -2.0)
+    psi_50_close_s  = rescale_mean(slicer.get(), mean = parameters.psi_leaf_50_close, percent=alpha)
     sel_cols.append("psi50_close")
 
     jackson_s       = rescale(slicer.get(), min= 0.90, max = 0.99)
@@ -129,25 +130,24 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
         soil_layers = []
         # Duplicate the top layer
         soil_layers.append(soil_layer_top)
-        soil_layers.append(copy.deepcopy(soil_layer_top))
-        soil_layers.append(copy.deepcopy(soil_layer_top))
+        # soil_layers.append(copy.deepcopy(soil_layer_top))
+        # soil_layers.append(copy.deepcopy(soil_layer_top))
 
         soil_layers[0].depth = 0.1
-        soil_layers[1].depth = 0.3
-        soil_layers[2].depth = 0.4
-
-        soil_layers[1].psi_soil_sat += -0.06*MPA_TO_HHEAD
-        soil_layers[2].psi_soil_sat += -0.06*MPA_TO_HHEAD
-
-        soil_layers[1].pore_size_ind += 0.04
-        soil_layers[2].pore_size_ind += 0.04
+        
+        # soil_layers[1].depth = 0.3
+        # soil_layers[2].depth = 0.4
+        # soil_layers[1].psi_soil_sat += -0.06*MPA_TO_HHEAD
+        # soil_layers[2].psi_soil_sat += -0.06*MPA_TO_HHEAD
+        # soil_layers[1].pore_size_ind += 0.04
+        # soil_layers[2].pore_size_ind += 0.04
 
         Convert_Soil_Parameters(soil_layers=soil_layers, parameters=params)
 
         params.stem_hydraulic_capacitance = cstem_s[i]
         # params.leaf_area_index = lai_s[i]
         params.g0 = g0_s[i]
-        params.g_bark = g_barks[i]
+        params.g_stem_res = g_stem_res[i]
         params.g1 = g1_s[i]
         
         params.vmax25 = vmax25_s[i]

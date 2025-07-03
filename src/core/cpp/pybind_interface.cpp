@@ -150,14 +150,16 @@ PYBIND11_MODULE(SimPHony, handle){
 
     py::class_<Parameters>(handle, "CParameters").
             def_readwrite("id", &Parameters::id).
+            def_readwrite("canopy_height", &Parameters::canopy_height).
+            def_readwrite("root_area_index", &Parameters::root_area_index).
 
+            def_readwrite("soil_profile_index", &Parameters::soil_profile_index).
             def_readwrite("stem_flow_type", &Parameters::stem_flow_type).
             def_readwrite("soil_water_type", &Parameters::soil_water_type).
             def_readwrite("conductivity_fraction_type", &Parameters::conductivity_fraction_type).
 
-            def_readwrite("root_area_index", &Parameters::root_area_index).
-            def_readwrite("soil_profile_index", &Parameters::soil_profile_index).
-            def_readwrite("canopy_height", &Parameters::canopy_height).
+
+
             def_readwrite("soil_layers", &Parameters::soil_layers).
             def_readwrite("stem_hydraulic_capacitance", &Parameters::stem_hydraulic_capacitance_max).
             def_readwrite("k_xylem_sat", &Parameters::k_xylem_sat).

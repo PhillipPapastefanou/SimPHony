@@ -43,10 +43,16 @@ class SoilLayer:
 
 
 class Parameters:
-
     def __init__(self):
         # Universal parameter id
         self.id = -1
+        # Root area index [1]
+        # Katul et al: 5.5 - 14.2
+        self.root_area_index = 12
+        # Plant height [m]
+        self.canopy_height = 31
+        
+        
         # Simulation timestep length [s]
         self.dts = 1800.0
         # Input timestep length [s]

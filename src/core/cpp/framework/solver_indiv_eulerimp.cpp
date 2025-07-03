@@ -34,7 +34,7 @@ void Solver_Indiv_Euler_Imp::Update_water_potentials(DateTime time) {
         update_psi_leaf();
         if (psi_leaf > min_leaf_water_potential + 0.5){
             update_psi_stem_ground();
-            update_psi_heart();
+            //update_psi_heart();
         }
 
     }

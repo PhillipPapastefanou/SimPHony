@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(SimPHony VERSION 1.0)
 
-
-
 cmake_host_system_information(RESULT _host_name QUERY HOSTNAME)
 
 if(${_host_name} MATCHES "bgc-jena.mpg.de$")
@@ -14,7 +12,7 @@ else()
 endif()
 
 if ("${HOSTSPEC}" STREQUAL "cluster_mpi_bgc")
-    set(PYTHON_EXECUTABLE /Net/Groups/BSI/work_scratch/ppapastefanou/envs/SimPHony_intel_oneapi/bin/python)
+    set(PYTHON_EXECUTABLE /Net/Groups/BSI/work_scratch/ppapastefanou/envs/SimPHony_intel_mpich/bin/python)
 else()
     # You prob have to adapt this path to match your environemnt
     set(PYTHON_EXECUTABLE /Users/pp/anaconda3/envs/PHS-post/bin/python)

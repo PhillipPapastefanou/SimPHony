@@ -14,7 +14,8 @@ enum class Swiss_soil_water_input_type{
     NLayersMean,
     NLayersMeanOneStd,
     NLayersMeanNStd,
-    NLayersIndiv
+    NLayersIndiv, 
+    OneLayer_Mean_One_Std
 };
 
 

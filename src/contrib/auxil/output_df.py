@@ -14,9 +14,10 @@ def create_output_df(output, date_start_str):
 
     df['vpd'] = output.Get_vpd()
 
-    df['ksSoilUp'] = np.array(output.Get_ks_soil())[:, 0];
-    df['ksSoil2'] = np.array(output.Get_ks_soil())[:, 1];
-    df['ksSoil3'] = np.array(output.Get_ks_soil())[:, 2];
+    nsoil_layers =  np.array(output.Get_ks_soil()).shape[1]
+
+    for sl in range(0,nsoil_layers):
+        df[f'ksSoil{sl}'] = np.array(output.Get_ks_soil())[:, sl];
 
     df['psiSoilUp'] = np.array(output.Get_psi_soil_indiv())[:, 0];
     df['psiSap'] = output.Get_psi_sap()

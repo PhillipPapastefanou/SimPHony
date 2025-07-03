@@ -67,17 +67,11 @@ public:
     Parameters();
     ~Parameters();
     void Set_derived();
-
     // Universal parameter setting ID
     int id = -1;
-
-    // Parameters that assumed to be constants and will not change
-    Constants constants;
-
     // Root area index [1]
     // Katul et al: 5.5 - 14.2
     double root_area_index = 10.0;
-
     // Plant height [m]
     double canopy_height = 20.0;
 
@@ -86,6 +80,10 @@ public:
     //    KirchhoffWeibull,
     //    KirchhoffPiecewiseErf
     Stem_flow_module_type stem_flow_type = Stem_flow_module_type::Linear;
+
+    // Parameters that are assumed to be constants and will not change
+    Constants constants;
+
 
     // Viscosity of the leaf to sap flow [1]
     // Todo: Check if kinematic or dynamic viscosity
@@ -117,7 +115,7 @@ public:
     double psi88_xylem = -6.0;
     // functional shape of xylem loss of conducitivity function
     // Weibull is the more accept throughout the literature and is asymmetrical
-    // Logit is symmetrical and can be solved analyyically when evaluated in the Kirchhoff transition
+    // Logit is symmetrical and can be solved analytically when evaluated in the Kirchhoff transition
     Conductivity_fraction_module_type  conductivity_fraction_type = Conductivity_fraction_module_type::Weibull;
 
     // Leaf hydraulic conductance [mol H2O m-2 MPa-1]

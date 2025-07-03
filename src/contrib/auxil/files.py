@@ -126,6 +126,8 @@ def get_soil_water_filepath_swiss_cc(soilwater_input_type : Swiss_soil_water_inp
         file_soil_water = os.path.join(root_data_path, 'swiss', 'input', 'vwc_swicc_cc_2023_std_n.csv')
     elif soilwater_input_type == Swiss_soil_water_input_type.NLayers_Mean_One_Std:
         file_soil_water = os.path.join(root_data_path, 'swiss', 'input', 'swiss_cc_soil_water_with_sd.csv')
+    elif soilwater_input_type == Swiss_soil_water_input_type.OneLayer_Mean_One_Std:
+        file_soil_water = os.path.join(root_data_path, 'swiss', 'input', 'SWC_Inter.csv')
     else: 
         print("Soil water input file not specified.")
         exit(99)

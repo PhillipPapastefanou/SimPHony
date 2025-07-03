@@ -81,8 +81,11 @@ void Config::Read(std::string filename) {
                     swiss_soil_water_input_type.value = Swiss_soil_water_input_type::NLayersMeanNStd;
                 else if(value == "nlayers_indiv")
                     swiss_soil_water_input_type.value = Swiss_soil_water_input_type::NLayersIndiv;
+                else if (value == "onelayer_mean_one_std")
+                    swiss_soil_water_input_type.value = Swiss_soil_water_input_type::OneLayer_Mean_One_Std;
                 else{
                     std::cout << "Invalid swiss_soil_water_input_type" << std::endl;
+                    std::cout << "Recieved: " << value;
                     exit(99);
                 }
                 swiss_soil_water_input_type.found = true;
