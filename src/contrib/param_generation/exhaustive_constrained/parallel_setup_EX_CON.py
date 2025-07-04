@@ -225,7 +225,7 @@ class ParallelSetupEXCON:
                 target_rmse *= 1.0/8.0
                 df_w['target_rmse'] = target_rmse
                 output_path = self.config.output_path
-                if target_rmse.values < 1.5:
+                if target_rmse.values < 1.4:
                     df_w.to_csv(f"{output_path}/parameters_f{id}.csv{self.rank}")
                 else:
                     print(f"Skipping: parameters_f{id} of {self.rank}. Error: {target_rmse}.")

@@ -69,8 +69,8 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
     g0_s            = rescale_mean(slicer.get(), mean = parameters.g0, percent=alpha)
     sel_cols.append("g0")
 
-    g1_s            = rescale_mean(slicer.get(), mean = parameters.g1, percent=alpha)
-    sel_cols.append("g1")
+    # g1_s            = rescale_mean(slicer.get(), mean = parameters.g1, percent=alpha)
+    # sel_cols.append("g1")
     
     vmax25_s            = rescale_mean(slicer.get(), mean = parameters.vmax25, percent=alpha)
     sel_cols.append("vmax25")
@@ -148,7 +148,7 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
         # params.leaf_area_index = lai_s[i]
         params.g0 = g0_s[i]
         params.g_stem_res = g_stem_res[i]
-        params.g1 = g1_s[i]
+        params.g1 = 2.35
         
         params.vmax25 = vmax25_s[i]
         params.jmax25 = jmax25_s[i]
