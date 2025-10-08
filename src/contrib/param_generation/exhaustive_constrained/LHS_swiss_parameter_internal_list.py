@@ -130,9 +130,9 @@ def Calculate_parameter_list_one_layer(rank, ncombs):
 
     g0_s            = rescale(slicer.get(), min= 0.001, max = 0.002)
     #g1_s            = rescale(slicer.get(), min = 1.0, max = 3.0)
-    g_barks_factor    = rescale(slicer.get(), min = 0.0, max = 1.0)
+    g_barks_factor    = rescale(slicer.get(), min = 0.0, max = 0.5)
     #k_xylems_sats   = rescale(slicer.get(), min = 0.5, max= 3.0)
-    k_xylems_sats   = rescale(slicer.get(), min = 0.3, max= 1.5)
+    k_xylems_sats   = rescale(slicer.get(), min = 0.3, max= 2.5)
     k_xylems_sats *= KG_TO_MOL
     huber_values    = rescale(slicer.get(), min = 1/5000, max= 1/2000)
     cstem_s         = rescale(slicer.get(), min = 20, max=250)

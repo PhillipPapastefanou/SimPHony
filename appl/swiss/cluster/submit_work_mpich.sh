@@ -5,9 +5,9 @@
 #SBATCH -D ./
 #SBATCH --get-user-env
 #SBATCH --export=ALL
-#SBATCH --time=100:00:00
-#SBATCH --nodes=8
-#SBATCH --ntasks=512
+#SBATCH --time=200:00:00
+#SBATCH --nodes=10
+#SBATCH --ntasks=640
 #SBATCH --partition='work'
 #SBATCH --mem='300G'
 
