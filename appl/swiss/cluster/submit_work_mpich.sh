@@ -6,8 +6,8 @@
 #SBATCH --get-user-env
 #SBATCH --export=ALL
 #SBATCH --time=100:00:00
-#SBATCH --nodes=12
-#SBATCH --ntasks=768
+#SBATCH --nodes=8
+#SBATCH --ntasks=512
 #SBATCH --partition='work'
 #SBATCH --mem='300G'
 
@@ -36,4 +36,4 @@ which python
 
 export FI_PROVIDER=tcp
 
-mpirun -n 768 /Net/Groups/BSI/work_scratch/ppapastefanou/envs/SimPHony_intel_mpich/bin/python -u swiss_cc_mpi_cluster_EX_CON.py
+mpirun -n 640 /Net/Groups/BSI/work_scratch/ppapastefanou/envs/SimPHony_intel_mpich/bin/python -u swiss_cc_mpi_cluster_EX_CON.py

@@ -48,7 +48,7 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
     psi_soil_sats *= MPA_TO_HHEAD
     pore_size_ind = rescale(slicer.get(), min=0.238, max = 0.291) # 1 sigma
     #pore_size_ind = rescale(slicer.get(), min=0.216, max = 0.325)  # 2 sigmas
-    sigma_wcont    = rescale(slicer.get(), min = -1.5, max = 1.5)
+    sigma_wcont    = rescale(slicer.get(), min = -0.5, max = 0.5)
 
     soil_collection = []
     for i in range(ncombs):
@@ -98,8 +98,8 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
     cleaf_s        = rescale_mean(slicer.get(), mean = parameters.leaf_hydraulic_capacitance, percent=alpha)
     sel_cols.append("kappa_leaf")
 
-    d_50close_s     = rescale_mean(slicer.get(), mean = parameters.d_50_close, percent=alpha)
-    sel_cols.append("d50_close")
+    # d_50close_s     = rescale_mean(slicer.get(), mean = parameters.d_50_close, percent=alpha)
+    # sel_cols.append("d50_close")
 
     psi_50_close_s  = rescale_mean(slicer.get(), mean = parameters.psi_leaf_50_close, percent=alpha)
     sel_cols.append("psi50_close")
@@ -164,7 +164,8 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
         params.huber_value = huber_values[i]
 
         params.psi_leaf_50_close = psi_50_close_s[i]
-        params.d_50_close = d_50close_s[i]
+        #params.d_50_close = d_50close_s[i]
+        params.d_50_close = 2.5
         params.jackson_root_beta = jackson_s[i]
 
         params.wcont_sigma_deviation = sigma_wcont[i]

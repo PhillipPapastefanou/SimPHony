@@ -13,7 +13,7 @@ from src.contrib.auxil.output_df import create_output_df
 from src.contrib.config import Config, Swiss_soil_water_input_type
 
 root_path = "/Net/Groups/BSI/scratch/ppapastefanou/simulations/SimPHony/swiss_cc"
-scenario = "10_ex_con_2025_full_logit_mean_one"
+scenario = "21_ex_con_2025_full_logit_mean_one_wcont"
 
 setup = Setup()
 setup.Apply_default_swiss(Swiss_soil_water_input_type.OneLayer_Mean_One_Std)

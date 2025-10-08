@@ -130,11 +130,12 @@ def Calculate_parameter_list_one_layer(rank, ncombs):
 
     g0_s            = rescale(slicer.get(), min= 0.001, max = 0.002)
     #g1_s            = rescale(slicer.get(), min = 1.0, max = 3.0)
-    g_barks_factor    = rescale(slicer.get(), min = 0.1, max = 0.3)
-    k_xylems_sats   = rescale(slicer.get(), min = 0.5, max= 3.0)
+    g_barks_factor    = rescale(slicer.get(), min = 0.0, max = 1.0)
+    #k_xylems_sats   = rescale(slicer.get(), min = 0.5, max= 3.0)
+    k_xylems_sats   = rescale(slicer.get(), min = 0.3, max= 1.5)
     k_xylems_sats *= KG_TO_MOL
-    huber_values    = rescale(slicer.get(), min = 1/4500, max= 1/3000)
-    cstem_s         = rescale(slicer.get(), min = 20, max=200)
+    huber_values    = rescale(slicer.get(), min = 1/5000, max= 1/2000)
+    cstem_s         = rescale(slicer.get(), min = 20, max=250)
     cstem_s *= KG_TO_MOL
     
     vmax25s         = rescale(slicer.get(), min = 30, max = 50)
@@ -145,8 +146,8 @@ def Calculate_parameter_list_one_layer(rank, ncombs):
 
     # lai_s           = rescale(slicer.get(), min= 4.6, max = 5.0)
     cleaf_s_log        = rescale(slicer.get(), min=np.log10(0.001), max=np.log10(0.0025))
-    d_50close_s     = rescale(slicer.get(), min = 2.0, max = 4.0)
-    psi_50_close_s  = rescale(slicer.get(), min = -1.2, max = -0.6)
+    d_50close_s     = rescale(slicer.get(), min = 2.0, max = 3.0)
+    psi_50_close_s  = rescale(slicer.get(), min = -1.2, max = -0.5)
     #jackson_s       = rescale(slicer.get(), min = 0.90, max = 0.98)
     #psi50_xylems    = rescale(slicer.get(), min = -4.0, max = -3.8)
     #psi88_xylems_offset    = rescale(slicer.get(), min = 1.0, max = 1.5)
@@ -194,7 +195,7 @@ def Calculate_parameter_list_one_layer(rank, ncombs):
         params.soil_water_model_type = Soil_Water_Model_Type.VanGenuchten.name
         params.stem_flow_type = Stem_Flow_Model_Type.Linear.name
         
-        params.conductivity_fraction_type = Conductivity_Fraction_Module_Type.Logit.name
+        params.conductivity_fraction_type = Conductivity_Fraction_Module_Type.Weibull.name
         
         params.sustain_xylem_damage = True
         plist.Add(params)
