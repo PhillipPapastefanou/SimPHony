@@ -43,23 +43,25 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
 
     # Values according to David steger ( 50-200 mm day-1)
     k_soil_sats_logs = rescale(slicer.get(), min=-5.3, max = -4.6)
+    #psi_soil_sats = rescale(slicer.get(), min=-0.025, max = -0.011) # 1 sigma
     psi_soil_sats = rescale(slicer.get(), min=-0.025, max = -0.011) # 1 sigma
     #psi_soil_sats = rescale(slicer.get(), min=-0.035, max = -0.007)  # 2 sigmas
     psi_soil_sats *= MPA_TO_HHEAD
     pore_size_ind = rescale(slicer.get(), min=0.238, max = 0.291) # 1 sigma
     #pore_size_ind = rescale(slicer.get(), min=0.216, max = 0.325)  # 2 sigmas
-    sigma_wcont    = rescale(slicer.get(), min = -1, max = 1)
+    sigma_wcont    = rescale(slicer.get(), min = -1.5, max = 1.5)
 
     soil_collection = []
     for i in range(ncombs):
         soil_collection.append(SoilLayer())
 
     for i in range(ncombs):
-        soil_collection[i].k_soil_sat = 10**k_soil_sats_logs[i]
-        soil_collection[i].psi_soil_sat = psi_soil_sats[i]
+        soil_collection[i].k_soil_sat = 10**(-4.8)
+        #soil_collection[i].psi_soil_sat = psi_soil_sats[i]
+        soil_collection[i].psi_soil_sat = -0.018 * MPA_TO_HHEAD
         soil_collection[i].theta_s = 0.6
         soil_collection[i].theta_r = 0.0
-        soil_collection[i].pore_size_ind = pore_size_ind[i]
+        soil_collection[i].pore_size_ind = 0.2645
 
     sel_cols.append("k_soil_sat_01")
     sel_cols.append("psi_soil_sat_01")
@@ -110,7 +112,7 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
     psi50_xylems    = rescale(slicer.get(), min = -4.2, max = -3.5)
     sel_cols.append("psi_50_xylem")
 
-    psi88_xylems_offset    = rescale(slicer.get(), min = 0.3, max = 1.0)
+    psi88_xylems_offset    = rescale(slicer.get(), min = 0.3, max = 1.2)
     sel_cols.append("psi_88_xylem")
 
     root_area_indexes    = rescale_mean(slicer.get(), mean = parameters.root_area_index, percent=alpha)

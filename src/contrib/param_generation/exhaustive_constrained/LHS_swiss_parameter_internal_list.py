@@ -128,9 +128,9 @@ def Calculate_parameter_list_one_layer(rank, ncombs):
     for i in range(ncombs):
         soil_collection.append(SoilLayer())
 
-    g0_s            = rescale(slicer.get(), min= 0.001, max = 0.002)
+    #g0_s            = rescale(slicer.get(), min= 0.001, max = 0.002)
     #g1_s            = rescale(slicer.get(), min = 1.0, max = 3.0)
-    g_barks_factor    = rescale(slicer.get(), min = 0.0, max = 0.5)
+    g_barks_factor    = rescale(slicer.get(), min = 0.0, max = 0.3)
     #k_xylems_sats   = rescale(slicer.get(), min = 0.5, max= 3.0)
     k_xylems_sats   = rescale(slicer.get(), min = 0.3, max= 2.5)
     k_xylems_sats *= KG_TO_MOL
@@ -146,7 +146,7 @@ def Calculate_parameter_list_one_layer(rank, ncombs):
 
     # lai_s           = rescale(slicer.get(), min= 4.6, max = 5.0)
     cleaf_s_log        = rescale(slicer.get(), min=np.log10(0.001), max=np.log10(0.0025))
-    d_50close_s     = rescale(slicer.get(), min = 2.0, max = 3.0)
+    d_50close_s     = rescale(slicer.get(), min = 2.0, max = 4.0)
     psi_50_close_s  = rescale(slicer.get(), min = -1.2, max = -0.5)
     #jackson_s       = rescale(slicer.get(), min = 0.90, max = 0.98)
     #psi50_xylems    = rescale(slicer.get(), min = -4.0, max = -3.8)
@@ -170,8 +170,8 @@ def Calculate_parameter_list_one_layer(rank, ncombs):
 
         params.stem_hydraulic_capacitance = cstem_s[i]
         # params.leaf_area_index = lai_s[i]
-        params.g0 = g0_s[i]
-        params.g_stem_res = g0_s[i]* g_barks_factor[i]
+        params.g0 = 0.0015
+        params.g_stem_res = params.g0* g_barks_factor[i]
         params.g1 = 2.35
         params.vmax25 = vmax25s[i]
         params.jmax25 = jmax25s[i]
