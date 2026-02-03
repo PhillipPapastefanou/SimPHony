@@ -42,7 +42,7 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
     slicer = Subslicer(array=sample)
 
     # Values according to David steger ( 50-200 mm day-1)
-    k_soil_sats_logs = rescale(slicer.get(), min=-5.3, max = -4.6)
+    k_soil_sats_logs = rescale(slicer.get(), min=-7.0, max = -4.8)
     #psi_soil_sats = rescale(slicer.get(), min=-0.025, max = -0.011) # 1 sigma
     psi_soil_sats = rescale(slicer.get(), min=-0.025, max = -0.011) # 1 sigma
     #psi_soil_sats = rescale(slicer.get(), min=-0.035, max = -0.007)  # 2 sigmas
@@ -56,23 +56,24 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
         soil_collection.append(SoilLayer())
 
     for i in range(ncombs):
-        soil_collection[i].k_soil_sat = 10**(-4.8)
+        soil_collection[i].k_soil_sat = 10**k_soil_sats_logs[i]
         #soil_collection[i].psi_soil_sat = psi_soil_sats[i]
         soil_collection[i].psi_soil_sat = -0.018 * MPA_TO_HHEAD
         soil_collection[i].theta_s = 0.6
         soil_collection[i].theta_r = 0.0
-        soil_collection[i].pore_size_ind = 0.2645
+        soil_collection[i].pore_size_ind = 0.285
+        #soil_collection[i].pore_size_ind = pore_size_ind[i]
 
     sel_cols.append("k_soil_sat_01")
     sel_cols.append("psi_soil_sat_01")
     sel_cols.append("psi_01")
     sel_cols.append("sigma_wconts")
 
-    g0_s            = rescale_mean(slicer.get(), mean = parameters.g0, percent=alpha)
-    sel_cols.append("g0")
+    # g0_s            = rescale_mean(slicer.get(), mean = parameters.g0, percent=alpha)
+    # sel_cols.append("g0")
 
-    # g1_s            = rescale_mean(slicer.get(), mean = parameters.g1, percent=alpha)
-    # sel_cols.append("g1")
+    g1_s            = rescale_mean(slicer.get(), mean = parameters.g1, percent=alpha)
+    sel_cols.append("g1")
     
     vmax25_s            = rescale_mean(slicer.get(), mean = parameters.vmax25, percent=alpha)
     sel_cols.append("vmax25")
@@ -93,6 +94,11 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
     cstem_s         = rescale_mean(slicer.get(), mean = parameters.stem_hydraulic_capacitance, percent=alpha)
     #cstem_s *= KG_TO_MOL
     sel_cols.append("kappa_stem")
+    
+    cstem_res_s         = rescale_mean(slicer.get(), mean = parameters.stem_hydraulic_capacitance_res, percent=alpha)
+    #cstem_s *= KG_TO_MOL
+    sel_cols.append("kappa_stem")
+
 
     # lai_s           = rescale(slicer.get(), min= 4.6, max = 5.0)
     # sel_cols.append("lai")
@@ -112,7 +118,7 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
     psi50_xylems    = rescale(slicer.get(), min = -4.2, max = -3.5)
     sel_cols.append("psi_50_xylem")
 
-    psi88_xylems_offset    = rescale(slicer.get(), min = 0.3, max = 1.2)
+    psi88_xylems_offset    = rescale(slicer.get(), min = 0.4, max = 1.2)
     sel_cols.append("psi_88_xylem")
 
     root_area_indexes    = rescale_mean(slicer.get(), mean = parameters.root_area_index, percent=alpha)
@@ -147,10 +153,11 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
         Convert_Soil_Parameters(soil_layers=soil_layers, parameters=params)
 
         params.stem_hydraulic_capacitance = cstem_s[i]
+        params.stem_hydraulic_capacitance_res = cstem_res_s[i]
         # params.leaf_area_index = lai_s[i]
-        params.g0 = g0_s[i]
+        params.g0 = 0.0015
         params.g_stem_res = g_stem_res[i]
-        params.g1 = 2.35
+        params.g1 = g1_s[i]
         
         params.vmax25 = vmax25_s[i]
         params.jmax25 = jmax25_s[i]
@@ -186,7 +193,7 @@ def Calculate_LHS_alpha(rank, ncombs, parameters: Parameters, alpha, parameter_f
         params.stem_flow_type = Stem_Flow_Model_Type.Linear.name
         #params.conductivity_fraction_type = Conductivity_Fraction_Module_Type.Logit
 
-        params.sustain_xylem_damage = False
+        params.sustain_xylem_damage = True
 
         # if i % 5000 == 0:
         #     print(f"{i/ncombs * 100.0}% completed")

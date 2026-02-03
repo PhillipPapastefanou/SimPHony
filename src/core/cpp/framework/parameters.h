@@ -89,11 +89,18 @@ public:
     // Todo: Check if kinematic or dynamic viscosity
      double eta_LS = 1.0; // 1.0 = Water
 
-    // Stem hydraulic capacity [mol m-3 MPa-1]
+    // Stem hydraulic capacitance [mol m-3 MPa-1]
     // From Meinzer et al. 2011 Figure 13.2
     // Range: 10 - 500 kg H2O m-3 MPa-1
     // Convert to [mol H2O m-3 MPa-1]
     double stem_hydraulic_capacitance_max = 100 * constants.KG_H2O_To_Mol;
+
+    // Residual stem hydraulic capacitance [mol m-3 MPa-1]
+    // Range: 0 - 30 kg H2O m-3 MPa-1
+    // Convert to [mol H2O m-3 MPa-1]
+    double stem_hydraulic_capacitance_res = 20 * constants.KG_H2O_To_Mol;
+    /// Turgor loss point [MPa]
+    double psi_tlp = -1.2; 
 
     // Xylem saturated hydraulic conductivity [mol m-1 s-1 MPa-1]
     // Typical range between 0.5 and 10 kg m-1 s-1 MPa-1 (Xu et al. 2016)

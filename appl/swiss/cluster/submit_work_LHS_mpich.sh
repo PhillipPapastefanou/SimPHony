@@ -6,10 +6,10 @@
 #SBATCH --get-user-env
 #SBATCH --export=ALL
 #SBATCH --time=200:00:00
-#SBATCH --nodes=8
-#SBATCH --ntasks=512
+#SBATCH --nodes=6
+#SBATCH --ntasks=384
 #SBATCH --partition='work'
-#SBATCH --mem='300G'
+#SBATCH --mem='450G'
 
 module purge
 #module -q load gnu12 R/4.3.2
@@ -28,9 +28,12 @@ source ~/.bash_profile
 echo "QUINCY path: $QUINCY"
 
 source /User/homes/ppapastefanou/miniconda3/etc/profile.d/conda.sh
+#conda activate /Net/Groups/BSI/work_scratch/ppapastefanou/envs/phs
+#conda activate /Net/Groups/BSI/work_scratch/ppapastefanou/envs/QPy_gnu
+#conda activate /Net/Groups/BSI/work_scratch/ppapastefanou/envs/QPy_gnu_mpich
 conda activate /Net/Groups/BSI/work_scratch/ppapastefanou/envs/SimPHony_intel_mpich
 which python
 
 export FI_PROVIDER=tcp
 
-mpirun -n 512 /Net/Groups/BSI/work_scratch/ppapastefanou/envs/SimPHony_intel_mpich/bin/python -u swiss_cc_mpi_cluster_EX_CON.py
+mpirun -n 384 /Net/Groups/BSI/work_scratch/ppapastefanou/envs/SimPHony_intel_mpich/bin/python swiss_cc_mpi_cluster_LHS.py

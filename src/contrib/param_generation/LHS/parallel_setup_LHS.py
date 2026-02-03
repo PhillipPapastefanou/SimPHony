@@ -10,6 +10,7 @@ from SimPHony import DateTime
 from src.contrib.config import Config, Location, Swiss_soil_water_input_type
 
 from src.contrib.param_generation.LHS.LHS_Multi_Swiss_Application_automation_vangenuchten import Calculate_LHS_per_process_swiss_cc_indiv
+from src.contrib.param_generation.LHS.LHS_Multi_Swiss_Application_automation_vangenuchten import Calculate_LHS_per_process_swiss_cc_n_one_indiv
 from src.contrib.param_generation.LHS.LHS_Multi_Swiss_Application_automation_vangenuchten import Calculate_LHS_per_process_swiss_cc_n_std_n
 from src.contrib.param_generation.LHS.LHS_Multi_Hainich_Application_automation_vangenuchten import Calculate_LHS_per_process_hainich
 
@@ -90,6 +91,10 @@ class ParallelSetupWithLHS:
                 Calculate_LHS_per_process_swiss_cc_indiv(self.rank, self.n_sims_per_process, self.config.parameters_list_file)
             elif self.config.swiss_soil_water_input_type == Swiss_soil_water_input_type.NLayers_Mean_N_Std:
                 Calculate_LHS_per_process_swiss_cc_n_std_n(self.rank, self.n_sims_per_process, self.config.parameters_list_file)
+                
+            elif self.config.swiss_soil_water_input_type == Swiss_soil_water_input_type.OneLayer_Mean_One_Std:
+                Calculate_LHS_per_process_swiss_cc_n_one_indiv(self.rank, self.n_sims_per_process, self.config.parameters_list_file)
+                print("Going with: OneLayer Mean One Std")
             else:
                 print("Invalid soil water input type specified. Exiting...")
                 exit(99)
@@ -175,12 +180,19 @@ class ParallelSetupWithLHS:
 
             df_input = pd.read_csv(f"{self.config.parameters_list_file}{self.rank}")
 
-
-        df_input['psi_soil_sat0'] = df_input['psi_soil_sats'].str.split(';', expand=True).values[:, 0].astype(float)
-        df_input['k_soil_sat0'] = df_input['k_soil_sats'].str.split(';', expand=True).values[:, 0].astype(float)
-        df_input['theta_s0'] = df_input['theta_s'].str.split(';', expand=True).values[:, 0].astype(float)
-        df_input['theta_r0'] = df_input['theta_r'].str.split(';', expand=True).values[:, 0].astype(float)
-        df_input['pore_0'] = df_input['pore_size_ind'].str.split(';', expand=True).values[:, 0].astype(float)
+            # if isinstance(df_input['psi_soil_sats'], str):
+            #     df_input['psi_soil_sat0'] = df_input['psi_soil_sats'].str.split(';', expand=True).values[:, 0].astype(
+            #         float)
+            #     df_input['k_soil_sat0'] = df_input['k_soil_sats'].str.split(';', expand=True).values[:, 0].astype(float)
+            #     df_input['theta_s0'] = df_input['theta_s'].str.split(';', expand=True).values[:, 0].astype(float)
+            #     df_input['theta_r0'] = df_input['theta_r'].str.split(';', expand=True).values[:, 0].astype(float)
+            #     df_input['pore_0'] = df_input['pore_size_ind'].str.split(';', expand=True).values[:, 0].astype(float)
+            # else:
+            df_input['psi_soil_sat0'] = df_input['psi_soil_sats']
+            df_input['k_soil_sat0'] = df_input['k_soil_sats']
+            df_input['theta_s0'] = df_input['theta_s']
+            df_input['theta_r0'] = df_input['theta_r']
+            df_input['pore_0'] = df_input['pore_size_ind']
 
         df_c = pd.concat([df_input, df_rmse], axis=1)
 

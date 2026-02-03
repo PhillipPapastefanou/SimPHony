@@ -25,6 +25,8 @@ sys.path.append(os.path.join(THIS_DIR, os.pardir, os.pardir, os.pardir))
 from src.contrib.auxil.setups import Setup
 from src.contrib.auxil.output_df import create_output_df
 from src.contrib.config import Config, Swiss_soil_water_input_type
+from src.core.py.Parameters import Parameters
+
 
 root_path = "/Users/pp/data/Simulations/A08_SimPHony/swiss"
 scenario = ""
@@ -46,26 +48,26 @@ sys.path.append(setup.config.build_folder)
 from SimPHony import Simulation_Single_Swiss
 from SimPHony import DateTime
 
-# Create parameters
-params = Parameters()
+# # Create parameters
+# params = Parameters()
 
-params.canopy_height = 35
+# params.canopy_height = 35
 
-cparameters = params.Create_CParameters()
+# cparameters = params.Create_CParameters()
 
-# Setting up the simulation
-sim = Simulation_Single_Swiss()
-sim.Read_config(setup.config.config_file)
-sim.Init_parameters(cparameters)
-sim.Init_input()
-sim.Set_water_pot_initials(-1.0, -0.2)
+# # Setting up the simulation
+# sim = Simulation_Single_Swiss()
+# sim.Read_config(setup.config.config_file)
+# sim.Init_parameters(cparameters)
+# sim.Init_input()
+# sim.Set_water_pot_initials(-1.0, -0.2)
 
-timestart = DateTime(date_start_str, format)
-timeend = DateTime(date_end_str, format)
+# timestart = DateTime(date_start_str, format)
+# timeend = DateTime(date_end_str, format)
 
-sim.Init_eval(timestart, timeend)
-# Run the simulation
-sim.Run(timestart, timeend)
+# sim.Init_eval(timestart, timeend)
+# # Run the simulation
+# sim.Run(timestart, timeend)
 
 
 from src.core.py.Parameters import Parameters
@@ -84,7 +86,7 @@ params = Parameters()
 
 nsoil_layers = 1
 layer = SoilLayer()
-layer.k_soil_sat =60.0* 0.1 / 100.0 / 86400.0
+layer.k_soil_sat = 60.0* 0.1 / 100.0 / 86400.0
 layer.psi_soil_sat = -0.022 * 1000/9.81
 # layer.camp_b  = 10.4
 layer.theta_s = 0.6
@@ -107,33 +109,39 @@ params.canopy_height = 35
 #params.canopy_height = 15
 params.huber_value = 1.0 / 4000.0
 params.k_xylem_sat = 2.0 * 1000/18.0
-params.stem_hydraulic_capacitance = 180.0 * 1000 / 18
-params.leaf_hydraulic_capacitance = 0.25 * 1000 / 18
+params.stem_hydraulic_capacitance = 220.0 * 1000 / 18
+params.stem_hydraulic_capacitance_res = 20.0 * 1000 / 18
+params.psi_tlp = -1.2
+params.leaf_hydraulic_capacitance = 0.015 * 1000 / 18
 params.g_stem_res = 0.0
 params.ratio_heart_sap_area = 3.0
-params.k_heart_sap = 0.00003
+params.k_heart_sap = 0.0
 #params.k_heart_sap = 0.001
 
-params.g0 = 0.0025
-params.g1 = 4.0
+params.g0 = 0.0015
+params.g1 = 2.5
 params.leaf_area_index = 4.8
-params.psi_leaf_50_close = -1.5
+params.psi_leaf_50_close = -0.5
+
+
 params.d_50_close = 2.0
 params.psi50_xylem = -3.5
-params.psi88_xylem = -5.5
+params.psi88_xylem = -4.5
 params.root_area_index = 4.5
 params.jackson_root_beta = 0.96
 params.tree_density = 34.0 / 10000.0
 params.jmax25 = 71
 params.vmax25 = 42
 params.permanent_xylem_fraction_threshold=True
+params.sustain_xylem_damage=True
 params.soil_water_model_type = Soil_Water_Model_Type.VanGenuchten.name
 
 #params.verbose = True
 
 #params.wcont_sigma_deviation = 1.2
-params.wcont_sigma_deviation = -1.0
-params.soil_profile_index = 2
+params.wcont_sigma_deviation = -0.5
+
+params.soil_profile_index = 1
 
 cparameters = params.Create_CParameters(soil_layers=soil_layers)
 

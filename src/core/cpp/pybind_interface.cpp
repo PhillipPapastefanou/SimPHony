@@ -161,7 +161,9 @@ PYBIND11_MODULE(SimPHony, handle){
 
 
             def_readwrite("soil_layers", &Parameters::soil_layers).
-            def_readwrite("stem_hydraulic_capacitance", &Parameters::stem_hydraulic_capacitance_max).
+            def_readwrite("stem_hydraulic_capacitance_max", &Parameters::stem_hydraulic_capacitance_max).
+            def_readwrite("stem_hydraulic_capacitance_res", &Parameters::stem_hydraulic_capacitance_res).
+            def_readwrite("psi_tlp", &Parameters::psi_tlp).
             def_readwrite("k_xylem_sat", &Parameters::k_xylem_sat).
             def_readwrite("huber_value", &Parameters::huber_value).
             def_readwrite("psi50_xylem", &Parameters::psi50_xylem).

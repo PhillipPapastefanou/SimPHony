@@ -76,11 +76,14 @@ void Parameter_CSV_Reader::parse_parameters(Parameters parameters, bool check_al
         parse_value(params.canopy_height, "canopy_height");
         parse_value(params.eta_LS, "eta_LS");
         parse_value(params.stem_hydraulic_capacitance_max, "stem_hydraulic_capacitance");
+        parse_value(params.stem_hydraulic_capacitance_res, "stem_hydraulic_capacitance_res");
+        parse_value(params.psi_tlp, "psi_tlp");
         parse_value(params.leaf_hydraulic_capacitance, "leaf_hydraulic_capacitance");
         parse_value(params.k_xylem_sat, "k_xylem_sat");
         parse_value(params.huber_value, "huber_value");
         parse_value(params.psi50_xylem, "psi50_xylem");
         parse_value(params.psi88_xylem, "psi88_xylem");
+        parse_value(params.sustain_xylem_damage, "sustain_xylem_damage");
 
         parse_value(params.leaf_area_index,  "leaf_area_index");
         parse_value(params.psi_leaf_50_close,  "psi_leaf_50_close");

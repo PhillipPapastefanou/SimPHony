@@ -153,8 +153,16 @@ double Solver_Indiv_Euler_Imp::d_psi_stem_ground(double psi_leaf, double psi_ste
     // Lateral water flow
     O = (psi_heart_ground - psi_stem) * params.k_heart_sap;
 
+    
+    const double gamma_diff = params.stem_hydraulic_capacitance_max - params.stem_hydraulic_capacitance_res;
+    const double gamma_min = params.stem_hydraulic_capacitance_res;
+    const double ratio = psi_stem / params.psi_tlp;
+    const double slope = 10.0;
+    const double denom = 1.0 + std::pow(ratio, slope);
+    const double gamma_stem =  gamma_diff / denom + gamma_min;
+
     // Return the derivative of the stem water potential
-    return ((G - J + O - T_res)  / (params.stem_hydraulic_capacitance_max * params.canopy_height * params.huber_value));
+    return ((G - J + O - T_res)  / (gamma_stem * params.canopy_height * params.huber_value));
 }
 
 double Solver_Indiv_Euler_Imp::update_transpiration() {

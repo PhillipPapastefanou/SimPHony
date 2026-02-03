@@ -95,6 +95,10 @@ class Parameters:
         # Range: 10 - 500 kg m-3 MPa-1
         c_kg = 200
         self.stem_hydraulic_capacitance = c_kg * 1000.0 / 18.0
+        # Residual stem hydraulic capacitance [mol m-3 MPa-1]
+        self.stem_hydraulic_capacitance_res = 20 * 1000.0 / 18.0
+        # Turgo loss point [MPA]
+        self.psi_tlp = -1.2
         # Xylem saturated Hydraulic conductivity [mol m-2 s-1 MPa]
         # from xu et al 2016: 1.7 - 7.5 kg H2O m-2 s-1
         # 1 mole of water equals 18g
@@ -285,7 +289,9 @@ class Parameters:
 
         cparameters.root_area_index = self.root_area_index
         cparameters.canopy_height = self.canopy_height
-        cparameters.stem_hydraulic_capacitance = self.stem_hydraulic_capacitance
+        cparameters.stem_hydraulic_capacitance_max = self.stem_hydraulic_capacitance
+        cparameters.stem_hydraulic_capacitance_res = self.stem_hydraulic_capacitance_res
+        cparameters.psi_tlp = self.psi_tlp
         cparameters.k_xylem_sat = self.k_xylem_sat
         cparameters.huber_value = self.huber_value
         cparameters.psi50_xylem = self.psi50_xylem
