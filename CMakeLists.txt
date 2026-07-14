@@ -15,7 +15,7 @@ if ("${HOSTSPEC}" STREQUAL "cluster_mpi_bgc")
     set(PYTHON_EXECUTABLE /Net/Groups/BSI/work_scratch/ppapastefanou/envs/SimPHony_intel_mpich/bin/python)
 else()
     # You prob have to adapt this path to match your environemnt
-    set(PYTHON_EXECUTABLE /Users/pp/anaconda3/envs/PHS-post/bin/python)
+    set(PYTHON_EXECUTABLE python)
 endif()
 
 # We cannot use pybind find python utilities as this ususally 'finds' the wrong function on the cluster
