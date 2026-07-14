@@ -8,7 +8,8 @@ from src.contrib.auxil.output_df import create_output_df
 from src.contrib.config import Config, Swiss_soil_water_input_type
 
 root_path = "/Net/Groups/BSI/scratch/ppapastefanou/simulations/SimPHony/swiss_cc"
-scenario = "46_LHS_no_TLP"
+scenario = "45-3_LHS_no_gstem_full"
+scenario = "45-2_LHS_high_wcontvar_full"
 
 
 setup = Setup()
@@ -20,7 +21,7 @@ setup.config.config_file = os.path.join(setup.config.input_path, "config_py.txt"
 setup.config.write_individual_parameter_list_progress = True
 setup.config.nbest = 100
 
-setup.config.nsims = 5000000
+setup.config.nsims = 1000000
 setup.Export()
 
 ncombs_per_parameter = 0

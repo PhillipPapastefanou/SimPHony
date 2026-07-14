@@ -200,7 +200,7 @@ def Calculate_LHS_per_process_swiss_cc_n_one_indiv(rank, ncombs, parameter_fle):
     MPA_TO_HHEAD = 1000.0/9.81
 
     seed   = 12345 * rank + 1321
-    sampler = qmc.LatinHypercube(d = 22, seed= seed)
+    sampler = qmc.LatinHypercube(d = 25, seed= seed)
     sample = sampler.random(n = ncombs)
     sample = sample.T
 
@@ -217,7 +217,8 @@ def Calculate_LHS_per_process_swiss_cc_n_one_indiv(rank, ncombs, parameter_fle):
     pore_size_ind = rescale(slicer.get(), min=0.27, max = 0.29) # 1 sigma
     #pore_size_ind = rescale(slicer.get(), min=0.216, max = 0.325)  # 2 sigmas
     #sigma_wcont    = rescale(slicer.get(), min = -1.5, max = 2.0)
-    sigma_wcont    = rescale(slicer.get(), min = 0, max = 2.0)
+    #sigma_wcont    = rescale(slicer.get(), min = -1.0, max =2.0)
+    sigma_wcont    = rescale(slicer.get(), min = 1.9, max = 1.9)
 
     soil_collection = []
     for i in range(ncombs):
@@ -247,6 +248,7 @@ def Calculate_LHS_per_process_swiss_cc_n_one_indiv(rank, ncombs, parameter_fle):
     sel_cols.append("g1")
     
     g_barks_factor    = rescale(slicer.get(), min = 0.0, max = 0.3)
+    #g_barks_factor    = rescale(slicer.get(), min = 0.0, max = 0.0)
     #k_xylems_sats   = rescale(slicer.get(), min = 0.5, max= 3.0)
     k_xylems_sats   = rescale(slicer.get(), min = 0.3, max= 2.0)
     k_xylems_sats *= KG_TO_MOL
@@ -332,7 +334,7 @@ def Calculate_LHS_per_process_swiss_cc_n_one_indiv(rank, ncombs, parameter_fle):
         Convert_Soil_Parameters(soil_layers=soil_layers, parameters=params)
 
         params.stem_hydraulic_capacitance = cstem_s[i]
-        params.stem_hydraulic_capacitance_res = cstem_s[i]
+        params.stem_hydraulic_capacitance_res = cstem_res_s[i]
         params.psi_tlp = psi_tlp_sap_s[i]
         # params.leaf_area_index = lai_s[i]
         params.g0 = g0_s[i]

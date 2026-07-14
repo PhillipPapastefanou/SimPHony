@@ -9,7 +9,7 @@
 #SBATCH --nodes=6
 #SBATCH --ntasks=384
 #SBATCH --partition='work'
-#SBATCH --mem='450G'
+#SBATCH --mem='300G'
 
 module purge
 #module -q load gnu12 R/4.3.2

@@ -31,11 +31,12 @@ scenario_name = "19_ex_con_2025_full_logit_mean_one"
 scenario_name = "23_ex_con_2025_full_logit_mean_one_wcont"
 scenario_name = "29_ex_con_2025_full_logit_mean_one_wcont_TLP"
 
-root_output_directory = "/Net/Groups/BSI/scratch/ppapastefanou/simulations/SimPHony/"
-scenario_name = "45_LHS_TLP"
+root_output_directory = "/Net/Groups/BSI/scratch/ppapastefanou/simulations/SimPHony/swiss_cc/"
+scenario_name = "45-2_LHS_no_wcontvar_full"
+scenario_name = "45-2_LHS_no_wcontvar_full"
 #scenario_name = "46_LHS_no_TLP"
 nmax = 1000
-N_BEST = 50
+N_BEST = 30
 # root_output_directory = "/Users/pp/data/Simulations/A08_SimPHony/swiss/excon"
 # scenario_name = "old_params_extensive"
 
