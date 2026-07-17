@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Plant Hydraulics — Live Simulation</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uplot@1.6.31/dist/uPlot.min.css">
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    max-width: 1400px;
+    margin: 24px auto;
+    padding: 0 16px;
+  }
+  h1 { font-size: 1.25rem; margin-bottom: 4px; }
+  #status { font-size: 0.85rem; color: #666; margin-bottom: 16px; }
+  #status.error { color: #b00020; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .sidebar {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    position: sticky;
+    top: 16px;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+  }
+  .sidebar h2 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #888;
+    margin: 20px 0 10px;
+  }
+  .sidebar h2:first-child { margin-top: 0; }
+
+  .control { margin-bottom: 14px; }
+  .control label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .control label span.val { font-weight: 400; color: #555; }
+  .control input[type=range] { width: 100%; }
+
+  .main { min-width: 0; }
+  .chart-block { margin-bottom: 28px; }
+  .chart-block h2 { font-size: 0.95rem; margin: 0 0 6px 2px; color: #333; }
+  .chart-block .u-wrap { width: 100%; }
+
+  #debug {
+    white-space: pre-wrap;
+    font-family: ui-monospace, monospace;
+    font-size: 0.75rem;
+    background: #f6f6f6;
+    border-radius: 6px;
+    padding: 8px 10px;
+    display: none;
+    margin-top: 16px;
+  }
+  #debug.show { display: block; }
+</style>
+</head>
+<body>
+
+<h1>Plant Hydraulics — Live Simulation</h1>
+<div id="status">Loading WASM module…</div>
+
+<div class="layout">
+  <div class="sidebar" id="sidebar">
+    <!-- slider controls are generated into here by SLIDER_CONFIGS below -->
+  </div>
+
+  <div class="main">
+    <div class="chart-block">
+      <h2>Stem water potential (psi_stem)</h2>
+      <div id="chart_psi_stem"></div>
+    </div>
+    <div class="chart-block">
+      <h2>Leaf water potential (psi_leaf)</h2>
+      <div id="chart_psi_leaf"></div>
+    </div>
+  </div>
+</div>
+
+<pre id="debug"></pre>
+
+<script src="https://cdn.jsdelivr.net/npm/uplot@1.6.31/dist/uPlot.iife.min.js"></script>
+
+<!--
+  =====================================================================
+  PATH #1 — the Emscripten JS glue file.
+  This <script src="..."> is where its path/filename goes. It cannot be
+  a JS variable because this tag must load and run before the code below
+  exists. Matches your CMakeLists.txt: add_executable(SimPHony_Web ...)
+  with SUFFIX ".js" produces "SimPHony_Web.js" (+ "SimPHony_Web.wasm")
+  next to your build output. Path below matches a build dir at
+  ../build_web relative to this HTML file — adjust if you move either.
+  EXPORT_NAME=SimPHony in your target_link_options is what makes the
+  global factory function be called "SimPHony()" below — if you ever
+  change EXPORT_NAME in CMake, update every "SimPHony(" call in this
+  file to match.
+  =====================================================================
+-->
+<script src="../build_web/SimPHony_Web.js"></script>
+
+<script>
+"use strict";
+
+// =======================================================================
+// PATH #2 and #3 — everything else lives here, in one place.
+//
+// PATH #2: WASM_PATH — where SimPHony_Web.wasm lives, relative to this
+//   HTML file. Leave this alone if it sits right next to
+//   SimPHony_Web.js (the default emcc/CMake output layout, and what
+//   PATH #1 above assumes) — the glue file finds it automatically and
+//   this setting is only used as an explicit override via locateFile().
+//
+// PATH #3: FORCING_BIN_PATH — where the forcing.bin produced by
+//   csv_to_forcing_bin.py lives, relative to this HTML file.
+// =======================================================================
+const WASM_PATH = '../build_web/SimPHony_Web.wasm';
+const FORCING_BIN_PATH = '../forcing.bin'; // adjust if forcing.bin isn't next to this HTML file
+
+// =======================================================================
+// Parameter sliders. Each entry maps a slider directly onto an embind
+// Parameters property of the same name (bindings.cpp / class_<Parameters>).
+// Grouped by heading for the sidebar; add more entries here to expose more
+// tunable fields — no other code needs to change.
+//
+// Defaults marked "(test_hainich_direct.py)" match your validated
+// reference test; others fall back to parameters.h's own defaults since
+// the calibrated value isn't known for that specific field.
+// =======================================================================
+const SLIDER_CONFIGS = [
+  {
+    group: 'Canopy & Roots',
+    key: 'root_area_index', label: 'Root area index',
+    min: 0.5, max: 15, step: 0.1, default: 4.5, // updated reference params
+    format: (v) => v.toFixed(2),
+  },
+  {
+    group: 'Canopy & Roots',
+    key: 'canopy_height', label: 'Canopy height (m)',
+    min: 5, max: 45, step: 0.5, default: 35, // updated reference params
+    format: (v) => v.toFixed(1),
+  },
+  {
+    group: 'Xylem conductivity',
+    key: 'k_xylem_sat', label: 'Xylem sat. conductivity',
+    min: 20, max: 400, step: 5, default: 2.0 * 1000 / 18, // updated reference params
+    format: (v) => v.toFixed(1),
+  },
+  {
+    group: 'Xylem conductivity',
+    key: 'psi50_xylem', label: 'Xylem ψ₅₀ (MPa)',
+    min: -8, max: -0.5, step: 0.1, default: -3.5, // updated reference params
+    format: (v) => v.toFixed(2),
+  },
+  {
+    group: 'Xylem conductivity',
+    key: 'psi88_xylem', label: 'Xylem ψ₈₈ (MPa)',
+    min: -10, max: -1, step: 0.1, default: -4.5, // updated reference params
+    format: (v) => v.toFixed(2),
+  },
+  {
+    group: 'Hydraulic capacitance',
+    key: 'stem_hydraulic_capacitance_max', label: 'Stem capacitance (max)',
+    min: 1000, max: 20000, step: 100, default: 220.0 * 1000 / 18, // updated reference params
+    format: (v) => v.toFixed(0),
+  },
+  {
+    group: 'Hydraulic capacitance',
+    key: 'stem_hydraulic_capacitance_res', label: 'Stem capacitance (res)',
+    min: 0, max: 5000, step: 50, default: 20.0 * 1000 / 18, // updated reference params
+    format: (v) => v.toFixed(0),
+  },
+  {
+    group: 'Hydraulic capacitance',
+    key: 'leaf_hydraulic_capacitance', label: 'Leaf capacitance',
+    min: 0.05, max: 3.0, step: 0.05, default: 0.015 * 1000 / 18, // updated reference params
+    format: (v) => v.toFixed(3),
+  },
+  {
+    group: 'Hydraulic capacitance',
+    key: 'huber_value', label: 'Huber value',
+    min: 0.0001, max: 0.001, step: 0.00001, default: 1 / 4000, // updated reference params
+    format: (v) => v.toFixed(5),
+  },
+  {
+    group: 'Stomatal',
+    key: 'psi_tlp', label: 'Turgor loss point (MPa)',
+    min: -3, max: -0.2, step: 0.05, default: -1.2, // updated reference params
+    format: (v) => v.toFixed(2),
+  },
+  {
+    group: 'Soil',
+    key: 'soil_k_sat_log10', label: 'Soil sat. conductivity (log₁₀ m/s)',
+    // Saturated hydraulic conductivity spans several orders of magnitude
+    // physically (~1e-9 clay to ~1e-3 sand/gravel) — a linear slider can't
+    // usefully cover that, so this one is log10-scaled. Applied uniformly
+    // to all three soil layers via Set_soil_k_sat_log10() (soil_layers
+    // isn't an embind-settable property, so this bypasses the normal
+    // params[cfg.key] = value path — see the "special" handling below).
+    min: -9, max: -3, step: 0.05,
+    default: Math.log10(1.0 / 100.0 / 86400.0), // matches Init_soil_layers_default_hainich()
+    special: 'soil_k_sat_log10',
+    format: (v) => `${v.toFixed(2)} (${Math.pow(10, v).toExponential(2)} m/s)`,
+  },
+];
+
+const statusEl = document.getElementById('status');
+const debugEl = document.getElementById('debug');
+
+function setStatus(msg, isError) {
+  statusEl.textContent = msg;
+  statusEl.classList.toggle('error', !!isError);
+}
+
+function logDebug(msg) {
+  debugEl.classList.add('show');
+  debugEl.textContent += msg + "\n";
+  console.log(msg);
+}
+
+// ---------------------------------------------------------------------
+// Build the sidebar sliders from SLIDER_CONFIGS, grouped under headings.
+// ---------------------------------------------------------------------
+function buildSliders() {
+  const sidebar = document.getElementById('sidebar');
+  let lastGroup = null;
+
+  for (const cfg of SLIDER_CONFIGS) {
+    if (cfg.group !== lastGroup) {
+      const h = document.createElement('h2');
+      h.textContent = cfg.group;
+      sidebar.appendChild(h);
+      lastGroup = cfg.group;
+    }
+
+    const wrap = document.createElement('div');
+    wrap.className = 'control';
+
+    const label = document.createElement('label');
+    label.htmlFor = cfg.key;
+    const valSpan = document.createElement('span');
+    valSpan.className = 'val';
+    valSpan.id = cfg.key + '_val';
+    valSpan.textContent = cfg.format(cfg.default);
+    label.append(cfg.label + ' ', valSpan);
+
+    const input = document.createElement('input');
+    input.type = 'range';
+    input.id = cfg.key;
+    input.min = cfg.min;
+    input.max = cfg.max;
+    input.step = cfg.step;
+    input.value = cfg.default;
+
+    wrap.append(label, input);
+    sidebar.appendChild(wrap);
+
+    cfg.element = input;
+    cfg.valElement = valSpan;
+  }
+}
+
+// ---------------------------------------------------------------------
+// FRC2 binary forcing loader — see csv_to_forcing_bin.py for the format.
+// Single fetch, single malloc, single bulk copy, single call into WASM.
+// ---------------------------------------------------------------------
+const FRC_MAGIC = 'FRC2';
+const HEADER_BYTES = 16;
+
+async function loadForcingData(Module, input, url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`failed to fetch ${url}: ${res.status} ${res.statusText}`);
+  const buf = await res.arrayBuffer();
+  const dv = new DataView(buf);
+
+  const magic = new TextDecoder().decode(new Uint8Array(buf, 0, 4));
+  if (magic !== FRC_MAGIC) throw new Error(`bad forcing binary magic "${magic}", expected "${FRC_MAGIC}"`);
+
+  const n = dv.getInt32(4, true);
+  const nLayers = dv.getInt32(8, true);
+  const bodyBytes = buf.byteLength - HEADER_BYTES;
+  const expectedBytes = n * 4 + n * 4 + n * 4 + n * 4 + n * nLayers * 4;
+  if (bodyBytes !== expectedBytes) {
+    throw new Error(`forcing binary size mismatch: got ${bodyBytes} bytes, expected ${expectedBytes} for n=${n}, nLayers=${nLayers}`);
+  }
+
+  const ptr = Module._malloc(bodyBytes);
+  try {
+    Module.HEAPU8.set(new Uint8Array(buf, HEADER_BYTES), ptr); // one bulk memcpy
+    input.Set_Forcing_Data_Blob(ptr, n, nLayers);
+  } finally {
+    Module._free(ptr);
+  }
+
+  // timestamps live at the very start of the body — keep our own JS-side
+  // copy for the x-axis so we don't need a views getter on the C++ side
+  // just to plot against time.
+  const timestamps = new Int32Array(buf.slice(HEADER_BYTES, HEADER_BYTES + n * 4));
+
+  return { n, nLayers, timestamps };
+}
+
+// ---------------------------------------------------------------------
+// uPlot setup — one chart per output series.
+// ---------------------------------------------------------------------
+function makeChart(containerId, seriesLabel) {
+  const opts = {
+    width: document.querySelector('.main').clientWidth,
+    height: 320,
+    scales: { x: { time: true } },
+    series: [
+      {},
+      { label: seriesLabel, stroke: "#2563eb", width: 1.5 },
+    ],
+    axes: [{}, {}],
+  };
+  return new uPlot(opts, [[], []], document.getElementById(containerId));
+}
+
+// ---------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------
+async function main() {
+  buildSliders();
+
+  if (typeof SimPHony !== 'function') {
+    throw new Error(
+      "SimPHony() not found — check that SimPHony_Web.js is the correct " +
+      "glue file and that CMakeLists.txt still sets " +
+      "-sEXPORT_NAME=SimPHony (or update this file to match whatever " +
+      "your build's factory function is called)."
+    );
+  }
+
+  setStatus('Instantiating WASM module…');
+  const Module = await SimPHony({
+    // Only takes effect if the runtime actually asks to locate the .wasm
+    // file by name (it usually resolves it relative to SimPHony_Web.js on
+    // its own). This is here so WASM_PATH is the one place to change it if
+    // your .wasm ends up somewhere else — e.g. served from a different
+    // folder or a hashed build filename.
+    locateFile: (path) => (path.endsWith('.wasm') ? WASM_PATH : path),
+    // Route native std::cout/std::cerr into the on-page debug panel too,
+    // not just the browser devtools console (Emscripten's default target).
+    print: (text) => logDebug('[stdout] ' + text),
+    printErr: (text) => logDebug('[stderr] ' + text),
+  });
+
+  setStatus('Setting up simulation…');
+  const sim = new Module.Simulation_Single_Hainich();
+
+  // Web equivalents of your native/pybind flow
+  // (sim.Read_config(...) -> sim.Init_parameters(...) -> sim.Init_input() ->
+  // sim.Set_water_pot_initials(...) from test_hainich_direct.py):
+  //
+  // - Init_config_web_hainich() builds a Config in memory (location=Hainich)
+  //   instead of reading one from a file — there's no filesystem to read
+  //   from in the browser.
+  // - Init_input_web() is Init_input() minus the internal Read_N_Parse()
+  //   call, since forcing data comes from the fast binary blob below
+  //   instead of a CSV parsed off disk.
+  sim.Init_config_web_hainich();
+  sim.Init_input_web();
+  const input = sim.Get_Input();
+
+  setStatus(`Loading forcing data (${FORCING_BIN_PATH})…`);
+  const { n, timestamps } = await loadForcingData(Module, input, FORCING_BIN_PATH);
+  logDebug(`Loaded forcing data: n=${n}, range=[${timestamps[0]}, ${timestamps[n - 1]}]`);
+
+  // Restrict the simulated window instead of running the full loaded range —
+  // a full year (~14880 half-hourly steps) took ~500ms per Run(), too slow
+  // for a slider dragged in real time. Adjust these two (0-indexed months,
+  // JS Date convention) to change the window; both must fall within the
+  // loaded forcing range logged above.
+  const SIM_START_MONTH = 7; // June
+  const SIM_END_MONTH_EXCLUSIVE = 9; // September -> covers all of Aug 31
+
+  const dataYear = new Date(timestamps[0] * 1000).getUTCFullYear();
+  const startEpoch = Math.floor(Date.UTC(dataYear, SIM_START_MONTH, 1, 0, 0, 0) / 1000);
+  const endEpoch = Math.floor(Date.UTC(dataYear, SIM_END_MONTH_EXCLUSIVE, 1, 0, 0, 0) / 1000);
+
+  if (startEpoch < timestamps[0] || endEpoch > timestamps[n - 1]) {
+    throw new Error(
+      `Simulation window [${startEpoch}, ${endEpoch}] falls outside the loaded ` +
+      `forcing range [${timestamps[0]}, ${timestamps[n - 1]}] — adjust SIM_START_MONTH/SIM_END_MONTH_EXCLUSIVE.`
+    );
+  }
+
+  // Index into the full timestamps array where our restricted window starts,
+  // so we can slice out the matching x-axis values later regardless of
+  // Output's length (rather than assuming it equals the full forcing n).
+  const startIdx = timestamps.findIndex((t) => t >= startEpoch);
+  logDebug(
+    `Simulation window: ${new Date(startEpoch * 1000).toISOString()} to ` +
+    `${new Date(endEpoch * 1000).toISOString()} (startIdx=${startIdx})`
+  );
+
+  // Baseline parameters once. Sliders only touch the fields listed in
+  // SLIDER_CONFIGS from here on — every other default is left as-is.
+  //
+  // Parameters' own constructor already has sane physical defaults for
+  // most scalar fields (see parameters.h) — the one thing it does NOT
+  // default is soil_layers (starts empty), which the soil water module
+  // needs to not produce NaNs. Init_soil_layers_default_hainich() fills
+  // in three layers matching the forcing data's depths (0.08/0.16/0.32 m)
+  // using the same physical values as test_hainich_direct.py.
+  sim.Init_parameters_default();
+  sim.Init_soil_layers_default_hainich();
+
+  // Reference initial water potentials from your validated test
+  // (test_hainich_direct.py: sim.Set_water_pot_initials(-1.0, -0.2)).
+  sim.Set_water_pot_initials(-1.0, -0.2);
+
+  // Init_eval()/Analyse() load sap-flow/psi-stem reference files to compute
+  // RMSE against measured data — not available in the browser and not
+  // needed just to plot raw model output, so both are skipped here.
+
+  const charts = {
+    psi_stem: makeChart('chart_psi_stem', 'psi_stem'),
+    psi_leaf: makeChart('chart_psi_leaf', 'psi_leaf'),
+  };
+
+  window.addEventListener('resize', () => {
+    const w = document.querySelector('.main').clientWidth;
+    charts.psi_stem.setSize({ width: w, height: 320 });
+    charts.psi_leaf.setSize({ width: w, height: 320 });
+  });
+
+  let rafPending = false;
+
+  function runAndRedraw() {
+    rafPending = false;
+    const frameStart = performance.now();
+
+    // Snapshot the live default Parameters, mutate every field a slider
+    // controls, hand the whole object back. Any field NOT listed in
+    // SLIDER_CONFIGS (soil_layers, dts, ...) stays exactly as
+    // Init_parameters_default()/Init_soil_layers_default_hainich() set it,
+    // since we round-trip the full struct instead of constructing a fresh,
+    // mostly-empty one.
+    //
+    // Sliders flagged `special` don't map onto a plain Parameters property
+    // (e.g. soil_k_sat_log10 touches every entry of soil_layers, which
+    // isn't embind-settable) — they're applied afterward via a dedicated
+    // C++ method instead, once the mutated Parameters are back on `sim`.
+    const paramSetStart = performance.now();
+    const params = sim.Get_parameters();
+    for (const cfg of SLIDER_CONFIGS) {
+      if (cfg.special) continue;
+      const value = parseFloat(cfg.element.value);
+      cfg.valElement.textContent = cfg.format(value);
+      params[cfg.key] = value;
+    }
+    sim.Init_parameters(params);
+    params.delete(); // embind heap-allocates this on every call — free it
+
+    for (const cfg of SLIDER_CONFIGS) {
+      if (!cfg.special) continue;
+      const value = parseFloat(cfg.element.value);
+      cfg.valElement.textContent = cfg.format(value);
+      if (cfg.special === 'soil_k_sat_log10') {
+        sim.Set_soil_k_sat_log10(value);
+      }
+    }
+    const paramSetEnd = performance.now();
+
+    const runStart = performance.now();
+    sim.Run_epoch(startEpoch, endEpoch);
+    const runEnd = performance.now();
+
+    // Get_output() returns a fresh Output by value (one cheap C++-side
+    // copy, not per-element JS marshaling). Reading the *_view() accessors
+    // on it gives zero-copy views into that instance's own memory; we
+    // .slice() them into detached JS arrays before handing to uPlot,
+    // since uPlot retains references between frames and the underlying
+    // WASM object is about to be deleted.
+    const output = sim.Get_output();
+    try {
+      const psiStemView = output.Get_psi_sap_view();
+      const psiLeafView = output.Get_psi_leaf_view();
+
+      // Output only covers our restricted [startEpoch, endEpoch] window, not
+      // the full loaded forcing range, so slice the matching x-axis values
+      // out of the full timestamps array starting at startIdx rather than
+      // assuming output length equals the full forcing n.
+      const len = psiLeafView.length;
+      let x;
+      if (startIdx >= 0 && startIdx + len <= n) {
+        x = timestamps.subarray(startIdx, startIdx + len);
+      } else {
+        logDebug(`warning: could not align output length ${len} to forcing timestamps (startIdx=${startIdx}), using synthetic time axis`);
+        x = Float64Array.from({ length: len }, (_, i) => startEpoch + i * 1800);
+      }
+
+      charts.psi_stem.setData([x, psiStemView.slice()]);
+      charts.psi_leaf.setData([x, psiLeafView.slice()]);
+    } finally {
+      output.delete();
+    }
+    const drawEnd = performance.now();
+
+    const paramSetMs = (paramSetEnd - paramSetStart).toFixed(1);
+    const runMs = (runEnd - runStart).toFixed(1);
+    const readDrawMs = (drawEnd - runEnd).toFixed(1);
+    const totalMs = (drawEnd - frameStart).toFixed(1);
+    logDebug(`[perf] params=${paramSetMs}ms Run_epoch=${runMs}ms readOutput+draw=${readDrawMs}ms total=${totalMs}ms`);
+
+    setStatus(`Ready (${totalMs}ms)`);
+  }
+
+  function scheduleRun() {
+    if (rafPending) return;
+    rafPending = true;
+    requestAnimationFrame(runAndRedraw);
+  }
+
+  for (const cfg of SLIDER_CONFIGS) {
+    cfg.element.addEventListener('input', scheduleRun);
+  }
+
+  // initial run so charts aren't empty on load
+  scheduleRun();
+}
+
+main().catch(err => {
+  setStatus('Error — see debug output below', true);
+  logDebug(String(err && err.stack ? err.stack : err));
+  console.error(err);
+});
+</script>
+</body>
+</html>

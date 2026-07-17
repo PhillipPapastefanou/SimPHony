@@ -7,7 +7,9 @@
 #include <string>
 #include "../framework/date_time.h"
 #include "../framework/parameters.h"
-#include <emscripten/val.h>   
+#ifdef __EMSCRIPTEN__
+#include <emscripten/val.h>
+#endif 
 
 using std::vector;
 class Output {
@@ -86,9 +88,14 @@ public:
 
     void Export_CSV(std::string filename);
 
+
+    #ifdef __EMSCRIPTEN__
     emscripten::val Get_T_view() const;
     emscripten::val Get_J_view() const;
     emscripten::val Get_psi_leaf_view() const;
+    emscripten::val Get_psi_sap_view() const;
+    #endif
+
 
 
 private:

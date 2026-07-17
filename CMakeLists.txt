@@ -52,12 +52,15 @@ if(EMSCRIPTEN)
     
     #  Emscripten Linker Flags
     target_link_options(SimPHony_Web PRIVATE 
-        "--bind"
-        "-sMODULARIZE=1"
-        "-sEXPORT_NAME=SimPHony"
-        "-sALLOW_MEMORY_GROWTH=1"
-        "-O3"
-    )
+    "--bind"
+    "-sMODULARIZE=1"
+    "-sEXPORT_NAME=SimPHony"
+    "-sALLOW_MEMORY_GROWTH=0"
+    "-sINITIAL_MEMORY=67108864"
+    "-sEXPORTED_FUNCTIONS=['_malloc','_free']"
+    "-sEXPORTED_RUNTIME_METHODS=['HEAPU8','HEAPF32','HEAP32']"
+    "-O3"
+)
 
 else()
     message(STATUS "Building Python Extension with PyBind11")

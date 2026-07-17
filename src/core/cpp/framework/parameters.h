@@ -114,7 +114,7 @@ public:
     // Conductivity or diffusivity between sap and heartwood [mol m-1 s-1 MPa-1]
     // Todo ensure if its bulk water transport or a diffusive process or both?
     // Futhermore also take care of all the units and areas this water is flowing through
-    double k_heart_sap = 10.0;
+    double k_heart_sap = 0.0;
 
     // Xylem water potential at loss of 50% conductivity [MPa]
     double psi50_xylem = -3.5;

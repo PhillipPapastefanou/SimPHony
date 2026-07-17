@@ -58,6 +58,13 @@ EMSCRIPTEN_BINDINGS(simphony_web_module) {
         .property("soil_water_type", &Parameters::soil_water_type)
         .property("psi_tlp", &Parameters::psi_tlp)
         .property("tree_density", &Parameters::tree_density)
+        .property("k_xylem_sat", &Parameters::k_xylem_sat)
+        .property("huber_value", &Parameters::huber_value)
+        .property("stem_hydraulic_capacitance_max", &Parameters::stem_hydraulic_capacitance_max)
+        .property("stem_hydraulic_capacitance_res", &Parameters::stem_hydraulic_capacitance_res)
+        .property("leaf_hydraulic_capacitance", &Parameters::leaf_hydraulic_capacitance)
+        .property("psi50_xylem", &Parameters::psi50_xylem)
+        .property("psi88_xylem", &Parameters::psi88_xylem)
         // Add any other properties you want to adjust from the web UI here
         ;
 
@@ -67,7 +74,9 @@ EMSCRIPTEN_BINDINGS(simphony_web_module) {
     class_<Input_Hainich>("Input_Hainich")
         // Allow JS to inject the data directly
         .function("Set_Forcing_Data", &Input_Hainich::Set_Forcing_Data)
-        .function("Set_Forcing_Data_Fast", &Input_Hainich::Set_Forcing_Data_Fast);
+        .function("Set_Forcing_Data_Fast", &Input_Hainich::Set_Forcing_Data_Fast)
+        .function("Set_Forcing_Data_Blob", &Input_Hainich::Set_Forcing_Data_Blob);   // add
+;
 
     class_<Output>("Output")
         // Expose getters so JS can extract the results
@@ -77,19 +86,30 @@ EMSCRIPTEN_BINDINGS(simphony_web_module) {
         .function("Get_psi_leaf", &Output::Get_psi_leaf)
         .function("Get_gs", &Output::Get_gs)
 
-        .function("Get_T_view", &Output::Get_T_view)        
-        .function("Get_J_view", &Output::Get_J_view)         
+        .function("Get_T_view", &Output::Get_T_view)
+        .function("Get_J_view", &Output::Get_J_view)
         .function("Get_psi_leaf_view", &Output::Get_psi_leaf_view)
+        .function("Get_psi_sap_view", &Output::Get_psi_sap_view)
         ;
 
     // ==========================================
     // 5. SIMULATION CLASSES (Base & Derived)
     // ==========================================
-    class_<Simulation_Single>("Simulation_Single")
-        // Base class handles parameter init, running, and getting output
-        .function("Init_parameters", &Simulation_Single::Init_parameters)
-        .function("Run", &Simulation_Single::Run)
-        .function("Get_output", &Simulation_Single::Get_output);
+class_<Simulation_Single>("Simulation_Single")
+    .function("Init_input", &Simulation_Single::Init_input)
+    .function("Init_config_web_hainich", &Simulation_Single::Init_config_web_hainich)
+    .function("Init_input_web", &Simulation_Single::Init_input_web)
+    .function("Init_parameters", &Simulation_Single::Init_parameters)
+    .function("Init_parameters_default", &Simulation_Single::Init_parameters_default) 
+    .function("Init_soil_layers_default_hainich", &Simulation_Single::Init_soil_layers_default_hainich)  // add
+    .function("Set_water_pot_initials", &Simulation_Single::Set_water_pot_initials)     // add
+    .function("Set_soil_k_sat_log10", &Simulation_Single::Set_soil_k_sat_log10)
+    .function("Run", &Simulation_Single::Run)
+    .function("Run_epoch", &Simulation_Single::Run_epoch)
+    .function("Get_parameters", &Simulation_Single::Get_parameters)
+    .function("Init_eval_epoch", &Simulation_Single::Init_eval_epoch)
+    .function("Get_output", &Simulation_Single::Get_output);
+
 
     class_<Simulation_Single_Hainich, base<Simulation_Single>>("Simulation_Single_Hainich")
         .constructor<>()

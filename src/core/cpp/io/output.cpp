@@ -4,11 +4,12 @@
 
 #include "output.h"
 #include <iostream>
+#ifdef __EMSCRIPTEN__
 #include <emscripten/val.h>
 
 using emscripten::val;
 using emscripten::typed_memory_view;
-
+#endif
 Output::Output(const Parameters& parameters):parameters(parameters) {
 
 }
@@ -209,7 +210,7 @@ vector<float> Output::Get_J_per_area() const {
     return Ja_adapted;
 }
 
-
+#ifdef __EMSCRIPTEN__
 val Output::Get_T_view() const {
     return val(typed_memory_view(Ta.size(), Ta.data()));
 }
@@ -219,7 +220,10 @@ val Output::Get_J_view() const {
 val Output::Get_psi_leaf_view() const {
     return val(typed_memory_view(psi_leaf_a.size(), psi_leaf_a.data()));
 }
-
+val Output::Get_psi_sap_view() const {
+    return val(typed_memory_view(psi_sap_ground_a.size(), psi_sap_ground_a.data()));
+}
+#endif
 
 void Output::Clear() {
     times.clear();

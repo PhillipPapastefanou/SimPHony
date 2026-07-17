@@ -94,6 +94,13 @@ void Model::Run(DateTime begin, DateTime end) {
     // Time difference in seconds to t0
     ts = begin - begin_available ;
 
+
+    std::cout << "AHLLO begin.t=" << begin.t << " end.t=" << end.t
+          << " begin_available.t=" << begin_available.t
+          << " end_available.t=" << end_available.t
+          << " delta_Ts=" << delta_Ts << " nsteps=" << nsteps
+          << " ts=" << ts << std::endl;
+
     // Initialise assimlation module
     Assimi_Farquar assimilation(params);
 

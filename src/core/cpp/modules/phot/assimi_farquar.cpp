@@ -121,6 +121,12 @@ void Assimi_Farquar::Update_photosynthesis(double ppfd, double catm, double gs, 
     double Km = KmTemp(tleaf, O2_conc);
     double Vmax = VmaxTemp(parameters.vmax25, tleaf);
     double Jmax = JmaxTemp(parameters.jmax25, tleaf);
+    Update_photosynthesis_precomputed(ppfd, catm, gs, GT, Km, Vmax, Jmax);
+}
+
+void Assimi_Farquar::Update_photosynthesis_precomputed(double ppfd, double catm, double gs,
+                                                         double GT, double Km, double Vmax, double Jmax)
+                                            {
     double x,x1,e,fx,fx1;
     x1 = 0.0;//initial guess
     e = 0.001; // accuracy in micromol * mol-1
@@ -149,13 +155,22 @@ Assimi_Farquar::Assimi_Farquar(const Parameters &parameters): parameters(paramet
 
 void Assimi_Farquar::Solve_Anet_gs(double ppfd, double catm, double vpd, double tleaf,
                                    double beta) {
+    // tleaf (and therefore GT/Km/Vmax/Jmax) is fixed for this whole call —
+    // compute the temperature-dependent terms once instead of recomputing
+    // them (6 exp() calls) on every outer iteration below, which previously
+    // ran up to 100 times per timestep for an identical result each time.
+    double GT = gammaTemp(tleaf);
+    double Km = KmTemp(tleaf, O2_conc);
+    double Vmax = VmaxTemp(parameters.vmax25, tleaf);
+    double Jmax = JmaxTemp(parameters.jmax25, tleaf);
+
     double gs_prev = 0.0;
     gs = 0.1;
     bool converged = false;
     const double EPS = 1E-6;
     int MAXITER = 100;
     for (int i = 0; i < MAXITER; ++i) {
-        Update_photosynthesis(ppfd, catm, gs, tleaf);
+        Update_photosynthesis_precomputed(ppfd, catm, gs, GT, Km, Vmax, Jmax);
         gs_prev = gs;
         gs = Update_gs(beta, An, catm, vpd);
         if (std::abs(gs-gs_prev) < EPS){

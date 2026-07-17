@@ -56,6 +56,16 @@ private:
     const double quantumYield = 0.3; //mol photon * mol-1 electron
     const double lightResponseCurvature = 0.9;
 
+    // Same computation as Update_photosynthesis(), but takes the
+    // temperature-dependent terms (GT, Km, Vmax, Jmax) as arguments instead
+    // of recomputing them from tleaf every call. Solve_Anet_gs() calls this
+    // in its outer gs/An loop, where tleaf (and therefore GT/Km/Vmax/Jmax)
+    // is constant across all iterations — Update_photosynthesis() itself is
+    // left untouched since it's called directly elsewhere (unit tests) and
+    // must keep its existing self-contained behavior.
+    void Update_photosynthesis_precomputed(double ppfd, double catm, double gs,
+                                            double GT, double Km, double Vmax, double Jmax);
+
     double gammaTemp(double Tleaf);
     double KmTemp(double Tleaf, double Oi);
     double KoTemp(double Tleaf);

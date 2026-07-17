@@ -6,6 +6,7 @@
 #include "../io/input_swiss_mult_soils.h"
 #include "../io/input_hainich.h"
 #include "parameter_csv_reader.h"
+#include <cmath>
 
 Simulation_Single::Simulation_Single() {
 
@@ -30,6 +31,60 @@ void Simulation_Single::Init_input() {
         input = std::make_unique<Input_Hainich>(*config);
 
     input->Read_N_Parse();
+}
+void Simulation_Single::Init_config_web_hainich() {
+    config = std::make_unique<Config>();
+    config->location = Location::Hainich;
+}
+
+void Simulation_Single::Init_input_web() {
+    if (config == nullptr){
+        std::cout << "Config has not been specified. Call Init_config_web_hainich() first." << std::endl;
+        exit(99);
+    }
+    if (config->location == Location::Swiss_cc)
+        input = std::make_unique<Input_Swiss_Multi_Soils>(*config);
+    else if (config->location == Location::Hainich)
+        input = std::make_unique<Input_Hainich>(*config);
+    // Deliberately no input->Read_N_Parse() — the web build supplies forcing
+    // data via Set_Forcing_Data_Blob() from a pre-converted binary instead of
+    // parsing a CSV off a filesystem that doesn't exist in the browser.
+}
+
+
+void Simulation_Single::Init_soil_layers_default_hainich() {
+    if (parameters == nullptr) {
+        std::cout << "Parameters have not been specified. Call Init_parameters_default() first." << std::endl;
+        exit(99);
+    }
+
+    Soil_layer layer{};
+    layer.k_soil_sat = 1.0 / 100.0 / 86400.0; // 1 cm/day -> m/s
+    layer.psi_soil_sat = -0.5;
+    layer.theta_s = 0.48;
+    layer.theta_r = 0.05;
+    layer.pore_size_ind = 0.6;
+    layer.organic_matter_fraction = 0.0;
+    layer.sand_fraction = 0.0;
+    layer.clay_fraction = 0.0;
+
+    parameters->soil_layers.clear();
+
+    Soil_layer l0 = layer; l0.depth = 0.08; parameters->soil_layers.push_back(l0);
+    Soil_layer l1 = layer; l1.depth = 0.16; parameters->soil_layers.push_back(l1);
+    Soil_layer l2 = layer; l2.depth = 0.32; parameters->soil_layers.push_back(l2);
+}
+
+
+void Simulation_Single::Set_soil_k_sat_log10(double log10_k_soil_sat) {
+    if (parameters == nullptr) {
+        std::cout << "Parameters have not been specified. Call Init_parameters_default() first." << std::endl;
+        exit(99);
+    }
+    const double k = std::pow(10.0, log10_k_soil_sat);
+    for (auto& layer : parameters->soil_layers) {
+        layer.k_soil_sat = k;
+    }
 }
 
 void Simulation_Single::Init_parameters_default() {
@@ -69,7 +124,6 @@ void Simulation_Single::Run(DateTime timestart, DateTime timeend) {
     model = std::make_unique<Model>(*parameters, *input, *config);
     model->Set_derived_parameters();
     model->Set_initial_conditions(psi_leaf_init, psi_stem_init);
-
     model->Run(timestart,timeend);
 }
 

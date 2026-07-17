@@ -27,8 +27,8 @@ void Input_Hainich::Set_Forcing_Data(const vector<long>& timestamps,
     for (size_t i = 0; i < timestamps.size(); ++i) {
 
 
-        //DateTime dt(timestamps[i]); 
-        //this->dates.push_back(dt);
+        DateTime dt(timestamps[i]); 
+        this->dates.push_back(dt);
 
 
         this->vpd.push_back(vpd_in[i] * 1000.0);
@@ -97,27 +97,25 @@ void Input_Hainich::Read_N_Parse() {
 
     forcing_parser = std::make_unique<InputCollection>(config.forcing_file.value, true, ',');
 
-    vector<int> forcing_indexes= {2,6,7,8,9 };
+    vector<int> forcing_indexes= {1, 2, 6, 7, 8, 9 }; // added 1 = Ta_4400 (air temperature)
     string format = "%Y-%m-%d %H:%M:%S";
     forcing_parser->init_regular("datetime", format);
     vector<vector<float> > forcing_input = forcing_parser->get_data(forcing_indexes);
     DateTime t0_f = forcing_parser->dates.front();
     DateTime tz_f = forcing_parser->dates.back();
 
-    //
     for (int i =0; i < forcing_parser->dates.size(); ++i) {
-        double rad_d = forcing_input[i][1];
+        double rad_d = forcing_input[i][2]; // was [1] — SWDR_4400 shifted from index 1 to 2
         this->rad.push_back(rad_d);
     }
 
-    // Slice forcing input according to indexes as we might have different dates
-    // for swc and other
     for (int i =0; i < forcing_parser->dates.size(); ++i) {
         dates.push_back(forcing_parser->dates[i]);
-        this->vpd.push_back(forcing_input[i][0] * 1000.0);
+        this->temp_air.push_back(forcing_input[i][0]);        // NEW — Ta_4400
+        this->vpd.push_back(forcing_input[i][1] * 1000.0);    // was [0] — VPD shifted to index 1
         this->sw_rad.push_back(rad[i]);
 
-        vector<float> theta_run(forcing_input[i].begin() + 2, forcing_input[i].end());
+        vector<float> theta_run(forcing_input[i].begin() + 3, forcing_input[i].end()); // was +2 — now skip Ta, VPD, SWDR
 
         for (auto& value: theta_run) {
             value /= 100;

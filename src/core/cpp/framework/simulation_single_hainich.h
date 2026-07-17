@@ -21,5 +21,6 @@ private:
     std::unique_ptr<TimeSeries> sap_series;
     std::unique_ptr<TimeSeries> psi_stem_series;
     std::unique_ptr<AnalysisHainich> analysis;
+    
 };
 

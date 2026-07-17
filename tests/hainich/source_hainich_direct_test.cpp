@@ -80,8 +80,10 @@ TEST(Hainich_tests, Apply_model_direct) {
     auto start_clock = std::chrono::high_resolution_clock::now();
     Model model(params, input, config);
 
+    std::cout << "A";
     model.Set_derived_parameters();
     model.Set_initial_conditions(psi_leaf_init, psi_stem_init);
+    std::cout << "b";
 
     DateTime begin =  DateTime("2023-04-01 00:00:00", "%Y-%m-%d %H:%M:%S");
     DateTime end   =  DateTime("2023-11-01 00:00:00", "%Y-%m-%d %H:%M:%S");
@@ -89,8 +91,10 @@ TEST(Hainich_tests, Apply_model_direct) {
     sap_data.GenerateModelObsIndexesSameRes(begin, end, params.dts);
     psi_stem_data.GenerateModelObsIndexes(begin, end, params.dts);
 
-    model.Run(begin, end);
 
+    
+    model.Run(begin, end);
+    std::cout << "c";
     AnalysisHainich analysis(model, params);
     analysis.CompareSapwood(sap_data);
 
