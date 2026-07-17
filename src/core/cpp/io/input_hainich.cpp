@@ -10,6 +10,88 @@
 Input_Hainich::Input_Hainich(const Config& config) : Input(config) {
 
 }
+void Input_Hainich::Set_Forcing_Data(const vector<long>& timestamps, 
+                                     const vector<float>& vpd_in, 
+                                     const vector<float>& rad_in, 
+                                     const vector<vector<float>>& theta_in) {
+    
+    this->dates.clear();
+    this->vpd.clear();
+    this->sw_rad.clear();
+    this->theta_per_layer.clear();
+    this->temp_air.clear();
+
+    const double KTOC = 273.15;
+
+
+    for (size_t i = 0; i < timestamps.size(); ++i) {
+
+
+        //DateTime dt(timestamps[i]); 
+        //this->dates.push_back(dt);
+
+
+        this->vpd.push_back(vpd_in[i] * 1000.0);
+        this->sw_rad.push_back(rad_in[i]);
+
+        vector<float> theta_run = theta_in[i];
+        for (auto& value : theta_run) {
+            value /= 100.0f;
+        }
+        this->theta_per_layer.push_back(theta_run);
+
+
+        double air_temp_kelv = 300;
+        this->temp_air.push_back(air_temp_kelv - KTOC );
+    }
+}
+
+
+void Input_Hainich::Set_Forcing_Data_Fast(uintptr_t ts_ptr, uintptr_t vpd_ptr,
+                                           uintptr_t rad_ptr, uintptr_t theta_ptr,
+                                           int n, int n_layers) {
+    auto* ts   = reinterpret_cast<int32_t*>(ts_ptr);
+    auto* vpd  = reinterpret_cast<float*>(vpd_ptr);
+    auto* rad  = reinterpret_cast<float*>(rad_ptr);
+    auto* theta= reinterpret_cast<float*>(theta_ptr);
+
+    dates.clear(); 
+    this->vpd.clear(); 
+    sw_rad.clear();
+    theta_per_layer.clear();
+    temp_air.clear();
+
+    for (int i = 0; i < n; ++i) {
+        //dates.emplace_back(ts[i]);
+        this->vpd.push_back(vpd[i] * 1000.0f);
+        sw_rad.push_back(rad[i]);
+        vector<float> row(theta + i*n_layers, theta + (i+1)*n_layers);
+        for (auto& v : row) v /= 100.0f;
+        theta_per_layer.push_back(std::move(row));
+        temp_air.push_back(300.0 - 273.15);
+    }
+}
+void Input_Hainich::Set_Forcing_Data_Blob(uintptr_t blob_ptr, int n, int n_layers) {
+    auto* base  = reinterpret_cast<uint8_t*>(blob_ptr);
+    auto* ts    = reinterpret_cast<int32_t*>(base);
+    auto* vpd   = reinterpret_cast<float*>(base + n * 4);
+    auto* rad   = reinterpret_cast<float*>(base + n * 8);
+    auto* temp  = reinterpret_cast<float*>(base + n * 12);
+    auto* theta = reinterpret_cast<float*>(base + n * 16); 
+
+    dates.clear(); this->vpd.clear(); sw_rad.clear();
+    theta_per_layer.clear(); temp_air.clear();
+
+    for (int i = 0; i < n; ++i) {
+        dates.push_back(DateTime(static_cast<time_t>(ts[i])));
+        this->vpd.push_back(vpd[i] * 1000.0f);
+        sw_rad.push_back(rad[i]);
+        temp_air.push_back(temp[i]);   // CSV is already deg C, no conversion needed
+        vector<float> row(theta + i*n_layers, theta + (i+1)*n_layers);
+        for (auto& v : row) v /= 100.0f;
+        theta_per_layer.push_back(std::move(row));
+    }
+}
 
 void Input_Hainich::Read_N_Parse() {
 

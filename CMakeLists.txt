@@ -18,18 +18,14 @@ else()
     set(PYTHON_EXECUTABLE python)
 endif()
 
-# We cannot use pybind find python utilities as this ususally 'finds' the wrong function on the cluster
-set(PYBIND11_FINDPYTHON OFF)
-set(USE_PYBIND11 ON)
-
-find_package(pybind11 CONFIG REQUIRED)
-message(STATUS "Found pybind11 v${pybind11_VERSION}: ${pybind11_INCLUDE_DIRS}")
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 message("Setting up build files for SimPHony version ${PROJECT_VERSION}")
-if(APPLE)
+if(EMSCRIPTEN)
+    message("Using Emscripten (WebAssembly) - skipping OS-specific system libraries")
+elseif(APPLE)
     message("Using Mac")
 elseif (UNIX)
     link_libraries(stdc++fs)
@@ -38,15 +34,48 @@ else()
     message("Using Win")
 endif()
 
-# ----------------------------------------------------
-# Setting up SimPHony main model interface with python
-# ----------------------------------------------------
+
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 add_subdirectory(src/core/cpp)
-# Specify the executable to build, and which sources to build it from
-pybind11_add_module(SimPHony src/core/cpp/pybind_interface.cpp
-        ${sources})
+
+if(EMSCRIPTEN)
+    message(STATUS "Building for WebAssembly with Emscripten")
+    
+    # Create the WebAssembly executable using your new bindings file
+    # (Replace 'bindings.cpp' with whatever you named the embind file)
+    add_executable(SimPHony_Web src/core/cpp/bindings.cpp ${sources})
+
+    
+    # Tell Emscripten to use Embind and output a .js file (which auto-generates the .wasm)
+    set_target_properties(SimPHony_Web PROPERTIES SUFFIX ".js")
+    
+    #  Emscripten Linker Flags
+    target_link_options(SimPHony_Web PRIVATE 
+        "--bind"
+        "-sMODULARIZE=1"
+        "-sEXPORT_NAME=SimPHony"
+        "-sALLOW_MEMORY_GROWTH=1"
+        "-O3"
+    )
+
+else()
+    message(STATUS "Building Python Extension with PyBind11")
+    
+    # We cannot use pybind find python utilities as this usually 'finds' the wrong function on the cluster
+    set(PYBIND11_FINDPYTHON OFF)
+    set(USE_PYBIND11 ON)
+
+    find_package(pybind11 CONFIG REQUIRED)
+    message(STATUS "Found pybind11 v${pybind11_VERSION}: ${pybind11_INCLUDE_DIRS}")
+
+    # Specify the executable to build, and which sources to build it from
+    pybind11_add_module(SimPHony src/core/cpp/pybind_interface.cpp ${sources})
+endif()
+
+
+
+
 
 # ----------------------------------------------------
 # Setting up google tests

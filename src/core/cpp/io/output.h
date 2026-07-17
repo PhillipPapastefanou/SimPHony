@@ -7,6 +7,7 @@
 #include <string>
 #include "../framework/date_time.h"
 #include "../framework/parameters.h"
+#include <emscripten/val.h>   
 
 using std::vector;
 class Output {
@@ -84,6 +85,10 @@ public:
     const vector<int> &Get_steps_psi_stem() const;
 
     void Export_CSV(std::string filename);
+
+    emscripten::val Get_T_view() const;
+    emscripten::val Get_J_view() const;
+    emscripten::val Get_psi_leaf_view() const;
 
 
 private:

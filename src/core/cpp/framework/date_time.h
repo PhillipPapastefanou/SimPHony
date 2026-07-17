@@ -13,6 +13,7 @@ public:
     DateTime(tm tms);
     DateTime(std::string date_string, std::string format);
     DateTime(const DateTime& dateTime, long seconds);
+    explicit DateTime(time_t epoch_seconds);
     DateTime AddSeconds(long seconds);
     ~DateTime();
     void print();
@@ -30,6 +31,7 @@ public:
 
 private:
     void create_time();
+    void populate_fields(); 
 };
 
 long operator -(DateTime t1, DateTime t2);

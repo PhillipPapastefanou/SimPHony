@@ -25,6 +25,8 @@ public:
 
     Output Get_output();
 
+    Input* Get_Input_Base_Pointer() { return input.get(); }
+
 protected:
     double psi_leaf_init;
     double psi_stem_init;

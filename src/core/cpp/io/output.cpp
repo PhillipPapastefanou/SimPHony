@@ -4,6 +4,10 @@
 
 #include "output.h"
 #include <iostream>
+#include <emscripten/val.h>
+
+using emscripten::val;
+using emscripten::typed_memory_view;
 
 Output::Output(const Parameters& parameters):parameters(parameters) {
 
@@ -204,6 +208,18 @@ const vector<DateTime> &Output::Get_dates() const {
 vector<float> Output::Get_J_per_area() const {
     return Ja_adapted;
 }
+
+
+val Output::Get_T_view() const {
+    return val(typed_memory_view(Ta.size(), Ta.data()));
+}
+val Output::Get_J_view() const {
+    return val(typed_memory_view(Ja.size(), Ja.data()));
+}
+val Output::Get_psi_leaf_view() const {
+    return val(typed_memory_view(psi_leaf_a.size(), psi_leaf_a.data()));
+}
+
 
 void Output::Clear() {
     times.clear();

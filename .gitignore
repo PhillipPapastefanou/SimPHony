@@ -1,6 +1,7 @@
 cmake-build-release
 cmake-build-debug
 build
+build_web
 unsort
 appl/unsort
 examples/hainich/local/plt
