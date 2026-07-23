@@ -15,17 +15,22 @@ DateTime::~DateTime() {
 
 }
 
-DateTime::DateTime(const DateTime &dateTime, long seconds) {
-
-    tmt = dateTime.tmt;
-    tmt.tm_sec = dateTime.tmt.tm_sec + seconds;
-    create_time();
+DateTime::DateTime(const DateTime &dateTime, long seconds) : DateTime(static_cast<time_t>(dateTime.t + seconds)) {
 }
 
 DateTime DateTime::AddSeconds(long seconds) {
-    tm tm_new = this->tmt;
-    tm_new.tm_sec += seconds;
-    return DateTime(tm_new);
+    // Deliberately epoch-based (t + seconds, then re-derive the calendar
+    // fields via the time_t constructor's gmtime_r) rather than adding into
+    // tmt.tm_sec and re-normalizing via timegm(). Model::Run() calls this
+    // with `ts`, a cumulative offset that reaches into the tens of millions
+    // of seconds over a multi-month run -- timegm()'s overflow
+    // normalization for a tm_sec that large turned out to be
+    // platform-dependent: correct on macOS's libc, but silently stuck
+    // (hour/min never advanced) under Emscripten's musl libc, which broke
+    // the once-daily stomatal-closure update in solver_indiv_eulerimp.cpp
+    // in the WASM build specifically. Epoch arithmetic sidesteps the whole
+    // overflow-normalization question.
+    return DateTime(static_cast<time_t>(this->t + seconds));
 }
 
 DateTime::DateTime(tm tm) {

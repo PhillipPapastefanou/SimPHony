@@ -67,6 +67,25 @@ public:
     Parameters();
     ~Parameters();
     void Set_derived();
+
+    // Soil layer setters below apply a single value uniformly to every
+    // entry of soil_layers (layer depth stays per-layer, set separately by
+    // whatever builds soil_layers). They live here rather than on
+    // Simulation_Single because soil_layers is parameter data Parameters
+    // already owns; Simulation_Single is orchestration only. k_soil_sat is
+    // set as log10(k_soil_sat [m s-1]) since saturated hydraulic
+    // conductivity spans several orders of magnitude physically (~1e-9
+    // clay to ~1e-3 sand/gravel), which a linear control can't usefully
+    // cover.
+    void Set_soil_k_sat_log10(double log10_k_soil_sat);
+    void Set_soil_psi_soil_sat(double psi_soil_sat);
+    void Set_soil_theta_s(double theta_s);
+    void Set_soil_theta_r(double theta_r);
+    void Set_soil_pore_size_ind(double pore_size_ind);
+    void Set_soil_camp_b(double camp_b);
+    void Set_soil_organic_matter_fraction(double organic_matter_fraction);
+    void Set_soil_sand_fraction(double sand_fraction);
+    void Set_soil_clay_fraction(double clay_fraction);
     // Universal parameter setting ID
     int id = -1;
     // Root area index [1]
@@ -217,5 +236,6 @@ public:
     std::vector<Soil_layer> soil_layers;
 
 private:
+    void Set_soil_layers_field(double Soil_layer::* member, double value);
 
 };

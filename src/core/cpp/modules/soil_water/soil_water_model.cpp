@@ -30,9 +30,10 @@ vector<vector<double> > Soil_water_module::Get_ks() {
     return ks_2D;
 }
 
-void Soil_water_module::ParseTheta() {
+void Soil_water_module::ParseTheta(int start_idx, int end_idx) {
 
     const vector<vector<float> >& theta_raw_input = input_module.theta_per_layer;
+    const int n = static_cast<int>(theta_raw_input.size());
 
     this->psi_soil_2D.resize(theta_raw_input.size());
     this->ks_2D.resize(theta_raw_input.size());
@@ -51,8 +52,16 @@ void Soil_water_module::ParseTheta() {
 
     theta_2D.resize(theta_raw_input.size());
 
+    // Only the [start_idx, end_idx) sub-range gets populated -- see the
+    // CalculatePsiAndKs() comment in soil_water_model.h. theta_2D/psi_soil_2D/
+    // ks_2D still resize()d to the full series above so absolute indices
+    // used elsewhere (Model::Run) stay valid; entries outside the requested
+    // range are simply never read.
+    const int lo = start_idx > 0 ? start_idx : 0;
+    const int hi = (end_idx < 0 || end_idx > n) ? n : end_idx;
+
     // Loop through timesteps
-    for (int i = 0; i < theta_raw_input.size(); ++i) {
+    for (int i = lo; i < hi; ++i) {
         vector<float> theta_list;
         if (config.swiss_soil_water_input_type.value == Swiss_soil_water_input_type::NLayersIndiv) {
             theta_list.resize(3);

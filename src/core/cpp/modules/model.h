@@ -14,7 +14,15 @@ class Model{
 
 public:
     Model(Parameters& parameters, Input& input, Config& config);
+    // Precalculates soil water potential/conductivity over the *entire*
+    // loaded forcing series. Kept for existing callers (Simulation_Multi,
+    // several tests) that don't know their simulation window up front.
     void Set_derived_parameters();
+    // Same, but restricts the (expensive) soil-water precalculation to
+    // [begin, end] instead of the whole forcing series, since Run(begin, end)
+    // never reads outside that window anyway. Prefer this overload whenever
+    // the window is known ahead of time (e.g. Simulation_Single::Run).
+    void Set_derived_parameters(DateTime begin, DateTime end);
     void Set_initial_conditions(double psi_leaf_zero, double psi_soil_zero);
     void Run(DateTime begin, DateTime end);
     const Output& Get_output() const;
@@ -79,6 +87,12 @@ private:
     Output output;
 
     void add_output();
+
+    // Shared implementation for both Set_derived_parameters() overloads.
+    // soil_start_idx/soil_end_idx are forwarded to
+    // Soil_water_module::CalculatePsiAndKs() -- see its declaration for
+    // what they mean; (0, -1) means "the whole forcing series".
+    void Set_derived_parameters_impl(int soil_start_idx, int soil_end_idx);
 };
 
 

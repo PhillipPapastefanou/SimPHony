@@ -15,14 +15,18 @@ Van_Genuchten::~Van_Genuchten() noexcept {
 }
 
 
-void Van_Genuchten::CalculatePsiAndKs() {
+void Van_Genuchten::CalculatePsiAndKs(int start_idx, int end_idx) {
 
-    ParseTheta();
+    ParseTheta(start_idx, end_idx);
 
     vector<double> psi_row(nsoil);
     vector<double> k_row(nsoil);
 
-    for (int i = 0; i < theta_2D.size(); ++i) {
+    const int n = static_cast<int>(theta_2D.size());
+    const int lo = start_idx > 0 ? start_idx : 0;
+    const int hi = (end_idx < 0 || end_idx > n) ? n : end_idx;
+
+    for (int i = lo; i < hi; ++i) {
         // The loop also reverse the layers to make the top layer be layer one.
         // Top layer must always be the layer 0
         vector<float > theta = theta_2D[i];

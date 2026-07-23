@@ -6,7 +6,6 @@
 #include "../io/input_swiss_mult_soils.h"
 #include "../io/input_hainich.h"
 #include "parameter_csv_reader.h"
-#include <cmath>
 
 Simulation_Single::Simulation_Single() {
 
@@ -76,17 +75,6 @@ void Simulation_Single::Init_soil_layers_default_hainich() {
 }
 
 
-void Simulation_Single::Set_soil_k_sat_log10(double log10_k_soil_sat) {
-    if (parameters == nullptr) {
-        std::cout << "Parameters have not been specified. Call Init_parameters_default() first." << std::endl;
-        exit(99);
-    }
-    const double k = std::pow(10.0, log10_k_soil_sat);
-    for (auto& layer : parameters->soil_layers) {
-        layer.k_soil_sat = k;
-    }
-}
-
 void Simulation_Single::Init_parameters_default() {
     parameters = std::make_unique<Parameters>();
 }
@@ -121,10 +109,20 @@ void Simulation_Single::Run(DateTime timestart, DateTime timeend) {
         std::cout << "Exiting...";
         exit(99);
     }
+    std::cout << "DEBUG Run: before model construction, parameters.get()=" << parameters.get()
+              << " soil_layers.size()=" << parameters->soil_layers.size() << std::endl;
     model = std::make_unique<Model>(*parameters, *input, *config);
-    model->Set_derived_parameters();
+    std::cout << "DEBUG Run: model constructed OK" << std::endl;
+    // Windowed overload: restricts the soil-water precalculation to
+    // [timestart, timeend] instead of the entire loaded forcing series (see
+    // Model::Set_derived_parameters' comment) -- this is the hot path called
+    // on every interactive Run_epoch() from the web dashboard.
+    model->Set_derived_parameters(timestart, timeend);
+    std::cout << "DEBUG Run: Set_derived_parameters(begin,end) returned OK" << std::endl;
     model->Set_initial_conditions(psi_leaf_init, psi_stem_init);
+    std::cout << "DEBUG Run: Set_initial_conditions returned OK" << std::endl;
     model->Run(timestart,timeend);
+    std::cout << "DEBUG Run: model->Run returned OK" << std::endl;
 }
 
 void Simulation_Single::Init_eval(DateTime timestart, DateTime timeend) {

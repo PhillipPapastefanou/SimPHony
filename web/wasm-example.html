@@ -456,8 +456,9 @@ async function main() {
     //
     // Sliders flagged `special` don't map onto a plain Parameters property
     // (e.g. soil_k_sat_log10 touches every entry of soil_layers, which
-    // isn't embind-settable) — they're applied afterward via a dedicated
-    // C++ method instead, once the mutated Parameters are back on `sim`.
+    // isn't embind-settable as a property) — they're applied via a
+    // dedicated Parameters method instead, on this same snapshot, before
+    // it's handed back to Init_parameters().
     const paramSetStart = performance.now();
     const params = sim.Get_parameters();
     for (const cfg of SLIDER_CONFIGS) {
@@ -466,17 +467,16 @@ async function main() {
       cfg.valElement.textContent = cfg.format(value);
       params[cfg.key] = value;
     }
-    sim.Init_parameters(params);
-    params.delete(); // embind heap-allocates this on every call — free it
-
     for (const cfg of SLIDER_CONFIGS) {
       if (!cfg.special) continue;
       const value = parseFloat(cfg.element.value);
       cfg.valElement.textContent = cfg.format(value);
       if (cfg.special === 'soil_k_sat_log10') {
-        sim.Set_soil_k_sat_log10(value);
+        params.Set_soil_k_sat_log10(value);
       }
     }
+    sim.Init_parameters(params);
+    params.delete(); // embind heap-allocates this on every call — free it
     const paramSetEnd = performance.now();
 
     const runStart = performance.now();

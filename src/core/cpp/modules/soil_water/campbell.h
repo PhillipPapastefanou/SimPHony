@@ -10,6 +10,6 @@ public:
     Campbell(const Parameters &parameters, const Input &input, const Config& config);
     ~Campbell() override;
 
-    void CalculatePsiAndKs() override;
+    void CalculatePsiAndKs(int start_idx = 0, int end_idx = -1) override;
 
 };

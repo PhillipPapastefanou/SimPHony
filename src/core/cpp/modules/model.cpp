@@ -1,6 +1,7 @@
 #include "model.h"
 #include <cmath>
 #include <iostream>
+#include <chrono>
 
 #include "soil_water/soil_water_model.h"
 #include "soil_water/saxton.h"
@@ -29,6 +30,32 @@ config(config)
 }
 
 void Model::Set_derived_parameters() {
+    Set_derived_parameters_impl(0, -1);
+}
+
+void Model::Set_derived_parameters(DateTime begin, DateTime end) {
+    // Same index math Run() uses to look up begin_available/time_index,
+    // just done ahead of time so the soil-water precalc below only covers
+    // the steps Run(begin, end) will actually read.
+    const DateTime begin_available = input_module.dates.front();
+    const long ts_begin = begin - begin_available;
+    const long ts_end = end - begin_available;
+    const int soil_start_idx = static_cast<int>(ts_begin / params.dts_input);
+    // +1: inclusive of the last step Run()'s loop can land on after its own
+    // (separately-rounded) nsteps computation.
+    const int soil_end_idx = static_cast<int>(ts_end / params.dts_input) + 1;
+
+    std::cout << "DEBUG Set_derived_parameters(begin,end): dts_input=" << params.dts_input
+              << " ts_begin=" << ts_begin << " ts_end=" << ts_end
+              << " soil_start_idx=" << soil_start_idx << " soil_end_idx=" << soil_end_idx
+              << " dates.size()=" << input_module.dates.size()
+              << " theta_per_layer.size()=" << input_module.theta_per_layer.size()
+              << std::endl;
+
+    Set_derived_parameters_impl(soil_start_idx, soil_end_idx);
+}
+
+void Model::Set_derived_parameters_impl(int soil_start_idx, int soil_end_idx) {
 
     std::string water_model_str;
     switch (params.soil_water_type) {
@@ -53,7 +80,7 @@ void Model::Set_derived_parameters() {
         }
     }
 
-    soil_water_module->CalculatePsiAndKs();
+    soil_water_module->CalculatePsiAndKs(soil_start_idx, soil_end_idx);
     input_k_soil = soil_water_module->Get_ks();
     input_psi_soil = soil_water_module->Get_psi_soil_head();
 
@@ -104,6 +131,17 @@ void Model::Run(DateTime begin, DateTime end) {
     // Initialise assimlation module
     Assimi_Farquar assimilation(params);
 
+    // ---- PROFILE_MODEL_RUN: temporary manual timing, remove when done ----
+    // Coarse per-phase timing without needing a profiler set up. Prints a
+    // summary once at the end of Run(). Delete this block (and the two
+    // timed sections below) once you've moved to a real profiler or are
+    // done investigating.
+    using clock = std::chrono::high_resolution_clock;
+    double ns_assim = 0.0;
+    double ns_solve = 0.0;
+    double ns_output = 0.0;
+    // ------------------------------------------------------------------
+
     for (int i = 0; i < nsteps; ++i) {
 
         DateTime time_current = time_start.AddSeconds(ts);
@@ -129,24 +167,51 @@ void Model::Run(DateTime begin, DateTime end) {
 
         const double vpd_kPa = ivpd / 1000.0;
 
+        // ---- PROFILE_MODEL_RUN ----
+        auto t0 = clock::now();
         assimilation.Solve_Anet_gs(isw_down * 2.0 * 0.2, ica, vpd_kPa, itemp_air,  beta);
+        auto t1 = clock::now();
+        ns_assim += std::chrono::duration<double, std::nano>(t1 - t0).count();
+        // ---------------------------
 
         const double gs = assimilation.Get_Gs();
 
         water_potential_solver->Update_input(ipsi_soil, ik_soil, gs , ivpd, ipressure);
+
+        // ---- PROFILE_MODEL_RUN ----
+        auto t2 = clock::now();
         water_potential_solver->Update_water_potentials(time_current);
+        auto t3 = clock::now();
+        ns_solve += std::chrono::duration<double, std::nano>(t3 - t2).count();
+        // ---------------------------
 
 
+        // ---- PROFILE_MODEL_RUN ----
+        auto t4 = clock::now();
         // Adding variables to up output files
         add_output();
         output.Add_anet(assimilation.Get_An());
 
         // Update_photosythesis the output of the solvers aswell
         water_potential_solver->Update_output(output);
+        auto t5 = clock::now();
+        ns_output += std::chrono::duration<double, std::nano>(t5 - t4).count();
+        // ---------------------------
 
         // Update_photosythesis time step
         ts += dts;
     }
+
+    // ---- PROFILE_MODEL_RUN ----
+    std::cout << "[profile] nsteps=" << nsteps
+              << " Solve_Anet_gs: total=" << (ns_assim / 1e6) << "ms"
+              << " avg=" << (ns_assim / std::max(1, nsteps)) << "ns/step"
+              << " | Update_water_potentials: total=" << (ns_solve / 1e6) << "ms"
+              << " avg=" << (ns_solve / std::max(1, nsteps)) << "ns/step"
+              << " | output_bookkeeping: total=" << (ns_output / 1e6) << "ms"
+              << " avg=" << (ns_output / std::max(1, nsteps)) << "ns/step"
+              << std::endl;
+    // ---------------------------
 
 }
 
@@ -155,17 +220,10 @@ void Model::add_output() {
     output.Add_Timestep(ts);
     output.Add_DateTime(time_start.AddSeconds(ts));
 
-    vector<float> psi_soil_f(ipsi_soil.begin(), ipsi_soil.end());
-    // Convert hydraulic head to MPa
-    for (int i = 0; i < psi_soil_f.size(); ++i) {
-        psi_soil_f[i] *= params.constants.HydraulicHeadInMtoMPa;
-    }
-    output.Add_psi_soil_indiv(psi_soil_f);
-
-    vector<float> ks_soil_f(ik_soil.begin(), ik_soil.end());
-    for (auto& e: ks_soil_f)
-        e *= 1.0;
-    output.Add_ks_indiv(ks_soil_f);
+    // Convert hydraulic head to MPa while appending -- Add_psi_soil_indiv
+    // applies the scale itself, so no intermediate vector is built here.
+    output.Add_psi_soil_indiv(ipsi_soil, params.constants.HydraulicHeadInMtoMPa);
+    output.Add_ks_indiv(ik_soil);
 
     output.Add_vpd(ivpd);
 

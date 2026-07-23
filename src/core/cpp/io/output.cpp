@@ -34,8 +34,8 @@ void Output::Add_O(double O) {
     Oa.push_back(O);
 }
 
-void Output::Add_G_indiv(vector<float> G_indiv) {
-    Gaa.push_back(G_indiv);
+void Output::Add_G_indiv(const vector<double>& G_indiv, double scale) {
+    Gaa.Add_row(G_indiv, scale);
 }
 
 void Output::Add_psi_leaf(float psi_leaf) {
@@ -60,14 +60,14 @@ void Output::Add_psi_heart_ground(float psi_root) {
     psi_heart_ground_a.push_back(psi_root);
 }
 
-void Output::Add_psi_stems_seg(vector<float> psi_stem_seg) {
-    psi_stem_a.push_back(psi_stem_seg);
+void Output::Add_psi_stems_seg(const vector<double>& psi_stem_seg, double scale) {
+    psi_stem_a.Add_row(psi_stem_seg, scale);
 }
 
 
 
-void Output::Add_psi_soil_indiv(vector<float> psi_soil_indiv) {
-    psi_soil_aa.push_back(psi_soil_indiv);
+void Output::Add_psi_soil_indiv(const vector<double>& psi_soil_indiv, double scale) {
+    psi_soil_aa.Add_row(psi_soil_indiv, scale);
 }
 
 void Output::Add_gs(double gs) {
@@ -78,8 +78,8 @@ void Output::Add_beta(double beta) {
     beta_a.push_back(beta);
 }
 
-void Output::Add_ks_indiv(vector<float> ks_indiv) {
-    k_soil_aa.push_back(ks_indiv);
+void Output::Add_ks_indiv(const vector<double>& ks_indiv, double scale) {
+    k_soil_aa.Add_row(ks_indiv, scale);
 }
 
 void Output::Add_vpd(double vpd) {
@@ -121,8 +121,8 @@ const vector<float> &Output::Get_O() const {
 }
 
 
-const vector<vector<float>> &Output::Get_G_indiv() const {
-    return Gaa;
+vector<vector<float>> Output::Get_G_indiv() const {
+    return Gaa.To_nested();
 }
 
 const vector<float> &Output::Get_psi_leaf() const {
@@ -137,8 +137,8 @@ const vector<float> &Output::Get_psi_heart() const {
     return psi_heart_ground_a;
 }
 
-const vector<vector<float> > &Output::Get_psi_soil_indiv() const {
-    return psi_soil_aa;
+vector<vector<float> > Output::Get_psi_soil_indiv() const {
+    return psi_soil_aa.To_nested();
 }
 
 const vector<float> &Output::Get_gs() const {
@@ -153,8 +153,8 @@ const vector<float> &Output::Get_vpd() const {
     return vpd_a;
 }
 
-const vector<vector<float> > &Output::Get_ks_soil() const {
-    return k_soil_aa;
+vector<vector<float> > Output::Get_ks_soil() const {
+    return k_soil_aa.To_nested();
 }
 
 const vector<int> &Output::Get_steps_psi_leaf() const {
@@ -222,6 +222,15 @@ val Output::Get_psi_leaf_view() const {
 }
 val Output::Get_psi_sap_view() const {
     return val(typed_memory_view(psi_sap_ground_a.size(), psi_sap_ground_a.data()));
+}
+val Output::Get_gs_view() const {
+    return val(typed_memory_view(gs_a.size(), gs_a.data()));
+}
+val Output::Get_vpd_view() const {
+    return val(typed_memory_view(vpd_a.size(), vpd_a.data()));
+}
+val Output::Get_beta_view() const {
+    return val(typed_memory_view(beta_a.size(), beta_a.data()));
 }
 #endif
 

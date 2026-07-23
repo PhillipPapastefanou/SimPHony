@@ -103,17 +103,12 @@ void Water_Potential_Solver::Update_output(Output &output) {
     output.Add_G(G);
     output.Add_O(O);
 
-    vector<float> Gi_f(Gi.begin(), Gi.end());
-    for (auto& e: Gi_f)
-        e *= 1.0;
-
-    output.Add_G_indiv(Gi_f);
+    output.Add_G_indiv(Gi);
     output.Add_psi_leaf(psi_leaf);
     output.Add_psi_sap_ground(psi_sap_ground);
     output.Add_psi_heart_ground(psi_heart_ground);
 
-    vector<float> psi_stems_f(psi_stem_segments.begin(), psi_stem_segments.end());
-    output.Add_psi_stems_seg(psi_stems_f);
+    output.Add_psi_stems_seg(psi_stem_segments);
 
     output.Add_gs(gs);
     output.Add_beta(beta_stom_cond);

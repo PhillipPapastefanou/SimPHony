@@ -47,7 +47,7 @@ void Solver_Indiv_Euler_Imp::Update_water_potentials(DateTime time) {
     // Obtain local time of the day
     const int hour = time.hour;
     const int min = time.min;
-    
+
     // Update_photosythesis beta parameter that rescales stomatal conductance
     // beta = 0 -> stomata closed; beta = 1 -> stomata fully open
     // We're only calling the stom opening hour once per day in the morning to avoid

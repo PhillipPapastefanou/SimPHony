@@ -11,7 +11,7 @@ public:
     Van_Genuchten(const Parameters &parameters, const Input &input, const Config &config);
     ~Van_Genuchten();
 
-    void CalculatePsiAndKs() override;
+    void CalculatePsiAndKs(int start_idx = 0, int end_idx = -1) override;
 
 private:
 

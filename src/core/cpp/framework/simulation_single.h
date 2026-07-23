@@ -25,17 +25,6 @@ public:
     void Init_parameters(Parameters params);
     void Set_water_pot_initials(double psi_leaf, double psi_stem);
 
-    // Sets k_soil_sat uniformly across every configured soil layer, given
-    // as log10(k_soil_sat [m s-1]) rather than the raw value — saturated
-    // hydraulic conductivity spans several orders of magnitude physically
-    // (~1e-9 for clay to ~1e-3 for sand/gravel), so a linear slider is
-    // useless for exploring it; a log10 slider covers the physical range
-    // in a manageable control width. Mutates the live `parameters` object
-    // directly (soil_layers isn't embind-exposed as a settable property),
-    // so call this AFTER Init_parameters(), not on a Get_parameters()
-    // snapshot.
-    void Set_soil_k_sat_log10(double log10_k_soil_sat);
-    
     void Run(DateTime timestart, DateTime timeend);
     
     void Init_eval_epoch(long start_epoch, long end_epoch) {

@@ -18,7 +18,13 @@ public:
     Soil_water_module(const Parameters& parameters, const Input& input, const Config& config);
     virtual ~Soil_water_module();
 
-    virtual void CalculatePsiAndKs() = 0;
+    // start_idx/end_idx (in units of the input forcing's own timesteps, end
+    // exclusive) restrict the precalculation to a sub-range of the loaded
+    // forcing series instead of all of it -- Model::Run() only ever reads
+    // indices within its own [begin, end] simulation window, so anything
+    // outside that range is otherwise wasted work. Defaults (0, -1) mean
+    // "the whole series", preserving prior behavior for existing callers.
+    virtual void CalculatePsiAndKs(int start_idx = 0, int end_idx = -1) = 0;
     /// Matric potential of each soil layer expressed as hydraulic head [m]
     vector<vector<double> > Get_psi_soil_head();
     /// Hydraulic conductivity per soil layer [m s-1]
@@ -26,7 +32,7 @@ public:
 
 protected:
 
-    void ParseTheta();
+    void ParseTheta(int start_idx = 0, int end_idx = -1);
 
     const Parameters& parameters;
     const Input& input_module;
