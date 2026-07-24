@@ -38,13 +38,13 @@
     "min": 5, "max": 45, "step": 0.5, "default": 35, "decimals": 1
   },
   {
-    "name": "tree_density",
+    "name": "g0",
     "group": "Canopy & Roots",
-    "label": "Tree density",
-    "unit": "trees m-2",
-    "description": "Stand tree density. Used for output scaling only -- does not affect the per-tree water potential solution.",
-    "latex": "\\rho_{tree}",
-    "min": 0.01, "max": 2, "step": 0.01, "default": 1.0, "decimals": 2
+    "label": "Min. stomatal conductance",
+    "unit": "mol m-2 s-1",
+    "description": "Medlyn et al. 2011 model minimum/cuticular stomatal conductance g0 (residual conductance as photosynthesis approaches zero). Medlyn 2011: 0-0.05.",
+    "latex": "g_0",
+    "min": 0.0, "max": 0.05, "step": 0.001, "default": 0.005, "decimals": 3
   },
   {
     "name": "k_xylem_sat",
@@ -185,45 +185,5 @@
     "description": "Van Genuchten pore-size distribution index, applied uniformly to every soil layer.",
     "latex": "\\lambda_{pore}",
     "min": 0.1, "max": 2.0, "step": 0.01, "default": 0.6, "decimals": 3
-  },
-  {
-    "name": "camp_b",
-    "setter": "Set_soil_camp_b",
-    "group": "Soil",
-    "label": "Campbell b",
-    "unit": "-",
-    "description": "Campbell (1974) / Clapp & Hornberger (1978) shape parameter, applied uniformly to every soil layer. Only used when the Campbell soil-water module is selected.",
-    "latex": "b_{Campbell}",
-    "min": 2, "max": 15, "step": 0.1, "default": 8.4, "decimals": 2
-  },
-  {
-    "name": "organic_matter_fraction",
-    "setter": "Set_soil_organic_matter_fraction",
-    "group": "Soil",
-    "label": "Organic matter fraction",
-    "unit": "0-1",
-    "description": "Soil organic matter fraction, applied uniformly to every soil layer. Only used by the Saxton06 pedotransfer functions.",
-    "latex": "f_{om}",
-    "min": 0.0, "max": 0.3, "step": 0.005, "default": 0.0, "decimals": 3
-  },
-  {
-    "name": "sand_fraction",
-    "setter": "Set_soil_sand_fraction",
-    "group": "Soil",
-    "label": "Sand fraction",
-    "unit": "0-1",
-    "description": "Soil sand fraction, applied uniformly to every soil layer. Only used by the Saxton06 pedotransfer functions.",
-    "latex": "f_{sand}",
-    "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.0, "decimals": 3
-  },
-  {
-    "name": "clay_fraction",
-    "setter": "Set_soil_clay_fraction",
-    "group": "Soil",
-    "label": "Clay fraction",
-    "unit": "0-1",
-    "description": "Soil clay fraction, applied uniformly to every soil layer. Only used by the Saxton06 pedotransfer functions.",
-    "latex": "f_{clay}",
-    "min": 0.0, "max": 1.0, "step": 0.01, "default": 0.0, "decimals": 3
   }
 ]

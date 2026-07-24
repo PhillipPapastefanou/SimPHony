@@ -19,11 +19,24 @@
      log panel is deliberately left in a monospace font -- it's a log
      console, not UI copy, and column alignment there matters more than
      matching the rest of the page. */
+  /* body is a fixed-100vh flex column (h1/status/.layout stacked), so
+     .layout -- and the three columns inside it -- can size themselves
+     against a *known* remaining height instead of the page just growing
+     however tall its content wants to be. That's what lets short windows
+     shrink the plots/schematic instead of pushing them below the fold: see
+     .layout/.sidebar/.schematic-col/.plots-col below, and plotsColDims()
+     in the script. (position:sticky doesn't achieve this on its own --
+     it only pins a column once you've actually scrolled *past* its
+     natural offset, which never happens if the page is already at
+     scrollTop 0 and everything fits, or hasn't been scrolled yet.) */
   body {
     font-family: "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     max-width: 1500px;
-    margin: 24px auto;
-    padding: 0 16px;
+    margin: 0 auto;
+    padding: 24px 16px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
   /* Full HD (~1920) windows are rarely maximized edge-to-edge, but when they
      are -- and on 4K (~3840, or ~1920 logical px at 2x HiDPI scaling) --
@@ -37,40 +50,54 @@
   @media (min-width: 2400px) {
     body { max-width: 2300px; }
   }
-  h1 { font-size: 1.25rem; margin-bottom: 4px; }
-  #status { font-size: 0.85rem; color: #666; margin-bottom: 16px; }
+  h1 { font-size: 1.25rem; margin: 0 0 4px; flex: 0 0 auto; }
+  #status { font-size: 0.85rem; color: #666; margin: 0 0 16px; flex: 0 0 auto; }
   #status.error { color: #b00020; }
 
   /* Three columns: sliders | schematic + drought-stress | plots. Middle
      and right split 0.8fr/1.2fr rather than evenly -- the schematic reads
-     fine smaller, and the plots benefit more from the extra width. */
+     fine smaller, and the plots benefit more from the extra width.
+     flex:1 1 auto + min-height:0 lets .layout consume exactly the height
+     body's flex column has left after h1/#status, instead of sizing to its
+     own content -- that's the height budget the three columns below then
+     stretch to fill (grid's default align-items:stretch) and clamp
+     themselves against. */
   .layout {
     display: grid;
     grid-template-columns: 300px 0.8fr 1.2fr;
     gap: 24px;
-    align-items: start;
+    flex: 1 1 auto;
+    min-height: 0;
   }
   @media (min-width: 1800px) {
     .layout { grid-template-columns: 320px 0.8fr 1.2fr; }
   }
 
-  .sidebar, .schematic-col {
-    position: sticky;
-    top: 16px;
-    max-height: calc(100vh - 32px);
+  /* All three columns stretch to .layout's full (viewport-bound) height and
+     scroll internally rather than growing the page -- .plots-col
+     additionally resizes its uPlot charts to that same budget in JS (see
+     plotsColDims()/fitPlotsColCharts() below), and .schematic-col shrinks
+     its figure via the flex rules further down, so in practice this
+     overflow is a safety net for very short windows rather than the normal
+     path. min-height:0 overrides grid items' default content-based minimum
+     size, which would otherwise force the row taller than .layout's own
+     height instead of actually clipping/scrolling here. */
+  .sidebar, .schematic-col, .plots-col {
+    min-height: 0;
     overflow-y: auto;
     scrollbar-gutter: stable;
   }
   /* Below this, three flexible columns stop leaving any of them enough
-     room to be useful -- stack into one column instead of squeezing.
-     Must come after the base .sidebar, .schematic-col rule above: same
-     selector/specificity, so source order decides the winner, not which
-     one is inside a @media block. */
+     room to be useful -- stack into one column instead of squeezing, and
+     drop the fixed-viewport-height layout for plain top-to-bottom page
+     scrolling, which suits a narrow/stacked layout better anyway. Must
+     come after the base rules above: same selector/specificity, so source
+     order decides the winner, not which one is inside a @media block. */
   @media (max-width: 1150px) {
-    .layout { grid-template-columns: 1fr; }
-    .sidebar, .schematic-col {
-      position: static;
-      max-height: none;
+    body { height: auto; }
+    .layout { grid-template-columns: 1fr; flex: 0 0 auto; }
+    .sidebar, .schematic-col, .plots-col {
+      overflow-y: visible;
     }
   }
 
@@ -102,8 +129,29 @@
   }
   .panel h2 { font-size: 1rem; margin: 0 0 12px; color: #333; }
 
-  .figure-panel img { width: 100%; height: auto; display: block; border-radius: 4px; }
+  /* figure-panel is itself a flex column so the image -- the only piece
+     without an intrinsic content-driven minimum height -- is the one that
+     absorbs a short window instead of pushing drought-panel (below it, in
+     .schematic-col) out of view. min-height:0 overrides flex's default
+     "never shrink below content size" on both the panel and the image, so
+     it can actually shrink below its natural width-driven height once
+     .schematic-col's max-height (see above) runs out of room; drought-panel
+     stays flex:0 0 auto so its sliders always render at full/natural size. */
+  .figure-panel { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+  .figure-panel h2, .figure-panel .caption { flex: 0 0 auto; }
+  .figure-panel img {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+    border-radius: 4px;
+  }
   .figure-panel .caption { font-size: 0.78rem; color: #777; margin: 10px 0 0; line-height: 1.5; }
+
+  .drought-panel { flex: 0 0 auto; }
 
   .control { margin-bottom: 14px; }
   .control:last-child { margin-bottom: 0; }
@@ -279,6 +327,7 @@
           <option value="vpd">VPD</option>
           <option value="theta">Soil water content (θ)</option>
           <option value="beta">Stomatal closure (β)</option>
+          <option value="gs">Stomatal conductance (gs)</option>
         </select>
       </div>
       <div id="chart_secondary"></div>
@@ -618,18 +667,71 @@ async function loadForcingData(Module, input, url) {
 // 2x2 grid), so they share one sizing path based on .plots-col's actual
 // rendered width -- itself driven by the responsive .layout grid in the
 // <style> above, so this already adapts from a narrow window up to a 4K
-// screen with no further work here. Height is derived from that width too
-// (clamped) rather than fixed.
+// screen with no further work here. Height is fit to the *viewport's*
+// height too (see plotsColDims()), not just derived from width, so a short
+// window shrinks the charts instead of pushing the time-range block below
+// the fold -- .plots-col is capped/scrollable (see <style>) purely as a
+// safety net for windows too short even for the clamped minimum.
 // ---------------------------------------------------------------------
 // .plots-col carries the .panel class (18px padding each side, see <style>
-// above) -- clientWidth includes that padding, but charts are children
-// inside it, so their available width is 2*18px narrower than clientWidth.
+// above) -- clientWidth/Height include that padding, but charts are
+// children inside it, so their available space is 2*18px narrower/shorter.
 const PLOTS_COL_PADDING = 18 * 2;
 
+// Height of everything in .plots-col *except* the two main chart
+// placeholders (#chart_primary/#chart_secondary): both chart-block
+// headers/dropdowns, the whole time-range block (header + its fixed-70px
+// overview chart), .plots-col's own vertical padding, and the two 20px
+// gaps its flex column inserts between its three children. All of that is
+// static HTML present from page load, so -- unlike the two main charts --
+// it can be measured directly regardless of what's been built yet.
+function plotsColChromeHeight() {
+  const blocks = document.querySelectorAll('.plots-col > .chart-block');
+  const primaryHeader = blocks[0].querySelector('h2').getBoundingClientRect().height
+    + blocks[0].querySelector('.chart-select-row').getBoundingClientRect().height;
+  const secondaryHeader = blocks[1].querySelector('.chart-select-row').getBoundingClientRect().height;
+  const rangesliderBlock = document.querySelector('.rangeslider-block').getBoundingClientRect().height;
+  const gaps = 20 * 2;
+  return primaryHeader + secondaryHeader + rangesliderBlock + PLOTS_COL_PADDING + gaps;
+}
+
+// Must match the <style> media query that stacks .layout into one column
+// and drops .plots-col's fixed-viewport-height sizing in favor of normal
+// page flow/scrolling (there's no fixed height budget to fit into there).
+const STACKED_LAYOUT_QUERY = '(max-width: 1150px)';
+
 function plotsColDims() {
-  const colWidth = document.querySelector('.plots-col').clientWidth - PLOTS_COL_PADDING;
-  const height = Math.max(220, Math.min(360, Math.round(colWidth * 0.46)));
+  const colEl = document.querySelector('.plots-col');
+  const colWidth = colEl.clientWidth - PLOTS_COL_PADDING;
+
+  if (window.matchMedia(STACKED_LAYOUT_QUERY).matches) {
+    // Narrow/stacked layout: .plots-col sizes to its own content instead of
+    // a fixed viewport-height budget, so there's nothing meaningful to fit
+    // charts *into* -- fall back to a plain width-based estimate instead.
+    const height = Math.max(160, Math.min(420, Math.round(colWidth * 0.46)));
+    return { width: colWidth, height };
+  }
+
+  // .plots-col is a grid item stretched to fill .layout's full height (see
+  // <style> -- .layout is itself a flex child sized against the viewport),
+  // so its own clientHeight is already the exact, CSS-resolved available
+  // space -- no need to re-derive it from window.innerHeight/offsets.
+  const availH = colEl.clientHeight - PLOTS_COL_PADDING;
+  const height = Math.max(160, Math.min(420, Math.round((availH - plotsColChromeHeight()) / 2)));
+
   return { width: colWidth, height };
+}
+
+// Re-applies plotsColDims() to both main charts (and the overview strip) --
+// shared by the initial setup in main() and the resize listener, so the
+// very first paint already matches what a resize would produce instead of
+// visibly jumping on the first one.
+function fitPlotsColCharts() {
+  const { width, height } = plotsColDims();
+  if (charts.primary) charts.primary.setSize({ width, height });
+  if (charts.secondary) charts.secondary.setSize({ width, height });
+  if (overviewChart) overviewChart.setSize({ width, height: 70 });
+  if (rsWindowEl) updateRangeSliderVisual();
 }
 
 function makeMultiSeriesChart(containerId, seriesDefs, yLabel) {
@@ -867,6 +969,7 @@ async function main() {
     vpd: () => makeChart('chart_secondary', 'VPD', '#2563eb', 'VPD [Pa]'),
     theta: () => makeThetaChart('chart_secondary', N_SOIL_LAYERS),
     beta: () => makeChart('chart_secondary', 'β', '#000000', 'Stomatal closure β [-]'),
+    gs: () => makeChart('chart_secondary', 'gs', '#0d9488', 'Stomatal conductance [mol H2O m-2 s-1]'),
   };
 
   // key is 'primary' or 'secondary' -- destroys/replaces charts[key] and
@@ -892,6 +995,16 @@ async function main() {
   overviewChart.setScale('x', { min: startEpoch, max: endEpoch });
   setupRangeSlider();
   applyZoomRange(startEpoch, endEpoch); // start fully zoomed out
+  // plotsColChromeHeight() can only measure the time-range block's real
+  // (now-built) height once the overview chart above exists -- refit once
+  // more so the very first paint is already correctly sized instead of
+  // visibly jumping on the first window resize. uPlot defers a freshly
+  // constructed chart's actual DOM size to a requestAnimationFrame rather
+  // than applying it synchronously in the constructor, so the overview
+  // chart's real height isn't measurable (and .rangeslider-block's
+  // getBoundingClientRect() stays short) until at least one frame has
+  // passed -- double rAF to be safe.
+  requestAnimationFrame(() => requestAnimationFrame(fitPlotsColCharts));
 
   primarySelect.addEventListener('change', () => {
     rebuildChart('primary', PRIMARY_CHART_BUILDERS, primarySelect.value);
@@ -916,13 +1029,7 @@ async function main() {
     });
   }
 
-  window.addEventListener('resize', () => {
-    const { width, height } = plotsColDims();
-    if (charts.primary) charts.primary.setSize({ width, height });
-    if (charts.secondary) charts.secondary.setSize({ width, height });
-    overviewChart.setSize({ width, height: 70 });
-    updateRangeSliderVisual();
-  });
+  window.addEventListener('resize', fitPlotsColCharts);
 
   let rafPending = false;
 
@@ -980,6 +1087,8 @@ async function main() {
         charts.secondary.setData([x, output.Get_vpd_view().slice()]);
       } else if (charts.secondaryType === 'beta') {
         charts.secondary.setData([x, output.Get_beta_view().slice()]);
+      } else if (charts.secondaryType === 'gs') {
+        charts.secondary.setData([x, output.Get_gs_view().slice()]);
       } else if (charts.secondaryType === 'theta') {
         // theta is stored per-layer (row-major, strided), not contiguous,
         // so unlike the *_view getters above this isn't a zero-copy typed
