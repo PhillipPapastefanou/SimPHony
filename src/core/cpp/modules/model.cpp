@@ -83,6 +83,7 @@ void Model::Set_derived_parameters_impl(int soil_start_idx, int soil_end_idx) {
     soil_water_module->CalculatePsiAndKs(soil_start_idx, soil_end_idx);
     input_k_soil = soil_water_module->Get_ks();
     input_psi_soil = soil_water_module->Get_psi_soil_head();
+    input_theta = soil_water_module->Get_theta();
 
     input_air_temperature = input_module.temp_air;
     input_sw_down = input_module.sw_rad;
@@ -156,6 +157,7 @@ void Model::Run(DateTime begin, DateTime end) {
 
         ipsi_soil = input_psi_soil[time_index(ts)];
         ik_soil = input_k_soil[time_index(ts)];
+        itheta = input_theta[time_index(ts)];
 
 
         if (params.verbose){
@@ -224,6 +226,7 @@ void Model::add_output() {
     // applies the scale itself, so no intermediate vector is built here.
     output.Add_psi_soil_indiv(ipsi_soil, params.constants.HydraulicHeadInMtoMPa);
     output.Add_ks_indiv(ik_soil);
+    output.Add_theta_indiv(itheta);
 
     output.Add_vpd(ivpd);
 

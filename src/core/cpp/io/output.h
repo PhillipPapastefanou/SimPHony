@@ -44,6 +44,7 @@ public:
     void Add_gs( double gs);
     void Add_beta(double beta);
     void Add_ks_indiv(const vector<double>& ks_indiv, double scale = 1.0);
+    void Add_theta_indiv(const vector<float>& theta_indiv, double scale = 1.0);
     void Add_vpd(double vpd);
     void Add_anet(double anet);
 
@@ -87,6 +88,8 @@ public:
 
 
     vector<vector<float> > Get_ks_soil() const;
+
+    vector<vector<float> > Get_theta_indiv() const;
 
     const vector<int> &Get_steps_psi_leaf() const;
 
@@ -148,6 +151,13 @@ private:
             for (double v : src) data.push_back(static_cast<float>(v * scale));
         }
 
+        // Same as above but for callers whose source data is already float
+        // (e.g. soil water content) -- avoids a double round-trip.
+        void Add_row(const vector<float>& src, double scale) {
+            if (row_width == 0) row_width = static_cast<int>(src.size());
+            for (float v : src) data.push_back(static_cast<float>(v * scale));
+        }
+
         vector<vector<float> > To_nested() const {
             vector<vector<float> > out;
             if (row_width == 0) return out;
@@ -177,6 +187,7 @@ private:
     vector<float> anet_a;
 
     Flat_Matrix k_soil_aa;
+    Flat_Matrix theta_aa;
 
     vector<int> steps_psi_leaf_a;
     vector<int> steps_psi_stem_a;

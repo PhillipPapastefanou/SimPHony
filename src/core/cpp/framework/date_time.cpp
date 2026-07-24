@@ -39,7 +39,7 @@ DateTime::DateTime(tm tm) {
 }
 
 DateTime::DateTime() {
-    tm tm_new;
+    tm tm_new{};
     tmt = tm_new;
     create_time();
 }

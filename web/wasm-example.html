@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Plant Hydraulics — Live Simulation</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uplot@1.6.31/dist/uPlot.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <style>
   :root { color-scheme: light dark; }
   * { box-sizing: border-box; }
@@ -51,6 +52,8 @@
     margin-bottom: 4px;
   }
   .control label span.val { font-weight: 400; color: #555; }
+  .control label span.sym { font-weight: 400; color: #888; }
+  .control label .left { display: flex; align-items: baseline; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .control input[type=range] { width: 100%; }
 
   .main { min-width: 0; }
@@ -78,7 +81,7 @@
 
 <div class="layout">
   <div class="sidebar" id="sidebar">
-    <!-- slider controls are generated into here by SLIDER_CONFIGS below -->
+    <!-- slider controls are generated into here from parameters.json, see buildSliders() below -->
   </div>
 
   <div class="main">
@@ -96,6 +99,7 @@
 <pre id="debug"></pre>
 
 <script src="https://cdn.jsdelivr.net/npm/uplot@1.6.31/dist/uPlot.iife.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 
 <!--
   =====================================================================
@@ -132,92 +136,24 @@
 const WASM_PATH = '../build_web/SimPHony_Web.wasm';
 const FORCING_BIN_PATH = '../forcing.bin'; // adjust if forcing.bin isn't next to this HTML file
 
+// PATH #4: PARAMS_JSON_PATH — where parameters.json (the slider catalogue)
+//   lives, relative to this HTML file.
+const PARAMS_JSON_PATH = './parameters.json';
+
 // =======================================================================
-// Parameter sliders. Each entry maps a slider directly onto an embind
-// Parameters property of the same name (bindings.cpp / class_<Parameters>).
-// Grouped by heading for the sidebar; add more entries here to expose more
-// tunable fields — no other code needs to change.
-//
-// Defaults marked "(test_hainich_direct.py)" match your validated
-// reference test; others fall back to parameters.h's own defaults since
-// the calibrated value isn't known for that specific field.
+// Parameter sliders are data-driven from PARAMS_JSON_PATH (parameters.json)
+// instead of being hardcoded here. Each entry there has:
+//   name        embind Parameters property name, OR the target field name
+//               for a soil property (see `setter` below)
+//   setter      only present for soil_layers fields: soil_layers isn't an
+//               embind-settable property, so these go through a dedicated
+//               Parameters method instead of `params[name] = value`
+//   group       sidebar heading
+//   label, unit, description, latex   display metadata
+//   min/max/step/default/decimals     slider range and formatting
+// To expose another tunable field, add an entry to parameters.json — no
+// code here needs to change.
 // =======================================================================
-const SLIDER_CONFIGS = [
-  {
-    group: 'Canopy & Roots',
-    key: 'root_area_index', label: 'Root area index',
-    min: 0.5, max: 15, step: 0.1, default: 4.5, // updated reference params
-    format: (v) => v.toFixed(2),
-  },
-  {
-    group: 'Canopy & Roots',
-    key: 'canopy_height', label: 'Canopy height (m)',
-    min: 5, max: 45, step: 0.5, default: 35, // updated reference params
-    format: (v) => v.toFixed(1),
-  },
-  {
-    group: 'Xylem conductivity',
-    key: 'k_xylem_sat', label: 'Xylem sat. conductivity',
-    min: 20, max: 400, step: 5, default: 2.0 * 1000 / 18, // updated reference params
-    format: (v) => v.toFixed(1),
-  },
-  {
-    group: 'Xylem conductivity',
-    key: 'psi50_xylem', label: 'Xylem ψ₅₀ (MPa)',
-    min: -8, max: -0.5, step: 0.1, default: -3.5, // updated reference params
-    format: (v) => v.toFixed(2),
-  },
-  {
-    group: 'Xylem conductivity',
-    key: 'psi88_xylem', label: 'Xylem ψ₈₈ (MPa)',
-    min: -10, max: -1, step: 0.1, default: -4.5, // updated reference params
-    format: (v) => v.toFixed(2),
-  },
-  {
-    group: 'Hydraulic capacitance',
-    key: 'stem_hydraulic_capacitance_max', label: 'Stem capacitance (max)',
-    min: 1000, max: 20000, step: 100, default: 220.0 * 1000 / 18, // updated reference params
-    format: (v) => v.toFixed(0),
-  },
-  {
-    group: 'Hydraulic capacitance',
-    key: 'stem_hydraulic_capacitance_res', label: 'Stem capacitance (res)',
-    min: 0, max: 5000, step: 50, default: 20.0 * 1000 / 18, // updated reference params
-    format: (v) => v.toFixed(0),
-  },
-  {
-    group: 'Hydraulic capacitance',
-    key: 'leaf_hydraulic_capacitance', label: 'Leaf capacitance',
-    min: 0.05, max: 3.0, step: 0.05, default: 0.015 * 1000 / 18, // updated reference params
-    format: (v) => v.toFixed(3),
-  },
-  {
-    group: 'Hydraulic capacitance',
-    key: 'huber_value', label: 'Huber value',
-    min: 0.0001, max: 0.001, step: 0.00001, default: 1 / 4000, // updated reference params
-    format: (v) => v.toFixed(5),
-  },
-  {
-    group: 'Stomatal',
-    key: 'psi_tlp', label: 'Turgor loss point (MPa)',
-    min: -3, max: -0.2, step: 0.05, default: -1.2, // updated reference params
-    format: (v) => v.toFixed(2),
-  },
-  {
-    group: 'Soil',
-    key: 'soil_k_sat_log10', label: 'Soil sat. conductivity (log₁₀ m/s)',
-    // Saturated hydraulic conductivity spans several orders of magnitude
-    // physically (~1e-9 clay to ~1e-3 sand/gravel) — a linear slider can't
-    // usefully cover that, so this one is log10-scaled. Applied uniformly
-    // to all three soil layers via Set_soil_k_sat_log10() (soil_layers
-    // isn't an embind-settable property, so this bypasses the normal
-    // params[cfg.key] = value path — see the "special" handling below).
-    min: -9, max: -3, step: 0.05,
-    default: Math.log10(1.0 / 100.0 / 86400.0), // matches Init_soil_layers_default_hainich()
-    special: 'soil_k_sat_log10',
-    format: (v) => `${v.toFixed(2)} (${Math.pow(10, v).toExponential(2)} m/s)`,
-  },
-];
 
 const statusEl = document.getElementById('status');
 const debugEl = document.getElementById('debug');
@@ -234,13 +170,34 @@ function logDebug(msg) {
 }
 
 // ---------------------------------------------------------------------
-// Build the sidebar sliders from SLIDER_CONFIGS, grouped under headings.
+// Fetch the slider catalogue (see PARAMS_JSON_PATH above).
 // ---------------------------------------------------------------------
-function buildSliders() {
+async function loadParamConfigs(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`failed to fetch ${url}: ${res.status} ${res.statusText}`);
+  return res.json();
+}
+
+// soil_k_sat_log10 also shows the linear m/s value alongside the log10
+// slider value — everything else just formats to cfg.decimals places.
+function formatValue(cfg, value) {
+  let text = value.toFixed(cfg.decimals ?? 2);
+  if (cfg.name === 'soil_k_sat_log10') {
+    text += ` (${Math.pow(10, value).toExponential(2)} m/s)`;
+  }
+  return text;
+}
+
+// ---------------------------------------------------------------------
+// Build the sidebar sliders from the fetched parameter configs, grouped
+// under headings. Each config's `latex` is rendered with KaTeX next to its
+// label, and `description`/`unit` become a native tooltip on the control.
+// ---------------------------------------------------------------------
+function buildSliders(configs) {
   const sidebar = document.getElementById('sidebar');
   let lastGroup = null;
 
-  for (const cfg of SLIDER_CONFIGS) {
+  for (const cfg of configs) {
     if (cfg.group !== lastGroup) {
       const h = document.createElement('h2');
       h.textContent = cfg.group;
@@ -250,18 +207,40 @@ function buildSliders() {
 
     const wrap = document.createElement('div');
     wrap.className = 'control';
+    wrap.title = cfg.unit ? `${cfg.description} [${cfg.unit}]` : cfg.description;
 
     const label = document.createElement('label');
-    label.htmlFor = cfg.key;
+    label.htmlFor = cfg.name;
+
+    const left = document.createElement('span');
+    left.className = 'left';
+    left.append(cfg.label);
+
+    if (cfg.latex) {
+      const symSpan = document.createElement('span');
+      symSpan.className = 'sym';
+      if (window.katex) {
+        try {
+          katex.render(cfg.latex, symSpan, { throwOnError: false });
+        } catch (e) {
+          symSpan.textContent = cfg.latex;
+        }
+      } else {
+        symSpan.textContent = cfg.latex;
+      }
+      left.append(' (', symSpan, ')');
+    }
+
     const valSpan = document.createElement('span');
     valSpan.className = 'val';
-    valSpan.id = cfg.key + '_val';
-    valSpan.textContent = cfg.format(cfg.default);
-    label.append(cfg.label + ' ', valSpan);
+    valSpan.id = cfg.name + '_val';
+    valSpan.textContent = formatValue(cfg, cfg.default);
+
+    label.append(left, valSpan);
 
     const input = document.createElement('input');
     input.type = 'range';
-    input.id = cfg.key;
+    input.id = cfg.name;
     input.min = cfg.min;
     input.max = cfg.max;
     input.step = cfg.step;
@@ -336,7 +315,9 @@ function makeChart(containerId, seriesLabel) {
 // Main
 // ---------------------------------------------------------------------
 async function main() {
-  buildSliders();
+  setStatus(`Loading parameter catalogue (${PARAMS_JSON_PATH})…`);
+  const PARAM_CONFIGS = await loadParamConfigs(PARAMS_JSON_PATH);
+  buildSliders(PARAM_CONFIGS);
 
   if (typeof SimPHony !== 'function') {
     throw new Error(
@@ -411,7 +392,8 @@ async function main() {
   );
 
   // Baseline parameters once. Sliders only touch the fields listed in
-  // SLIDER_CONFIGS from here on — every other default is left as-is.
+  // PARAM_CONFIGS (parameters.json) from here on — every other default is
+  // left as-is.
   //
   // Parameters' own constructor already has sane physical defaults for
   // most scalar fields (see parameters.h) — the one thing it does NOT
@@ -449,30 +431,25 @@ async function main() {
 
     // Snapshot the live default Parameters, mutate every field a slider
     // controls, hand the whole object back. Any field NOT listed in
-    // SLIDER_CONFIGS (soil_layers, dts, ...) stays exactly as
+    // PARAM_CONFIGS (soil_layers' depth, dts, ...) stays exactly as
     // Init_parameters_default()/Init_soil_layers_default_hainich() set it,
     // since we round-trip the full struct instead of constructing a fresh,
     // mostly-empty one.
     //
-    // Sliders flagged `special` don't map onto a plain Parameters property
-    // (e.g. soil_k_sat_log10 touches every entry of soil_layers, which
-    // isn't embind-settable as a property) — they're applied via a
-    // dedicated Parameters method instead, on this same snapshot, before
-    // it's handed back to Init_parameters().
+    // Configs with a `setter` don't map onto a plain Parameters property
+    // (soil_layers fields touch every layer and aren't embind-settable as
+    // properties) — they're applied via the named Parameters method
+    // instead, on this same snapshot, before it's handed back to
+    // Init_parameters().
     const paramSetStart = performance.now();
     const params = sim.Get_parameters();
-    for (const cfg of SLIDER_CONFIGS) {
-      if (cfg.special) continue;
+    for (const cfg of PARAM_CONFIGS) {
       const value = parseFloat(cfg.element.value);
-      cfg.valElement.textContent = cfg.format(value);
-      params[cfg.key] = value;
-    }
-    for (const cfg of SLIDER_CONFIGS) {
-      if (!cfg.special) continue;
-      const value = parseFloat(cfg.element.value);
-      cfg.valElement.textContent = cfg.format(value);
-      if (cfg.special === 'soil_k_sat_log10') {
-        params.Set_soil_k_sat_log10(value);
+      cfg.valElement.textContent = formatValue(cfg, value);
+      if (cfg.setter) {
+        params[cfg.setter](value);
+      } else {
+        params[cfg.name] = value;
       }
     }
     sim.Init_parameters(params);
@@ -529,7 +506,7 @@ async function main() {
     requestAnimationFrame(runAndRedraw);
   }
 
-  for (const cfg of SLIDER_CONFIGS) {
+  for (const cfg of PARAM_CONFIGS) {
     cfg.element.addEventListener('input', scheduleRun);
   }
 

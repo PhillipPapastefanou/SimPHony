@@ -29,6 +29,8 @@ public:
     vector<vector<double> > Get_psi_soil_head();
     /// Hydraulic conductivity per soil layer [m s-1]
     vector<vector<double> > Get_ks();
+    /// Volumetric water content per soil layer [m3 m-3]
+    vector<vector<float> > Get_theta();
 
 protected:
 

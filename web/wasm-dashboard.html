@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Plant Hydraulics — Dashboard</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uplot@1.6.31/dist/uPlot.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <style>
   :root { color-scheme: light dark; }
   * { box-sizing: border-box; }
@@ -13,15 +14,40 @@
     margin: 24px auto;
     padding: 0 16px;
   }
+  /* Full HD (~1920) windows are rarely maximized edge-to-edge, but when they
+     are -- and on 4K (~3840, or ~1920 logical px at 2x HiDPI scaling) --
+     the fixed 1400px cap below leaves the page looking stranded in a sea of
+     margin. Step the cap up at wider viewports instead of leaving it fixed
+     or letting it run unbounded (which would stretch chart rows too wide to
+     read comfortably). */
+  @media (min-width: 1700px) {
+    body { max-width: 1700px; }
+  }
+  @media (min-width: 2400px) {
+    body { max-width: 2200px; }
+  }
   h1 { font-size: 1.25rem; margin-bottom: 4px; }
   #status { font-size: 0.85rem; color: #666; margin-bottom: 16px; }
   #status.error { color: #b00020; }
 
   .layout {
     display: grid;
-    grid-template-columns: 300px 1fr;
+    grid-template-columns: 300px 1fr 300px;
     gap: 24px;
     align-items: start;
+  }
+  @media (min-width: 1700px) {
+    .layout { grid-template-columns: 320px 1fr 340px; }
+  }
+  /* Below this, three fixed-width columns stop leaving the middle one
+     enough room to be useful -- stack everything into one column instead
+     of letting it squeeze. */
+  @media (max-width: 1100px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar, .figure-panel {
+      position: static;
+      max-height: none;
+    }
   }
 
   .sidebar {
@@ -30,15 +56,33 @@
     padding: 16px;
     position: sticky;
     top: 16px;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
   }
-  .sidebar h2 {
+  .sidebar details { margin-bottom: 4px; }
+  .sidebar summary {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: #888;
-    margin: 20px 0 10px;
+    margin: 16px 0 10px;
+    cursor: pointer;
+    user-select: none;
   }
-  .sidebar h2:first-child { margin-top: 0; }
+  .sidebar details:first-of-type summary { margin-top: 0; }
+  .sidebar details[open] > summary { color: #555; }
+
+  .figure-panel {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    position: sticky;
+    top: 16px;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+  }
+  .figure-panel img { width: 100%; height: auto; display: block; border-radius: 4px; }
+  .figure-panel .caption { font-size: 0.72rem; color: #888; margin-top: 8px; line-height: 1.4; }
 
   .control { margin-bottom: 14px; }
   .control label {
@@ -49,21 +93,43 @@
     margin-bottom: 4px;
   }
   .control label span.val { font-weight: 400; color: #555; }
+  .control label span.sym { font-weight: 400; color: #888; }
+  .control label .left { display: flex; align-items: baseline; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .control input[type=range] { width: 100%; }
 
   .main { min-width: 0; }
 
-  /* 2x2 grid mirroring the Flask app's make_subplots layout:
-     row 1 spans both columns (Leaf + Stem water potential, combined),
-     row 2 splits into VPD (left) and stomatal conductance (right). */
+  /* 2x2 grid: water potential | beta (top row), VPD | theta (bottom row). */
   .grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
   }
-  .grid .span2 { grid-column: 1 / -1; }
   .chart-block h2 { font-size: 0.95rem; margin: 0 0 6px 2px; color: #333; }
   .chart-block .hint { font-size: 0.72rem; color: #999; margin: 0 0 6px 2px; }
+
+  /* Series legends move from their default row below the chart to an
+     overlay in the plot's top-right corner instead, now that hover/cursor
+     is off (makeMultiSeriesChart) -- saves the vertical space that row
+     used to take on every quadrant. */
+  .uplot { position: relative; }
+  .u-legend {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    width: auto;
+    font-size: 0.68rem;
+    background: rgba(255, 255, 255, 0.82);
+    border-radius: 4px;
+    padding: 2px 6px;
+    pointer-events: none;
+  }
+  /* No x/time row to worry about here -- legend.live:false (set in
+     makeMultiSeriesChart) drops it entirely, leaving one row per real
+     series. */
+  .u-legend tr.u-series { display: flex; align-items: center; gap: 4px; }
+  .u-legend th { padding: 0; }
+  .u-legend .u-marker { width: 8px; height: 8px; }
 
   /* Range slider: a fixed-domain overview chart with a draggable/resizable
      window overlay, standing in for Plotly's xaxis rangeslider. Dragging it
@@ -113,12 +179,14 @@
   #debug {
     white-space: pre-wrap;
     font-family: ui-monospace, monospace;
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     background: #f6f6f6;
     border-radius: 6px;
-    padding: 8px 10px;
+    padding: 6px 8px;
     display: none;
     margin-top: 16px;
+    max-height: 120px;
+    overflow-y: auto;
   }
   #debug.show { display: block; }
 </style>
@@ -130,22 +198,26 @@
 
 <div class="layout">
   <div class="sidebar" id="sidebar">
-    <!-- slider controls are generated into here by SLIDER_CONFIGS below -->
+    <!-- slider controls are generated into here from parameters.json, see buildSliders() below -->
   </div>
 
   <div class="main">
     <div class="grid">
-      <div class="chart-block span2">
+      <div class="chart-block">
         <h2>Water potential — Leaf &amp; Stem</h2>
         <div id="chart_psi"></div>
+      </div>
+      <div class="chart-block">
+        <h2>Stomatal closure (β)</h2>
+        <div id="chart_beta"></div>
       </div>
       <div class="chart-block">
         <h2>VPD</h2>
         <div id="chart_vpd"></div>
       </div>
       <div class="chart-block">
-        <h2>Stomatal closure (β)</h2>
-        <div id="chart_beta"></div>
+        <h2>Soil water content (θ) — 3 layers</h2>
+        <div id="chart_theta"></div>
       </div>
     </div>
 
@@ -163,11 +235,18 @@
       </div>
     </div>
   </div>
+
+  <div class="figure-panel">
+    <img src="figure_1_simphony.png"
+         alt="SimPHony model schematic: leaf and stem water potentials (psi_Leaf, psi_Stem) connected through xylem conductivity K_xyl and capacitances Gamma_Leaf/Gamma_Stem, down to per-layer soil water potentials (psi_Soil) via soil-to-stem conductivities K_Soil-Stem and lateral flow G.">
+    <p class="caption">Model schematic — conductances (K), capacitances (Γ), and water potentials (ψ) at each compartment. Most sidebar sliders map directly onto a symbol here.</p>
+  </div>
 </div>
 
 <pre id="debug"></pre>
 
 <script src="https://cdn.jsdelivr.net/npm/uplot@1.6.31/dist/uPlot.iife.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 
 <!--
   =====================================================================
@@ -185,56 +264,31 @@
 // =======================================================================
 const WASM_PATH = '../build_web/SimPHony_Web.wasm';
 const FORCING_BIN_PATH = '../forcing.bin';
+const PARAMS_JSON_PATH = './parameters.json';
 
 // =======================================================================
-// Sliders — the same four knobs as the Flask reference app's
-// update_plot() route (slider1..slider4), including its unit
-// conversions, applied in runAndRedraw() below:
-//
-//   params.k_xylem_sat               = k_xylem * 1000 / 18
-//   params.stem_hydraulic_capacitance_max = gamma_stem * 1000 / 18
-//   params.psi_leaf_50_close         = psi_leaf_50_close   (direct)
-//   params.leaf_hydraulic_capacitance = gamma_leaf / 1000 * 1000 / 18
-//
-// The Flask app's single `stem_hydraulic_capacitance` field predates
-// this model's split into _max/_res (see wasm-example.html); gamma_stem
-// maps onto stem_hydraulic_capacitance_max here, and _res is left at
-// its Init_parameters_default() value untouched by this simpler UI.
-//
-// Slider ranges/defaults are the *raw* (pre-conversion) values, chosen
-// so the converted result lands in the same physically-reasonable band
-// used by wasm-example.html's own sliders for these fields.
+// Parameter sliders are data-driven from PARAMS_JSON_PATH (parameters.json)
+// instead of being hardcoded here — the full native-Parameters-units set,
+// same catalogue wasm-example.html uses (this used to be a curated 4-slider
+// subset in Flask-app-style raw units with ad hoc unit conversions; that's
+// gone now in favor of the one shared catalogue). Each entry there has:
+//   name        embind Parameters property name, OR the target field name
+//               for a soil property (see `setter` below)
+//   setter      only present for soil_layers fields: soil_layers isn't an
+//               embind-settable property, so these go through a dedicated
+//               Parameters method instead of `params[name] = value`
+//   group       sidebar heading
+//   label, unit, description, latex   display metadata
+//   min/max/step/default/decimals     slider range and formatting
+// To expose another tunable field, add an entry to parameters.json — no
+// code here needs to change.
 // =======================================================================
-const SLIDER_CONFIGS = [
-  {
-    group: 'Xylem',
-    key: 'k_xylem', label: 'Xylem sat. conductivity (k_xylem)',
-    min: 0.2, max: 8, step: 0.1, default: 2.0,
-    format: (v) => v.toFixed(2),
-    apply: (params, v) => { params.k_xylem_sat = v * 1000 / 18; },
-  },
-  {
-    group: 'Capacitance',
-    key: 'gamma_stem', label: 'Stem capacitance (gamma_stem)',
-    min: 10, max: 500, step: 5, default: 220.0,
-    format: (v) => v.toFixed(0),
-    apply: (params, v) => { params.stem_hydraulic_capacitance_max = v * 1000 / 18; },
-  },
-  {
-    group: 'Capacitance',
-    key: 'gamma_leaf', label: 'Leaf capacitance (gamma_leaf)',
-    min: 2, max: 50, step: 0.5, default: 15.0,
-    format: (v) => v.toFixed(1),
-    apply: (params, v) => { params.leaf_hydraulic_capacitance = (v / 1000) * 1000 / 18; },
-  },
-  {
-    group: 'Stomatal',
-    key: 'psi_leaf_50_close', label: 'Leaf ψ₅₀ closure (MPa)',
-    min: -4, max: -0.2, step: 0.05, default: -1.5,
-    format: (v) => v.toFixed(2),
-    apply: (params, v) => { params.psi_leaf_50_close = v; },
-  },
-];
+
+// Flip to true (and reload) to see verbose per-run logging: WASM stdout
+// ([stdout] DEBUG ... lines), simulation-window/forcing-load details, and
+// per-frame perf timings. Left false, the log panel only ever shows actual
+// errors (stderr, uncaught exceptions) -- see logDebug() vs logError().
+const DEBUG = false;
 
 const statusEl = document.getElementById('status');
 const debugEl = document.getElementById('debug');
@@ -244,48 +298,113 @@ function setStatus(msg, isError) {
   statusEl.classList.toggle('error', !!isError);
 }
 
-function logDebug(msg) {
+// Appends to the log panel and scrolls it to the newest line, always
+// mirroring to the devtools console too.
+function appendLog(msg, isConsoleError) {
   debugEl.classList.add('show');
   debugEl.textContent += msg + "\n";
-  console.log(msg);
+  debugEl.scrollTop = debugEl.scrollHeight;
+  (isConsoleError ? console.error : console.log)(msg);
+}
+
+// Verbose/informational logging -- a no-op entirely (panel and devtools
+// console both) unless DEBUG is on.
+function logDebug(msg) {
+  if (DEBUG) appendLog(msg, false);
+}
+
+// Real errors (stderr, uncaught exceptions, load failures) -- always shown,
+// regardless of DEBUG.
+function logError(msg) {
+  appendLog(msg, true);
 }
 
 // ---------------------------------------------------------------------
-// Build the sidebar sliders from SLIDER_CONFIGS, grouped under headings.
+// Fetch the slider catalogue (see PARAMS_JSON_PATH above).
 // ---------------------------------------------------------------------
-function buildSliders() {
+async function loadParamConfigs(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`failed to fetch ${url}: ${res.status} ${res.statusText}`);
+  return res.json();
+}
+
+// soil_k_sat_log10 also shows the linear m/s value alongside the log10
+// slider value — everything else just formats to cfg.decimals places.
+function formatValue(cfg, value) {
+  let text = value.toFixed(cfg.decimals ?? 2);
+  if (cfg.name === 'soil_k_sat_log10') {
+    text += ` (${Math.pow(10, value).toExponential(2)} m/s)`;
+  }
+  return text;
+}
+
+// ---------------------------------------------------------------------
+// Build the sidebar sliders from the fetched parameter configs, grouped
+// under headings. Each config's `latex` is rendered with KaTeX next to its
+// label, and `description`/`unit` become a native tooltip on the control.
+// ---------------------------------------------------------------------
+function buildSliders(configs) {
   const sidebar = document.getElementById('sidebar');
   let lastGroup = null;
+  let groupEl = null; // <details> for the group currently being filled
 
-  for (const cfg of SLIDER_CONFIGS) {
+  for (const cfg of configs) {
     if (cfg.group !== lastGroup) {
-      const h = document.createElement('h2');
-      h.textContent = cfg.group;
-      sidebar.appendChild(h);
+      groupEl = document.createElement('details');
+      // Only the first group starts expanded -- with 5 groups / 22 sliders,
+      // showing them all at once was the exact "everything visible" problem
+      // this was meant to fix.
+      groupEl.open = lastGroup === null;
+      const summary = document.createElement('summary');
+      summary.textContent = cfg.group;
+      groupEl.appendChild(summary);
+      sidebar.appendChild(groupEl);
       lastGroup = cfg.group;
     }
 
     const wrap = document.createElement('div');
     wrap.className = 'control';
+    wrap.title = cfg.unit ? `${cfg.description} [${cfg.unit}]` : cfg.description;
 
     const label = document.createElement('label');
-    label.htmlFor = cfg.key;
+    label.htmlFor = cfg.name;
+
+    const left = document.createElement('span');
+    left.className = 'left';
+    left.append(cfg.label);
+
+    if (cfg.latex) {
+      const symSpan = document.createElement('span');
+      symSpan.className = 'sym';
+      if (window.katex) {
+        try {
+          katex.render(cfg.latex, symSpan, { throwOnError: false });
+        } catch (e) {
+          symSpan.textContent = cfg.latex;
+        }
+      } else {
+        symSpan.textContent = cfg.latex;
+      }
+      left.append(' (', symSpan, ')');
+    }
+
     const valSpan = document.createElement('span');
     valSpan.className = 'val';
-    valSpan.id = cfg.key + '_val';
-    valSpan.textContent = cfg.format(cfg.default);
-    label.append(cfg.label + ' ', valSpan);
+    valSpan.id = cfg.name + '_val';
+    valSpan.textContent = formatValue(cfg, cfg.default);
+
+    label.append(left, valSpan);
 
     const input = document.createElement('input');
     input.type = 'range';
-    input.id = cfg.key;
+    input.id = cfg.name;
     input.min = cfg.min;
     input.max = cfg.max;
     input.step = cfg.step;
     input.value = cfg.default;
 
     wrap.append(label, input);
-    sidebar.appendChild(wrap);
+    groupEl.appendChild(wrap);
 
     cfg.element = input;
     cfg.valElement = valSpan;
@@ -331,38 +450,67 @@ async function loadForcingData(Module, input, url) {
 // ---------------------------------------------------------------------
 // uPlot setup.
 // ---------------------------------------------------------------------
-// Drag-to-zoom is disabled on all three synced charts (cursor.drag.x:false)
+// Drag-to-zoom is disabled on all four synced charts (cursor.drag.x:false)
 // since the range slider below is the single, shared zoom control — see
-// setupRangeSlider(). Hover crosshair/legend stay on.
-function makeDualChart(containerId) {
+// setupRangeSlider(). Hover crosshair/legend stay on. All four quadrants
+// share one sizing/series-building path since they're now equal cells in
+// the same 2x2 grid.
+//
+// Quadrant width tracks .main's actual rendered width (itself driven by the
+// responsive .layout grid in the <style> above), so this already adapts to
+// anything from a narrow window up to a 4K screen with no further work here.
+// Height is derived from that width too (clamped) rather than fixed, so a
+// much wider .main on a big screen doesn't leave the charts looking
+// unnaturally flat.
+// ---------------------------------------------------------------------
+function chartQuadrantDims() {
+  const mainWidth = document.querySelector('.main').clientWidth;
+  const width = (mainWidth - 20) / 2;
+  const height = Math.max(240, Math.min(380, Math.round(width * 0.53)));
+  return { width, height };
+}
+
+function makeMultiSeriesChart(containerId, seriesDefs, yLabel) {
+  const { width, height } = chartQuadrantDims();
   const opts = {
-    width: document.querySelector('.main').clientWidth,
-    height: 320,
+    width,
+    height,
     scales: { x: { time: true } },
-    cursor: { drag: { x: false, y: false } },
-    series: [
-      {},
-      { label: 'Leaf', stroke: '#16a34a', width: 1.5 },
-      { label: 'Stem', stroke: '#ea580c', width: 1.5 },
-    ],
-    axes: [{}, { label: 'Water potential (MPa)' }],
+    // No hover/crosshair/drag -- these charts are read-only, and the range
+    // slider below is the only zoom control. legend.live:false drops the
+    // per-hover value column, leaving just static series labels+swatches,
+    // which the CSS below repositions inside the plot's top-right corner
+    // instead of a separate row under the chart.
+    cursor: { show: false },
+    legend: { live: false },
+    series: [{}, ...seriesDefs.map((s) => ({ label: s.label, stroke: s.stroke, width: 1.5 }))],
+    axes: [{}, { label: yLabel }],
   };
-  return new uPlot(opts, [[], [], []], document.getElementById(containerId));
+  const data = [[], ...seriesDefs.map(() => [])];
+  return new uPlot(opts, data, document.getElementById(containerId));
+}
+
+function makeDualChart(containerId) {
+  return makeMultiSeriesChart(containerId, [
+    { label: 'Leaf', stroke: '#16a34a' },
+    { label: 'Stem', stroke: '#ea580c' },
+  ], 'Water potential (MPa)');
 }
 
 function makeChart(containerId, seriesLabel, color, yLabel) {
-  const opts = {
-    width: (document.querySelector('.main').clientWidth - 20) / 2,
-    height: 260,
-    scales: { x: { time: true } },
-    cursor: { drag: { x: false, y: false } },
-    series: [
-      {},
-      { label: seriesLabel, stroke: color, width: 1.5 },
-    ],
-    axes: [{}, { label: yLabel }],
-  };
-  return new uPlot(opts, [[], []], document.getElementById(containerId));
+  return makeMultiSeriesChart(containerId, [{ label: seriesLabel, stroke: color }], yLabel);
+}
+
+// theta layers get one series each, colored distinctly (cycles past 5 in
+// case someone configures more soil layers than that).
+const THETA_LAYER_COLORS = ['#2563eb', '#7c3aed', '#db2777', '#059669', '#d97706'];
+
+function makeThetaChart(containerId, nLayers) {
+  const seriesDefs = Array.from({ length: nLayers }, (_, i) => ({
+    label: `Layer ${i + 1}`,
+    stroke: THETA_LAYER_COLORS[i % THETA_LAYER_COLORS.length],
+  }));
+  return makeMultiSeriesChart(containerId, seriesDefs, 'Volumetric water content [m3 m-3]');
 }
 
 // ---------------------------------------------------------------------
@@ -375,7 +523,7 @@ function makeChart(containerId, seriesLabel, color, yLabel) {
 let selMin, selMax; // current zoom window, epoch seconds
 let startEpoch, endEpoch; // full simulation window, set once in main()
 let overviewChart, rsWindowEl, rsHandleLeftEl, rsHandleRightEl;
-let charts; // { psi, vpd, beta } — set once in main(), read by applyZoomRange()
+let charts; // { psi, vpd, beta, theta } — set once in main(), read by applyZoomRange()
 
 function makeOverviewChart(containerId) {
   const opts = {
@@ -414,6 +562,7 @@ function applyZoomRange(min, max) {
   charts.psi.setScale('x', { min: selMin, max: selMax });
   charts.vpd.setScale('x', { min: selMin, max: selMax });
   charts.beta.setScale('x', { min: selMin, max: selMax });
+  charts.theta.setScale('x', { min: selMin, max: selMax });
   updateRangeSliderVisual();
 }
 
@@ -473,7 +622,9 @@ function setupRangeSlider() {
 // Main
 // ---------------------------------------------------------------------
 async function main() {
-  buildSliders();
+  setStatus(`Loading parameter catalogue (${PARAMS_JSON_PATH})…`);
+  const PARAM_CONFIGS = await loadParamConfigs(PARAMS_JSON_PATH);
+  buildSliders(PARAM_CONFIGS);
 
   if (typeof SimPHony !== 'function') {
     throw new Error(
@@ -486,7 +637,7 @@ async function main() {
   const Module = await SimPHony({
     locateFile: (path) => (path.endsWith('.wasm') ? WASM_PATH : path),
     print: (text) => logDebug('[stdout] ' + text),
-    printErr: (text) => logDebug('[stderr] ' + text),
+    printErr: (text) => logError('[stderr] ' + text),
   });
 
   setStatus('Setting up simulation…');
@@ -499,12 +650,11 @@ async function main() {
   const { n, timestamps } = await loadForcingData(Module, input, FORCING_BIN_PATH);
   logDebug(`Loaded forcing data: n=${n}, range=[${timestamps[0]}, ${timestamps[n - 1]}]`);
 
-  // Simulation window, taken directly from the Flask reference app
-  // (date_start_str = "2023-06-25 00:00:00", date_end_str = "2023-08-29 00:00:00").
+  // Simulation window: 01/06 - 05/08/2023 (DD/MM), i.e. June 1 - August 5.
   // Assigned to the module-level startEpoch/endEpoch (declared above,
   // outside main()) since setupRangeSlider()/applyZoomRange() need them too.
-  startEpoch = Math.floor(Date.UTC(2023, 5, 25, 0, 0, 0) / 1000);  // month is 0-indexed: 5 = June
-  endEpoch = Math.floor(Date.UTC(2023, 7, 29, 0, 0, 0) / 1000);    // 7 = August
+  startEpoch = Math.floor(Date.UTC(2023, 5, 1, 0, 0, 0) / 1000);  // month is 0-indexed: 5 = June
+  endEpoch = Math.floor(Date.UTC(2023, 7, 5, 0, 0, 0) / 1000);    // 7 = August
 
   if (startEpoch < timestamps[0] || endEpoch > timestamps[n - 1]) {
     throw new Error(
@@ -522,15 +672,17 @@ async function main() {
   // Baseline parameters/soil/initial water potentials — same reference
   // setup as the Flask app's run_model() (3 soil layers at 0.08/0.16/0.32 m,
   // Set_water_pot_initials(-1.0, -0.2)), applied once; sliders only touch
-  // the four fields in SLIDER_CONFIGS from here on.
+  // the fields listed in PARAM_CONFIGS (parameters.json) from here on.
   sim.Init_parameters_default();
-  sim.Init_soil_layers_default_hainich();
+  sim.Init_soil_layers_default_hainich(); // always exactly 3 soil layers
   sim.Set_water_pot_initials(-1.0, -0.2);
+  const N_SOIL_LAYERS = 3;
 
   charts = {
     psi: makeDualChart('chart_psi'),
-    vpd: makeChart('chart_vpd', 'VPD', '#2563eb', 'VPD [Pa]'),
     beta: makeChart('chart_beta', 'β', '#000000', 'Stomatal closure β [-]'),
+    vpd: makeChart('chart_vpd', 'VPD', '#2563eb', 'VPD [Pa]'),
+    theta: makeThetaChart('chart_theta', N_SOIL_LAYERS),
   };
 
   overviewChart = makeOverviewChart('chart_overview');
@@ -542,10 +694,11 @@ async function main() {
 
   window.addEventListener('resize', () => {
     const wFull = document.querySelector('.main').clientWidth;
-    charts.psi.setSize({ width: wFull, height: 320 });
-    const wHalf = (wFull - 20) / 2;
-    charts.vpd.setSize({ width: wHalf, height: 260 });
-    charts.beta.setSize({ width: wHalf, height: 260 });
+    const { width: wHalf, height: hQuadrant } = chartQuadrantDims();
+    charts.psi.setSize({ width: wHalf, height: hQuadrant });
+    charts.beta.setSize({ width: wHalf, height: hQuadrant });
+    charts.vpd.setSize({ width: wHalf, height: hQuadrant });
+    charts.theta.setSize({ width: wHalf, height: hQuadrant });
     overviewChart.setSize({ width: wFull, height: 70 });
     updateRangeSliderVisual();
   });
@@ -558,10 +711,14 @@ async function main() {
 
     const paramSetStart = performance.now();
     const params = sim.Get_parameters();
-    for (const cfg of SLIDER_CONFIGS) {
+    for (const cfg of PARAM_CONFIGS) {
       const value = parseFloat(cfg.element.value);
-      cfg.valElement.textContent = cfg.format(value);
-      cfg.apply(params, value);
+      cfg.valElement.textContent = formatValue(cfg, value);
+      if (cfg.setter) {
+        params[cfg.setter](value);
+      } else {
+        params[cfg.name] = value;
+      }
     }
     sim.Init_parameters(params);
     params.delete(); // embind heap-allocates this on every call — free it
@@ -593,6 +750,21 @@ async function main() {
       charts.vpd.setData([x, vpdView.slice()]);
       charts.beta.setData([x, betaView.slice()]);
 
+      // theta is stored per-layer (row-major, strided), not contiguous, so
+      // unlike the *_view getters above this isn't a zero-copy typed array --
+      // it's a VectorVectorFloat (embind-heap-allocated, see Get_parameters()
+      // comment elsewhere in this file) that has to be walked and .delete()d.
+      const thetaNested = output.Get_theta_indiv();
+      const thetaRows = thetaNested.size();
+      const thetaLayers = Array.from({ length: N_SOIL_LAYERS }, () => new Array(thetaRows));
+      for (let i = 0; i < thetaRows; i++) {
+        const row = thetaNested.get(i);
+        for (let s = 0; s < N_SOIL_LAYERS; s++) thetaLayers[s][i] = row.get(s);
+        row.delete();
+      }
+      thetaNested.delete();
+      charts.theta.setData([x, ...thetaLayers]);
+
       overviewChart.setData([x, psiLeafData, psiStemData]);
       overviewChart.setScale('x', { min: startEpoch, max: endEpoch });
       // New data resets uPlot's own auto-range on the main charts — put the
@@ -619,7 +791,7 @@ async function main() {
     requestAnimationFrame(runAndRedraw);
   }
 
-  for (const cfg of SLIDER_CONFIGS) {
+  for (const cfg of PARAM_CONFIGS) {
     cfg.element.addEventListener('input', scheduleRun);
   }
 
@@ -628,8 +800,7 @@ async function main() {
 
 main().catch(err => {
   setStatus('Error — see debug output below', true);
-  logDebug(String(err && err.stack ? err.stack : err));
-  console.error(err);
+  logError(String(err && err.stack ? err.stack : err));
 });
 </script>
 </body>

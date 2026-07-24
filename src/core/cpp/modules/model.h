@@ -43,6 +43,8 @@ private:
     vector<vector<double> > input_k_soil;
     // Soil hydraulic potential [m]
     vector<vector<double> > input_psi_soil;
+    // Soil volumetric water content per layer [m3 m-3]
+    vector<vector<float> > input_theta;
 
 
     std::unique_ptr<Soil_water_module> soil_water_module;
@@ -63,6 +65,8 @@ private:
     vector<double> ipsi_soil;
     // List of conductivities per soil layer [m s-1]
     vector<double> ik_soil;
+    // List of volumetric water contents per soil layer [m3 m-3]
+    vector<float> itheta;
 
     std::unique_ptr<Water_Potential_Solver> water_potential_solver;
 

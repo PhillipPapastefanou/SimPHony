@@ -30,6 +30,10 @@ vector<vector<double> > Soil_water_module::Get_ks() {
     return ks_2D;
 }
 
+vector<vector<float> > Soil_water_module::Get_theta() {
+    return theta_2D;
+}
+
 void Soil_water_module::ParseTheta(int start_idx, int end_idx) {
 
     const vector<vector<float> >& theta_raw_input = input_module.theta_per_layer;

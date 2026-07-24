@@ -108,6 +108,11 @@ EMSCRIPTEN_BINDINGS(simphony_web_module) {
         .function("Get_gs_view", &Output::Get_gs_view)
         .function("Get_vpd_view", &Output::Get_vpd_view)
         .function("Get_beta_view", &Output::Get_beta_view)
+        // Not a *_view -- theta is stored per-layer (row-major, strided),
+        // so there's no contiguous per-layer memory to hand back as a zero-
+        // copy typed array view. VectorVectorFloat was already registered
+        // above for exactly this ("For 2D Theta array").
+        .function("Get_theta_indiv", &Output::Get_theta_indiv)
         ;
 
     // ==========================================

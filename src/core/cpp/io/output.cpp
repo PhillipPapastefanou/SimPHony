@@ -82,6 +82,10 @@ void Output::Add_ks_indiv(const vector<double>& ks_indiv, double scale) {
     k_soil_aa.Add_row(ks_indiv, scale);
 }
 
+void Output::Add_theta_indiv(const vector<float>& theta_indiv, double scale) {
+    theta_aa.Add_row(theta_indiv, scale);
+}
+
 void Output::Add_vpd(double vpd) {
     vpd_a.push_back(vpd);
 }
@@ -155,6 +159,10 @@ const vector<float> &Output::Get_vpd() const {
 
 vector<vector<float> > Output::Get_ks_soil() const {
     return k_soil_aa.To_nested();
+}
+
+vector<vector<float> > Output::Get_theta_indiv() const {
+    return theta_aa.To_nested();
 }
 
 const vector<int> &Output::Get_steps_psi_leaf() const {
@@ -253,6 +261,7 @@ void Output::Clear() {
     vpd_a.clear();
     anet_a.clear();
     k_soil_aa.clear();
+    theta_aa.clear();
     steps_psi_leaf_a.clear();
     steps_psi_stem_a.clear();
 }
