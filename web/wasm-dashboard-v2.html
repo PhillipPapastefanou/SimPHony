@@ -119,6 +119,23 @@
   .control label .left { display: flex; align-items: baseline; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .control input[type=range] { width: 100%; }
 
+  /* Drought stress panel's two sliders: centered title flanked by a red
+     "Decrease" / blue "Increase" arrow instead of the generic left-aligned
+     label + right-aligned value row used everywhere else. */
+  .drought-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .drought-title { flex: 1; text-align: center; font-size: 0.82rem; font-weight: 600; }
+  .drought-title span.sym { font-weight: 400; color: #888; }
+  .drought-arrow { font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
+  .drought-arrow.increase { color: #dc2626; }
+  .drought-arrow.decrease { color: #2563eb; }
+  .drought-val { display: block; text-align: center; font-size: 0.78rem; font-weight: 400; color: #555; margin-top: 4px; }
+
   .plots-col { min-width: 0; display: flex; flex-direction: column; gap: 20px; }
   /* .plots-col reuses .panel for its border/radius/padding (see the HTML
      class list) so it's boxed the same as the sidebar and schematic
@@ -412,6 +429,24 @@ function formatValue(cfg, value) {
 // -- shared by buildSliders() below (grouped sidebar controls) and main()
 // (the two Drought stress panel controls, mounted outside the sidebar).
 // ---------------------------------------------------------------------
+// Renders cfg.latex via KaTeX into a <span class="sym">, falling back to
+// plain text if KaTeX isn't loaded or throws. Shared by buildControl() and
+// buildDroughtControl() below.
+function renderLatexSymbol(latex) {
+  const symSpan = document.createElement('span');
+  symSpan.className = 'sym';
+  if (window.katex) {
+    try {
+      katex.render(latex, symSpan, { throwOnError: false });
+    } catch (e) {
+      symSpan.textContent = latex;
+    }
+  } else {
+    symSpan.textContent = latex;
+  }
+  return symSpan;
+}
+
 function buildControl(cfg) {
   const wrap = document.createElement('div');
   wrap.className = 'control';
@@ -424,20 +459,7 @@ function buildControl(cfg) {
   left.className = 'left';
   left.append(cfg.label);
 
-  if (cfg.latex) {
-    const symSpan = document.createElement('span');
-    symSpan.className = 'sym';
-    if (window.katex) {
-      try {
-        katex.render(cfg.latex, symSpan, { throwOnError: false });
-      } catch (e) {
-        symSpan.textContent = cfg.latex;
-      }
-    } else {
-      symSpan.textContent = cfg.latex;
-    }
-    left.append(' (', symSpan, ')');
-  }
+  if (cfg.latex) left.append(' (', renderLatexSymbol(cfg.latex), ')');
 
   const valSpan = document.createElement('span');
   valSpan.className = 'val';
@@ -455,6 +477,67 @@ function buildControl(cfg) {
   input.value = cfg.default;
 
   wrap.append(label, input);
+
+  cfg.element = input;
+  cfg.valElement = valSpan;
+
+  return wrap;
+}
+
+// ---------------------------------------------------------------------
+// The two Drought stress panel sliders get a bespoke layout instead of
+// buildControl()'s sidebar row: a centered label flanked by a red
+// "Increase" arrow and a blue "Decrease" arrow, with the value readout
+// centered underneath. Red/blue always mean the same thing -- more stress
+// vs. less -- but which *side* of the slider that is depends on the field:
+// dragging vpd_dryness_factor up means drier air (more stress, so the red
+// arrow is on the right), while dragging theta_moisture_factor up means
+// wetter soil (less stress, so red is on the *left* there instead). That
+// mapping comes from parameters.json's increases_stress flag rather than
+// being hardcoded here, so both the text and the color move together.
+// ---------------------------------------------------------------------
+function buildDroughtControl(cfg) {
+  const wrap = document.createElement('div');
+  wrap.className = 'control drought-control';
+  wrap.title = cfg.unit ? `${cfg.description} [${cfg.unit}]` : cfg.description;
+
+  const header = document.createElement('div');
+  header.className = 'drought-header';
+
+  function stressArrow(isIncrease, side) {
+    const el = document.createElement('span');
+    el.className = 'drought-arrow ' + (isIncrease ? 'increase' : 'decrease');
+    const text = isIncrease ? 'Increase' : 'Decrease';
+    el.textContent = side === 'left' ? `← ${text}` : `${text} →`;
+    return el;
+  }
+
+  // Higher slider value = more stress -> increase-arrow on the right (and
+  // vice versa when the field's higher value actually relieves stress).
+  const leftArrow = stressArrow(!cfg.increases_stress, 'left');
+  const rightArrow = stressArrow(cfg.increases_stress, 'right');
+
+  const title = document.createElement('span');
+  title.className = 'drought-title';
+  title.append(cfg.label);
+  if (cfg.latex) title.append(' (', renderLatexSymbol(cfg.latex), ')');
+
+  header.append(leftArrow, title, rightArrow);
+
+  const input = document.createElement('input');
+  input.type = 'range';
+  input.id = cfg.name;
+  input.min = cfg.min;
+  input.max = cfg.max;
+  input.step = cfg.step;
+  input.value = cfg.default;
+
+  const valSpan = document.createElement('span');
+  valSpan.className = 'val drought-val';
+  valSpan.id = cfg.name + '_val';
+  valSpan.textContent = formatValue(cfg, cfg.default);
+
+  wrap.append(header, input, valSpan);
 
   cfg.element = input;
   cfg.valElement = valSpan;
@@ -704,7 +787,7 @@ async function main() {
   const sidebarCfgs = PARAM_CONFIGS.filter((cfg) => cfg.group !== 'Drought stress');
   buildSliders(sidebarCfgs);
   const droughtControlsEl = document.getElementById('drought_controls');
-  for (const cfg of droughtCfgs) droughtControlsEl.appendChild(buildControl(cfg));
+  for (const cfg of droughtCfgs) droughtControlsEl.appendChild(buildDroughtControl(cfg));
 
   setStatus('Loading WASM glue script…');
   await loadGlueScript(GLUE_JS_PATH);
@@ -818,6 +901,20 @@ async function main() {
     rebuildChart('secondary', SECONDARY_CHART_BUILDERS, secondarySelect.value);
     scheduleRun();
   });
+
+  // Dragging either Drought stress slider auto-selects the bottom plot that
+  // shows its direct effect (VPD or soil water content), so the change is
+  // immediately visible without also touching the dropdown by hand.
+  const droughtSecondaryTypes = { vpd_dryness_factor: 'vpd', theta_moisture_factor: 'theta' };
+  for (const cfg of droughtCfgs) {
+    const type = droughtSecondaryTypes[cfg.name];
+    if (!type) continue;
+    cfg.element.addEventListener('input', () => {
+      if (secondarySelect.value === type) return;
+      secondarySelect.value = type;
+      rebuildChart('secondary', SECONDARY_CHART_BUILDERS, type);
+    });
+  }
 
   window.addEventListener('resize', () => {
     const { width, height } = plotsColDims();
