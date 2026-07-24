@@ -67,6 +67,7 @@ EMSCRIPTEN_BINDINGS(simphony_web_module) {
         .property("psi88_xylem", &Parameters::psi88_xylem)
         .property("psi_leaf_50_close", &Parameters::psi_leaf_50_close)
         .property("d_50_close", &Parameters::d_50_close)
+        .property("g0", &Parameters::g0)
         .property("vpd_dryness_factor", &Parameters::vpd_dryness_factor)
         .property("theta_moisture_factor", &Parameters::theta_moisture_factor)
         // Add any other properties you want to adjust from the web UI here
