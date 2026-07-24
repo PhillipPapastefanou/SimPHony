@@ -225,6 +225,9 @@ val Output::Get_T_view() const {
 val Output::Get_J_view() const {
     return val(typed_memory_view(Ja.size(), Ja.data()));
 }
+val Output::Get_G_view() const {
+    return val(typed_memory_view(Ga.size(), Ga.data()));
+}
 val Output::Get_psi_leaf_view() const {
     return val(typed_memory_view(psi_leaf_a.size(), psi_leaf_a.data()));
 }

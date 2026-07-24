@@ -101,6 +101,7 @@ public:
     #ifdef __EMSCRIPTEN__
     emscripten::val Get_T_view() const;
     emscripten::val Get_J_view() const;
+    emscripten::val Get_G_view() const;
     emscripten::val Get_psi_leaf_view() const;
     emscripten::val Get_psi_sap_view() const;
     emscripten::val Get_gs_view() const;

@@ -103,6 +103,7 @@ EMSCRIPTEN_BINDINGS(simphony_web_module) {
 
         .function("Get_T_view", &Output::Get_T_view)
         .function("Get_J_view", &Output::Get_J_view)
+        .function("Get_G_view", &Output::Get_G_view)
         .function("Get_psi_leaf_view", &Output::Get_psi_leaf_view)
         .function("Get_psi_sap_view", &Output::Get_psi_sap_view)
         .function("Get_gs_view", &Output::Get_gs_view)
