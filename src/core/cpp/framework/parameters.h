@@ -195,6 +195,16 @@ public:
     // Choose 0.0 to have the mean water content, 1.0 equals to 1SD higher water content
     double wcont_sigma_deviation = 0.0;
 
+    // Drought-stress "atmospheric dryness" control [-]: constant multiplier
+    // applied to the observed VPD forcing over the whole simulation period.
+    // 1.0 = observed VPD unchanged.
+    double vpd_dryness_factor = 1.0;
+
+    // Drought-stress "soil moisture" control [-]: constant multiplier applied
+    // to the observed theta forcing (every layer) before the psi_soil/k_soil
+    // pedotransfer functions run. 1.0 = observed theta unchanged.
+    double theta_moisture_factor = 1.0;
+
     // Tree density [Trees m-2]
     // Used for output scaling onlny
     double tree_density = 1.0;

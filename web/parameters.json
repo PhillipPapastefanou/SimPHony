@@ -1,5 +1,23 @@
 [
   {
+    "name": "vpd_dryness_factor",
+    "group": "Drought stress",
+    "label": "Atmospheric stress",
+    "unit": "x VPD",
+    "description": "Constant multiplier on the observed VPD over the whole simulation period. 1.0 = observed VPD; above 1 is drier air, below 1 is more humid air.",
+    "latex": "f_{VPD}",
+    "min": 0.5, "max": 3.0, "step": 0.05, "default": 1.0, "decimals": 2
+  },
+  {
+    "name": "theta_moisture_factor",
+    "group": "Drought stress",
+    "label": "Soil moisture stress",
+    "unit": "x θ",
+    "description": "Constant multiplier on the observed soil water content (theta), applied uniformly to every layer over the whole simulation period. 1.0 = observed theta; below 1 is drier soil, above 1 is wetter soil.",
+    "latex": "f_{\\theta}",
+    "min": 0.5, "max": 1.5, "step": 0.02, "default": 1.0, "decimals": 2
+  },
+  {
     "name": "root_area_index",
     "group": "Canopy & Roots",
     "label": "Root area index",

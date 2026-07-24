@@ -85,6 +85,12 @@ void Soil_water_module::ParseTheta(int start_idx, int end_idx) {
             }
         }
 
+        // Drought-stress "soil moisture" slider: constant multiplier on the
+        // observed theta driver, applied before CalculatePsiAndKs() turns it
+        // into psi_soil/k_soil -- so it feeds the actual water uptake, not
+        // just the plotted series.
+        for (float& t : theta_list) t *= parameters.theta_moisture_factor;
+
         theta_2D[i] = theta_list;
     }
 

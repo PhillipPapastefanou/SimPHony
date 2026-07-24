@@ -101,7 +101,6 @@
     padding: 18px;
   }
   .panel h2 { font-size: 1rem; margin: 0 0 12px; color: #333; }
-  .panel .hint { font-size: 0.72rem; color: #999; margin: -6px 0 12px; }
 
   .figure-panel img { width: 100%; height: auto; display: block; border-radius: 4px; }
   .figure-panel .caption { font-size: 0.78rem; color: #777; margin: 10px 0 0; line-height: 1.5; }
@@ -238,15 +237,10 @@
 
     <div class="panel drought-panel">
       <h2>Drought stress</h2>
-      <p class="hint">Not wired to the simulation yet — for now these just move.</p>
-      <div class="control">
-        <label for="drought_severity">Drought severity <span class="val" id="drought_severity_val">0%</span></label>
-        <input type="range" id="drought_severity" min="0" max="100" step="1" value="0">
-      </div>
-      <div class="control">
-        <label for="drought_duration">Drought duration <span class="val" id="drought_duration_val">0 d</span></label>
-        <input type="range" id="drought_duration" min="0" max="60" step="1" value="0">
-      </div>
+      <!-- populated in main() from the parameters.json "Drought stress"
+           group (vpd_dryness_factor, theta_moisture_factor) via buildControl(),
+           the same control markup the sidebar groups use. -->
+      <div id="drought_controls"></div>
     </div>
   </div>
 
@@ -411,9 +405,66 @@ function formatValue(cfg, value) {
 }
 
 // ---------------------------------------------------------------------
+// Build a single slider control from a parameter config: label (+ optional
+// KaTeX symbol), value readout, and the range input itself. `description`/
+// `unit` become a native tooltip. Sets cfg.element/cfg.valElement so callers
+// (the param-apply loop and event wiring in main()) can read the live value
+// -- shared by buildSliders() below (grouped sidebar controls) and main()
+// (the two Drought stress panel controls, mounted outside the sidebar).
+// ---------------------------------------------------------------------
+function buildControl(cfg) {
+  const wrap = document.createElement('div');
+  wrap.className = 'control';
+  wrap.title = cfg.unit ? `${cfg.description} [${cfg.unit}]` : cfg.description;
+
+  const label = document.createElement('label');
+  label.htmlFor = cfg.name;
+
+  const left = document.createElement('span');
+  left.className = 'left';
+  left.append(cfg.label);
+
+  if (cfg.latex) {
+    const symSpan = document.createElement('span');
+    symSpan.className = 'sym';
+    if (window.katex) {
+      try {
+        katex.render(cfg.latex, symSpan, { throwOnError: false });
+      } catch (e) {
+        symSpan.textContent = cfg.latex;
+      }
+    } else {
+      symSpan.textContent = cfg.latex;
+    }
+    left.append(' (', symSpan, ')');
+  }
+
+  const valSpan = document.createElement('span');
+  valSpan.className = 'val';
+  valSpan.id = cfg.name + '_val';
+  valSpan.textContent = formatValue(cfg, cfg.default);
+
+  label.append(left, valSpan);
+
+  const input = document.createElement('input');
+  input.type = 'range';
+  input.id = cfg.name;
+  input.min = cfg.min;
+  input.max = cfg.max;
+  input.step = cfg.step;
+  input.value = cfg.default;
+
+  wrap.append(label, input);
+
+  cfg.element = input;
+  cfg.valElement = valSpan;
+
+  return wrap;
+}
+
+// ---------------------------------------------------------------------
 // Build the sidebar sliders from the fetched parameter configs, grouped
-// under headings. Each config's `latex` is rendered with KaTeX next to its
-// label, and `description`/`unit` become a native tooltip on the control.
+// under headings.
 // ---------------------------------------------------------------------
 function buildSliders(configs) {
   const sidebar = document.getElementById('sidebar');
@@ -434,69 +485,9 @@ function buildSliders(configs) {
       lastGroup = cfg.group;
     }
 
-    const wrap = document.createElement('div');
-    wrap.className = 'control';
-    wrap.title = cfg.unit ? `${cfg.description} [${cfg.unit}]` : cfg.description;
-
-    const label = document.createElement('label');
-    label.htmlFor = cfg.name;
-
-    const left = document.createElement('span');
-    left.className = 'left';
-    left.append(cfg.label);
-
-    if (cfg.latex) {
-      const symSpan = document.createElement('span');
-      symSpan.className = 'sym';
-      if (window.katex) {
-        try {
-          katex.render(cfg.latex, symSpan, { throwOnError: false });
-        } catch (e) {
-          symSpan.textContent = cfg.latex;
-        }
-      } else {
-        symSpan.textContent = cfg.latex;
-      }
-      left.append(' (', symSpan, ')');
-    }
-
-    const valSpan = document.createElement('span');
-    valSpan.className = 'val';
-    valSpan.id = cfg.name + '_val';
-    valSpan.textContent = formatValue(cfg, cfg.default);
-
-    label.append(left, valSpan);
-
-    const input = document.createElement('input');
-    input.type = 'range';
-    input.id = cfg.name;
-    input.min = cfg.min;
-    input.max = cfg.max;
-    input.step = cfg.step;
-    input.value = cfg.default;
-
-    wrap.append(label, input);
-    groupEl.appendChild(wrap);
-
-    cfg.element = input;
-    cfg.valElement = valSpan;
+    groupEl.appendChild(buildControl(cfg));
   }
 }
-
-// ---------------------------------------------------------------------
-// Drought-stress placeholders -- purely cosmetic, no wiring to Parameters
-// or the simulation. Just keeps their own displayed value in sync while
-// dragging, same as a real slider would, so they don't look broken.
-// ---------------------------------------------------------------------
-function wireCosmeticSlider(id, formatFn) {
-  const el = document.getElementById(id);
-  const valEl = document.getElementById(id + '_val');
-  el.addEventListener('input', () => {
-    valEl.textContent = formatFn(parseFloat(el.value));
-  });
-}
-wireCosmeticSlider('drought_severity', (v) => `${v.toFixed(0)}%`);
-wireCosmeticSlider('drought_duration', (v) => `${v.toFixed(0)} d`);
 
 // ---------------------------------------------------------------------
 // FRC2 binary forcing loader — identical to wasm-example.html.
@@ -705,7 +696,15 @@ function setupRangeSlider() {
 async function main() {
   setStatus(`Loading parameter catalogue (${PARAMS_JSON_PATH})…`);
   const PARAM_CONFIGS = await loadParamConfigs(PARAMS_JSON_PATH);
-  buildSliders(PARAM_CONFIGS);
+  // "Drought stress" has its own bespoke panel below the schematic instead
+  // of a generic sidebar group -- pull its two entries out and mount them
+  // there with the same buildControl() markup the sidebar groups use, each
+  // one driving only its own forcing series (VPD or theta).
+  const droughtCfgs = PARAM_CONFIGS.filter((cfg) => cfg.group === 'Drought stress');
+  const sidebarCfgs = PARAM_CONFIGS.filter((cfg) => cfg.group !== 'Drought stress');
+  buildSliders(sidebarCfgs);
+  const droughtControlsEl = document.getElementById('drought_controls');
+  for (const cfg of droughtCfgs) droughtControlsEl.appendChild(buildControl(cfg));
 
   setStatus('Loading WASM glue script…');
   await loadGlueScript(GLUE_JS_PATH);

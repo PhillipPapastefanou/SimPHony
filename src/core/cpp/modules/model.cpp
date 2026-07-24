@@ -152,7 +152,11 @@ void Model::Run(DateTime begin, DateTime end) {
         ipressure = 1.013 * 100000.0;
 
         itemp_air = input_air_temperature[time_index(ts)];
-        ivpd = input_vpd[time_index(ts)];
+        // Drought-stress "atmospheric dryness" slider: constant multiplier
+        // on the observed VPD driver, applied here so it feeds both the
+        // stomatal/transpiration solve below and the plotted VPD series
+        // (Add_vpd(ivpd) further down uses this same scaled value).
+        ivpd = input_vpd[time_index(ts)] * params.vpd_dryness_factor;
         isw_down = input_sw_down[time_index(ts)];
 
         ipsi_soil = input_psi_soil[time_index(ts)];
