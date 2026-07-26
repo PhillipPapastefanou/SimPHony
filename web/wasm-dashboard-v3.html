@@ -44,17 +44,20 @@
      column is gone -- T, J, G, psi_Leaf and psi_Stem now render as small
      sparklines positioned directly on the figure, near the symbol/arrow
      each one corresponds to (see OVERLAY_DEFS in the script below). The
-     third, thin column is just the (currently disabled) drought-stress
-     sliders -- too narrow for anything but a stacked label/slider/value. */
+     third column holds the drought-stress sliders, each followed by its
+     own live chart (VPD under Atmospheric stress, soil water content under
+     Soil moisture stress -- see DROUGHT_CHART_DEFS) sized to match the
+     schematic's overlay charts, hence this column being as wide as the
+     sidebar rather than the slim label-only strip it used to be. */
   .layout {
     display: grid;
-    grid-template-columns: 340px 1fr 120px;
+    grid-template-columns: 340px 1fr 300px;
     gap: 24px;
     flex: 1 1 auto;
     min-height: 0;
   }
   @media (min-width: 1800px) {
-    .layout { grid-template-columns: 360px 1fr 130px; }
+    .layout { grid-template-columns: 360px 1fr 320px; }
   }
 
   /* All three columns stretch to .layout's full (viewport-bound) height and
@@ -64,8 +67,21 @@
      windows rather than the normal path. min-height:0 overrides grid
      items' default content-based minimum size, which would otherwise
      force the row taller than .layout's own height instead of actually
-     clipping/scrolling here. */
-  .sidebar, .schematic-col, .drought-col {
+     clipping/scrolling here.
+     .sidebar itself no longer scrolls -- it's a flex column with the time
+     range pinned (flex:0 0 auto, see .rangeslider-block) and only
+     .sidebar-params (the "Parameter" heading + slider groups) taking the
+     scrollbar, via the same min-height:0/overflow-y:auto pattern -- so the
+     time range stays visible and reachable no matter how far the slider
+     list is scrolled. */
+  .sidebar { display: flex; flex-direction: column; min-height: 0; }
+  .schematic-col, .drought-col {
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
+  .sidebar-params {
+    flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
     scrollbar-gutter: stable;
@@ -79,7 +95,7 @@
   @media (max-width: 1150px) {
     body { height: auto; }
     .layout { grid-template-columns: 1fr; flex: 0 0 auto; }
-    .sidebar, .schematic-col, .drought-col { overflow-y: visible; }
+    .schematic-col, .drought-col, .sidebar-params { overflow-y: visible; }
   }
 
   .sidebar {
@@ -88,8 +104,8 @@
     padding: 16px;
   }
   .sidebar h2 { font-size: 1rem; margin: 0 0 12px; color: #333; }
-  .sidebar details { margin-bottom: 4px; }
-  .sidebar summary {
+  .sidebar-params details { margin-bottom: 4px; }
+  .sidebar-params summary {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -98,8 +114,8 @@
     cursor: pointer;
     user-select: none;
   }
-  .sidebar details:first-of-type summary { margin-top: 0; }
-  .sidebar details[open] > summary { color: #555; }
+  .sidebar-params details:first-of-type summary { margin-top: 0; }
+  .sidebar-params details[open] > summary { color: #555; }
 
   .schematic-col { display: flex; flex-direction: column; gap: 20px; }
 
@@ -114,10 +130,11 @@
      piece without an intrinsic content-driven minimum height -- is the one
      that absorbs a short window, rather than the panel just overflowing.
      min-height:0 overrides flex's default "never shrink below content
-     size". */
+     size". No caption row below the figure anymore, so schematic-stage's
+     flex:1 1 auto is the only thing sizing this column -- the figure
+     (and its overlay charts) now fill the entire panel below the h2. */
   .figure-panel { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
-  .figure-panel h2, .figure-panel .caption { flex: 0 0 auto; }
-  .figure-panel .caption { font-size: 0.78rem; color: #777; margin: 10px 0 0; line-height: 1.5; }
+  .figure-panel h2 { flex: 0 0 auto; }
 
   /* The figure + its overlaid live mini-charts. .schematic-stage just fills
      whatever box the flex column above gives it (any shape) -- the <img>
@@ -207,13 +224,13 @@
   .control input[type=range] { width: 100%; }
   .control input[type=range]:disabled { cursor: not-allowed; }
 
-  /* Drought stress lives in its own thin third column -- too narrow for
-     buildControl()'s label+value row or a horizontal arrow layout, so it
-     gets a compact stacked label/slider/value instead
-     (buildThinDroughtControl() in the script). .drought-col is that
-     column's box; .drought-panel.disabled (toggled from JS via
-     DROUGHT_PANEL_ENABLED rather than hardcoded, so flipping that one flag
-     is enough to bring it back) dims it. */
+  /* Drought stress column: a stacked label/slider/value per control
+     (buildThinDroughtControl() in the script), each followed by its own
+     live chart (buildDroughtChart()/DROUGHT_CHART_DEFS) -- VPD under
+     Atmospheric stress, soil water content under Soil moisture stress.
+     .drought-col is that column's box; .drought-panel.disabled (toggled
+     from JS via DROUGHT_PANEL_ENABLED rather than hardcoded, so flipping
+     that one flag is enough to disable it again) dims it. */
   .drought-col {
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -232,13 +249,49 @@
 
   .thin-drought-control { margin-bottom: 24px; text-align: center; }
   .thin-drought-control:last-child { margin-bottom: 0; }
-  .thin-drought-label { font-size: 0.68rem; font-weight: 600; color: #333; line-height: 1.25; margin-bottom: 8px; }
   .thin-drought-val { font-size: 0.68rem; color: #555; margin-top: 6px; }
   .thin-drought-control input[type=range] { width: 100%; }
 
+  /* Ported from wasm-dashboard-v2.html: the centered label flanked by a
+     red "Increase" / blue "Decrease" arrow (see stressArrow() in the
+     script) instead of a plain label above the slider. Red/blue always
+     mean the same thing -- more stress vs. less -- but which *side* it's
+     on depends on the field (parameters.json's increases_stress flag),
+     handled in JS, not here. */
+  .drought-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .drought-title { flex: 1; text-align: center; font-size: 0.68rem; font-weight: 600; color: #333; line-height: 1.25; }
+  .drought-arrow { font-size: 0.64rem; font-weight: 600; white-space: nowrap; }
+  .drought-arrow.increase { color: #dc2626; }
+  .drought-arrow.decrease { color: #2563eb; }
+
+  /* Sized to the same native aspect ratio as the schematic's overlay
+     boxes (616x460, see OVERLAY_DEFS) so these charts read as the same
+     "size" even though they sit in normal document flow (width:100% of
+     the drought column) rather than being pixel-positioned over an
+     image -- same visual treatment (card background/border/shadow) as
+     .overlay-chart otherwise, just position:relative instead of
+     absolute. */
+  .drought-chart-box {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 616 / 460;
+    margin-top: 10px;
+    background: rgba(255, 255, 255, 0.97);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 6px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
+    padding: 4px;
+  }
+
   /* Time range -- now the first thing in the sidebar (above the parameter
      groups) instead of living in a since-removed third "plots" column. */
-  .rangeslider-block { margin-bottom: 20px; }
+  .rangeslider-block { flex: 0 0 auto; margin-bottom: 20px; }
   .rangeslider-header {
     display: flex;
     justify-content: space-between;
@@ -316,8 +369,10 @@
       </div>
     </div>
 
-    <h2>Parameter</h2>
-    <!-- slider controls are generated into here from parameters.json, see buildSliders() below -->
+    <div class="sidebar-params" id="sidebar_params">
+      <h2>Parameter</h2>
+      <!-- slider controls are generated into here from parameters.json, see buildSliders() below -->
+    </div>
   </div>
 
   <div class="schematic-col">
@@ -329,7 +384,6 @@
         <!-- live mini-chart overlays (T, J, G, psi_Leaf, psi_Stem) are
              built and positioned in main() from OVERLAY_DEFS below. -->
       </div>
-      <p class="caption">Conductances (K), capacitances (Γ), and water potentials (ψ) at each compartment. Sliders on the left map onto a symbol here; the small live charts overlaid on the figure show that compartment's simulated time series. Drag the time range above the sliders to zoom all of them together.</p>
     </div>
   </div>
 
@@ -397,9 +451,9 @@ const PARAMS_JSON_PATH = './parameters.json';
 // this is only used in one place now.
 const CHART_FONT = '12px "Avenir Next", -apple-system, BlinkMacSystemFont, sans-serif';
 
-// Flip to re-enable the drought-stress sliders (currently disabled -- see
-// the <style>/<body> comments on .drought-panel).
-const DROUGHT_PANEL_ENABLED = false;
+// Flip to false to disable the drought-stress sliders again -- see the
+// <style>/<body> comments on .drought-panel.
+const DROUGHT_PANEL_ENABLED = true;
 
 // =======================================================================
 // Parameter sliders are data-driven from PARAMS_JSON_PATH (parameters.json)
@@ -531,19 +585,49 @@ function buildControl(cfg) {
 }
 
 // ---------------------------------------------------------------------
-// The Drought stress column is very thin (see .drought-col in <style>) --
-// too narrow for buildControl()'s label+value row, let alone an arrow
-// layout -- so its two sliders get a compact stacked label/slider/value
-// instead. (Currently disabled by default -- see DROUGHT_PANEL_ENABLED.)
+// The Drought stress column's two sliders get a centered label flanked by
+// a red "Increase" / blue "Decrease" arrow (ported from
+// wasm-dashboard-v2.html's buildDroughtControl()) instead of
+// buildControl()'s sidebar label+value row, plus the stacked
+// label/slider/value shape that already suits this column. Each is
+// followed by its own live chart -- see DROUGHT_CHART_DEFS /
+// buildDroughtChart() below.
+//
+// Red/blue always mean the same thing -- more stress vs. less -- but
+// which *side* of the slider that is depends on the field: dragging
+// vpd_dryness_factor up means drier air (more stress, so the red arrow is
+// on the right), while dragging theta_moisture_factor up means wetter
+// soil (less stress, so red is on the *left* there instead). That mapping
+// comes from parameters.json's increases_stress flag rather than being
+// hardcoded here, so both the text and the color move together.
 // ---------------------------------------------------------------------
+function stressArrow(isIncrease, side) {
+  const el = document.createElement('span');
+  el.className = 'drought-arrow ' + (isIncrease ? 'increase' : 'decrease');
+  const text = isIncrease ? 'Increase' : 'Decrease';
+  el.textContent = side === 'left' ? `← ${text}` : `${text} →`;
+  return el;
+}
+
 function buildThinDroughtControl(cfg) {
   const wrap = document.createElement('div');
   wrap.className = 'control thin-drought-control';
   wrap.title = cfg.unit ? `${cfg.description} [${cfg.unit}]` : cfg.description;
 
-  const label = document.createElement('div');
-  label.className = 'thin-drought-label';
-  label.textContent = cfg.label;
+  const header = document.createElement('div');
+  header.className = 'drought-header';
+
+  // Higher slider value = more stress -> increase-arrow on the right (and
+  // vice versa when the field's higher value actually relieves stress).
+  const leftArrow = stressArrow(!cfg.increases_stress, 'left');
+  const rightArrow = stressArrow(cfg.increases_stress, 'right');
+
+  const title = document.createElement('span');
+  title.className = 'drought-title';
+  title.append(cfg.label);
+  if (cfg.latex) title.append(' (', renderLatexSymbol(cfg.latex), ')');
+
+  header.append(leftArrow, title, rightArrow);
 
   const input = document.createElement('input');
   input.type = 'range';
@@ -558,7 +642,7 @@ function buildThinDroughtControl(cfg) {
   valSpan.id = cfg.name + '_val';
   valSpan.textContent = formatValue(cfg, cfg.default);
 
-  wrap.append(label, input, valSpan);
+  wrap.append(header, input, valSpan);
 
   cfg.element = input;
   cfg.valElement = valSpan;
@@ -571,7 +655,7 @@ function buildThinDroughtControl(cfg) {
 // under headings.
 // ---------------------------------------------------------------------
 function buildSliders(configs) {
-  const sidebar = document.getElementById('sidebar');
+  const sidebar = document.getElementById('sidebar_params');
   let lastGroup = null;
   let groupEl = null; // <details> for the group currently being filled
 
@@ -675,8 +759,19 @@ function makeOverviewChart(containerId) {
 }
 
 function updateRangeSliderVisual() {
-  const left = overviewChart.valToPos(selMin, 'x');
-  const right = overviewChart.valToPos(selMax, 'x');
+  // valToPos() returns a position relative to the *plotting area* (i.e.
+  // 0 = the left edge of the data area, past uPlot's own y-axis gutter),
+  // but rs_window is positioned absolutely against #rangeslider -- the
+  // same coordinate space as the chart's whole root element, gutter
+  // included. Left uncorrected, the highlighted window renders shifted
+  // left by exactly that gutter's width relative to the data it's
+  // supposed to be bracketing. Measuring the two elements' actual
+  // rendered rects (rather than reconstructing the offset from uPlot's
+  // internal bbox/pxRatio) sidesteps any devicePixelRatio rounding.
+  const plotLeft = overviewChart.over.getBoundingClientRect().left -
+    overviewChart.root.getBoundingClientRect().left;
+  const left = plotLeft + overviewChart.valToPos(selMin, 'x');
+  const right = plotLeft + overviewChart.valToPos(selMax, 'x');
   rsWindowEl.style.left = `${left}px`;
   rsWindowEl.style.width = `${Math.max(right - left, 6)}px`;
 }
@@ -687,7 +782,7 @@ function updateRangeSliderVisual() {
 function applyZoomRange(min, max) {
   selMin = Math.max(startEpoch, Math.min(min, max));
   selMax = Math.min(endEpoch, Math.max(min, max));
-  for (const def of OVERLAY_DEFS) {
+  for (const def of ALL_CHART_DEFS) {
     if (charts[def.key]) charts[def.key].setScale('x', { min: selMin, max: selMax });
   }
   syncGroupYRanges();
@@ -777,17 +872,68 @@ const OVERLAY_DEFS = [
   { key: 'G', label: 'G', color: '#000000', unit: 'mol H2O m-2 s-1', corner: 'bottom-left', scale: 1000, box: { x: 1364, y: 1118, w: 616, h: 460 } },
 ];
 
-// Applies the matching OVERLAY_DEFS entry's `scale` (if any) to a raw
+// Applies the matching `defs` entry's `scale` (if any) to a raw
 // Get_*_view() typed-array view before it's handed to uPlot -- .slice()
 // first since the view is a live pointer into WASM heap memory that's only
 // valid until the next allocation, and scaling in place would corrupt it.
-function scaledSeries(view, key) {
+// `defs` defaults to OVERLAY_DEFS (T/J/G's mol->mmol scaling); the
+// drought-column vpd chart passes DROUGHT_CHART_DEFS for its Pa->kPa one.
+function scaledSeries(view, key, defs = OVERLAY_DEFS) {
   const arr = view.slice();
-  const scale = OVERLAY_DEFS.find((d) => d.key === key).scale;
+  const scale = defs.find((d) => d.key === key).scale;
   if (scale) {
     for (let i = 0; i < arr.length; i++) arr[i] *= scale;
   }
   return arr;
+}
+
+// The drought-stress column's two live charts -- VPD under the
+// Atmospheric-stress slider, soil water content under Soil-moisture-stress
+// -- each mounted directly below its slider (see main()'s droughtCfgs
+// loop / buildDroughtChart()) rather than pixel-positioned over the
+// schematic image, so there's no OVERLAY_DEFS.box/layoutOverlays() math
+// here: just a normal flow element sized by .drought-chart-box's
+// aspect-ratio (see <style>). `afterParam` is the parameters.json `name`
+// this chart mounts after.
+// `scale` on vpd converts Output::Get_vpd_view()'s native Pa to the kPa
+// shown here (see input_hainich.cpp's `vpd_in[i] * 1000.0` -- the model
+// stores/computes in Pa internally).
+const DROUGHT_CHART_DEFS = [
+  { key: 'vpd', afterParam: 'vpd_dryness_factor', label: 'VPD', color: '#000000', unit: 'kPa', scale: 0.001 },
+  { key: 'theta', afterParam: 'theta_moisture_factor', label: 'θ', color: '#000000', unit: 'm3 m-3' },
+];
+
+// Both schematic-overlay and drought-column charts live in the one shared
+// `charts` map (keyed by OVERLAY_DEFS/DROUGHT_CHART_DEFS `key`) -- this
+// combined list is what applyZoomRange() iterates to keep every chart's x
+// scale (zoom window) in sync, overlay and drought alike.
+const ALL_CHART_DEFS = OVERLAY_DEFS.concat(DROUGHT_CHART_DEFS);
+
+// Unlike the _view getters above, Get_theta_indiv() has no zero-copy
+// counterpart (soil water content is stored per-layer, strided -- see its
+// C++ binding comment), so it returns a fresh embind vector-of-vectors
+// (outer index = timestep, inner = soil layer) that has to be walked with
+// .get()/.size() and explicitly .delete()'d rather than .slice()'d.
+// Averaged across layers here since theta_moisture_factor (the
+// Soil-moisture-stress slider) scales every layer uniformly -- one mean
+// series is enough to show its effect.
+function meanThetaSeries(output) {
+  const rows = output.Get_theta_indiv();
+  try {
+    const n = rows.size();
+    const out = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      const row = rows.get(i);
+      const nLayers = row.size();
+      let sum = 0;
+      for (let j = 0; j < nLayers; j++) sum += row.get(j);
+      out[i] = nLayers ? sum / nLayers : NaN;
+      row.delete();
+    }
+    return out;
+  } finally {
+    rows.delete();
+  }
 }
 
 // The two left-hand charts (both water potentials, MPa) and the three
@@ -954,8 +1100,67 @@ function layoutOverlays() {
   }
 }
 
+// Builds one drought-column chart -- box + plot mount + inline legend
+// label (the same bottom-left chip treatment as the schematic overlays,
+// see OVERLAY_DEFS) -- and its uPlot instance, appended into `parentEl`
+// (the slider control's own wrapper, so the chart sits directly under
+// that control) rather than into the schematic stage. Registers into the
+// shared `charts` map like buildOverlayCharts() does, so applyZoomRange()/
+// syncGroupYRanges() treat it identically to an overlay chart.
+function buildDroughtChart(def, parentEl) {
+  const box = document.createElement('div');
+  box.className = 'drought-chart-box';
+
+  const plotEl = document.createElement('div');
+  plotEl.className = 'overlay-plot';
+
+  const label = document.createElement('div');
+  label.className = 'overlay-inline-label corner-bottom-left';
+  label.style.color = def.color;
+  label.title = `${def.label} [${def.unit}]`;
+  const swatch = document.createElement('span');
+  swatch.className = 'swatch';
+  const text = document.createElement('span');
+  text.textContent = def.label;
+  label.append(swatch, text);
+  plotEl.appendChild(label);
+
+  box.appendChild(plotEl);
+  parentEl.appendChild(box);
+
+  charts[def.key] = new uPlot({
+    width: 1, height: 1, // placeholder -- layoutDroughtCharts() sizes it for real
+    pxAlign: 0,
+    scales: { x: { time: true } },
+    cursor: { show: false },
+    legend: { show: false },
+    series: [{}, { stroke: def.color, width: 1, points: { show: false } }],
+    axes: [
+      { font: CHART_FONT, size: 22, stroke: '#999', grid: { stroke: '#eee', width: 1 } },
+      { font: CHART_FONT, size: 34, stroke: '#999', grid: { stroke: '#eee', width: 1 } },
+    ],
+  }, [[], []], plotEl);
+  def.plotEl = plotEl;
+}
+
+// Sizes every drought-column chart to whatever its (CSS aspect-ratio
+// driven) box currently measures -- called on the initial paint and on
+// every resize (see the ResizeObserver in main()), same as layoutOverlays()
+// but without any position math since these charts live in normal flow.
+function layoutDroughtCharts() {
+  for (const def of DROUGHT_CHART_DEFS) {
+    if (charts[def.key] && def.plotEl) {
+      charts[def.key].setSize({
+        width: Math.max(1, def.plotEl.clientWidth),
+        height: Math.max(1, def.plotEl.clientHeight),
+      });
+    }
+  }
+}
+
 function fitAll() {
   layoutOverlays();
+  layoutDroughtCharts();
   if (overviewChart) {
     overviewChart.setSize({ width: sidebarContentWidth(), height: 70 });
     updateRangeSliderVisual();
@@ -968,15 +1173,29 @@ function fitAll() {
 async function main() {
   setStatus(`Loading parameter catalogue (${PARAMS_JSON_PATH})…`);
   const PARAM_CONFIGS = await loadParamConfigs(PARAMS_JSON_PATH);
-  // "Drought stress" has its own thin third column instead of a generic
-  // sidebar group -- pull its two entries out and mount them there.
-  // Disabled by default in this version (DROUGHT_PANEL_ENABLED) -- still
-  // built the same way so re-enabling later is a one-line flip.
+  // "Drought stress" has its own third column instead of a generic sidebar
+  // group -- pull its two entries out and mount them there, each with its
+  // own live chart (see DROUGHT_CHART_DEFS/buildDroughtChart()).
   const droughtCfgs = PARAM_CONFIGS.filter((cfg) => cfg.group === 'Drought stress');
   const sidebarCfgs = PARAM_CONFIGS.filter((cfg) => cfg.group !== 'Drought stress');
   buildSliders(sidebarCfgs);
+
+  // buildOverlayCharts() initializes the shared `charts` map (and the five
+  // schematic overlays into it) -- done here, before the drought charts
+  // below, since buildDroughtChart() only *adds* into that map rather than
+  // creating it. Doesn't depend on the WASM module/simulation, so there's
+  // no need to wait for those.
+  buildOverlayCharts();
+  layoutOverlays();
+
   const droughtControlsEl = document.getElementById('drought_controls');
-  for (const cfg of droughtCfgs) droughtControlsEl.appendChild(buildThinDroughtControl(cfg));
+  for (const cfg of droughtCfgs) {
+    const controlEl = buildThinDroughtControl(cfg);
+    droughtControlsEl.appendChild(controlEl);
+    const chartDef = DROUGHT_CHART_DEFS.find((d) => d.afterParam === cfg.name);
+    if (chartDef) buildDroughtChart(chartDef, controlEl);
+  }
+  layoutDroughtCharts();
   if (!DROUGHT_PANEL_ENABLED) {
     document.getElementById('drought_panel').classList.add('disabled');
     document.getElementById('drought_disabled_note').textContent = '(disabled for now)';
@@ -1037,32 +1256,34 @@ async function main() {
   sim.Init_soil_layers_default_hainich(); // always exactly 3 soil layers
   sim.Set_water_pot_initials(-1.0, -0.2);
 
-  buildOverlayCharts();
-  layoutOverlays();
-
   overviewChart = makeOverviewChart('chart_overview');
   // The overview always shows the full window — fixed regardless of zoom —
   // so its scale can be set once, immediately, without waiting for data.
   overviewChart.setScale('x', { min: startEpoch, max: endEpoch });
   setupRangeSlider();
-  applyZoomRange(startEpoch, endEpoch); // start fully zoomed out
+  // Start zoomed into the first two weeks rather than the whole run --
+  // "Reset zoom" (rs_reset click / rs_window dblclick, see
+  // setupRangeSlider()) still goes to the full [startEpoch, endEpoch]
+  // window, only this initial paint is narrower.
+  applyZoomRange(startEpoch, Math.min(endEpoch, startEpoch + 14 * 86400));
   // One rAF of insurance in case #schematic_stage's own box wasn't fully
   // settled yet when buildOverlayCharts()/layoutOverlays() measured it
   // above, so the very first paint already matches what a resize would
   // produce.
   requestAnimationFrame(fitAll);
 
-  // ResizeObserver on the two boxes that actually drive fitAll()'s math
-  // (the schematic stage sizes/positions the overlay charts; the sidebar's
-  // width sizes the overview chart) -- catches every way either can change
-  // size, not just a window resize: the grid columns reflowing, a
-  // <details> group opening/closing, fonts finishing load, the drought
-  // panel someday re-enabling, etc. A plain window 'resize' listener would
-  // miss all of those since the window itself never changes size in those
-  // cases.
+  // ResizeObserver on the boxes that actually drive fitAll()'s math (the
+  // schematic stage sizes/positions the overlay charts; the sidebar's
+  // width sizes the overview chart; the drought column's width -- via its
+  // charts' CSS aspect-ratio -- sizes the drought charts) -- catches every
+  // way any of them can change size, not just a window resize: the grid
+  // columns reflowing, a <details> group opening/closing, fonts finishing
+  // load, etc. A plain window 'resize' listener would miss all of those
+  // since the window itself never changes size in those cases.
   const resizeObserver = new ResizeObserver(fitAll);
   resizeObserver.observe(document.getElementById('schematic_stage'));
   resizeObserver.observe(document.getElementById('sidebar'));
+  resizeObserver.observe(document.getElementById('drought_controls'));
 
   let rafPending = false;
 
@@ -1111,6 +1332,8 @@ async function main() {
       charts.T.setData([x, scaledSeries(output.Get_T_view(), 'T')]);
       charts.J.setData([x, scaledSeries(output.Get_J_view(), 'J')]);
       charts.G.setData([x, scaledSeries(output.Get_G_view(), 'G')]);
+      charts.vpd.setData([x, scaledSeries(output.Get_vpd_view(), 'vpd', DROUGHT_CHART_DEFS)]);
+      charts.theta.setData([x, meanThetaSeries(output)]);
 
       overviewChart.setData([x, psiLeafData, psiStemData]);
       overviewChart.setScale('x', { min: startEpoch, max: endEpoch });
