@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Plant Hydraulics SimPHony Model (link) — Dashboard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uplot@1.6.31/dist/uPlot.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  /* Reserve scrollbar space up front instead of only when content actually
+     overflows -- without this, e.g. expanding a slider group just enough
+     to overflow pops a scrollbar in and shifts/narrows everything next to
+     it. */
+  html { scrollbar-gutter: stable; }
+  /* body is a fixed-100vh flex column (h1/status/.layout stacked), so
+     .layout -- and the two columns inside it -- can size themselves
+     against a *known* remaining height instead of the page just growing
+     however tall its content wants to be. That's what lets a short window
+     shrink the schematic (and its overlay charts) instead of pushing
+     things below the fold -- see .layout/.sidebar/.schematic-col and
+     .schematic-stage below. */
+  body {
+    font-family: "Avenir Next", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 24px 16px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  @media (min-width: 1800px) {
+    body { max-width: 1800px; }
+  }
+  @media (min-width: 2400px) {
+    body { max-width: 2300px; }
+  }
+  h1 { font-size: 1.25rem; margin: 0 0 4px; flex: 0 0 auto; }
+  #status { font-size: 0.85rem; color: #666; margin: 0 0 16px; flex: 0 0 auto; }
+  #status.error { color: #b00020; }
+
+  /* Two columns: sliders (time range on top, then the parameter groups) |
+     schematic with live mini-charts overlaid on it. v2's third "plots"
+     column is gone -- T, J, G, psi_Leaf and psi_Stem now render as small
+     sparklines positioned directly on the figure, near the symbol/arrow
+     each one corresponds to (see OVERLAY_DEFS in the script below). The
+     third, thin column is just the (currently disabled) drought-stress
+     sliders -- too narrow for anything but a stacked label/slider/value. */
+  .layout {
+    display: grid;
+    grid-template-columns: 340px 1fr 120px;
+    gap: 24px;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  @media (min-width: 1800px) {
+    .layout { grid-template-columns: 360px 1fr 130px; }
+  }
+
+  /* All three columns stretch to .layout's full (viewport-bound) height and
+     scroll internally rather than growing the page -- .schematic-stage
+     below additionally resizes itself and its overlay charts to that same
+     budget, so in practice this overflow is a safety net for very short
+     windows rather than the normal path. min-height:0 overrides grid
+     items' default content-based minimum size, which would otherwise
+     force the row taller than .layout's own height instead of actually
+     clipping/scrolling here. */
+  .sidebar, .schematic-col, .drought-col {
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
+  /* Below this, three columns stop leaving any of them enough room to be
+     useful -- stack into one column instead of squeezing, and drop the
+     fixed-viewport-height layout for plain top-to-bottom page scrolling,
+     which suits a narrow/stacked layout better anyway. Must come after the
+     base rules above: same selector/specificity, so source order decides
+     the winner, not which one is inside a @media block. */
+  @media (max-width: 1150px) {
+    body { height: auto; }
+    .layout { grid-template-columns: 1fr; flex: 0 0 auto; }
+    .sidebar, .schematic-col, .drought-col { overflow-y: visible; }
+  }
+
+  .sidebar {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .sidebar h2 { font-size: 1rem; margin: 0 0 12px; color: #333; }
+  .sidebar details { margin-bottom: 4px; }
+  .sidebar summary {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #888;
+    margin: 16px 0 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .sidebar details:first-of-type summary { margin-top: 0; }
+  .sidebar details[open] > summary { color: #555; }
+
+  .schematic-col { display: flex; flex-direction: column; gap: 20px; }
+
+  .panel {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 18px;
+  }
+  .panel h2 { font-size: 1rem; margin: 0 0 12px; color: #333; }
+
+  /* figure-panel is itself a flex column so .schematic-stage -- the only
+     piece without an intrinsic content-driven minimum height -- is the one
+     that absorbs a short window, rather than the panel just overflowing.
+     min-height:0 overrides flex's default "never shrink below content
+     size". */
+  .figure-panel { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+  .figure-panel h2, .figure-panel .caption { flex: 0 0 auto; }
+  .figure-panel .caption { font-size: 0.78rem; color: #777; margin: 10px 0 0; line-height: 1.5; }
+
+  /* The figure + its overlaid live mini-charts. .schematic-stage just fills
+     whatever box the flex column above gives it (any shape) -- the <img>
+     inside keeps its own proportions via object-fit:contain (so it's never
+     stretched/distorted, just letterboxed within that box), and the
+     overlay charts are positioned in *pixels* from the image's actual
+     rendered content rect (computed in JS -- see imageContentRect()/
+     layoutOverlays()), not CSS percentages of the stage. That's what keeps
+     them correctly anchored to the artwork even when the stage's own shape
+     doesn't match the image's -- letterboxing included. Figure_web_real.png
+     (unlike the plain figure_1_simphony.png used elsewhere) has five empty
+     boxes drawn directly into the artwork as placement targets; OVERLAY_DEFS
+     below records each one's native-pixel rect, and layoutOverlays() scales
+     those rects by the same object-fit:contain factor as the image itself,
+     so a chart always sits exactly inside its drawn box regardless of how
+     the stage is currently sized. */
+  .schematic-stage {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .schematic-stage > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* Small live charts, positioned+sized in JS (see layoutOverlays()) to
+     exactly cover one of the empty boxes drawn into Figure_web_real.png, so
+     they never spill onto the artwork's own labels/lines. Purely
+     decorative/informational -- pointer-events:none so they never intercept
+     clicks (not that anything below them is clickable anyway). */
+  .overlay-chart {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.97);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 6px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
+    padding: 4px;
+    pointer-events: none;
+  }
+  .overlay-plot { position: relative; width: 100%; height: 100%; }
+  /* A small legend chip (colored line swatch + label) layered over a corner
+     of the plot (z-index, since uPlot's own canvas wrapper is inserted
+     after it in the DOM) instead of a title row above the chart -- saves
+     the height that row used to take, and reads as a legend entry rather
+     than a heading. Which corner is per-chart (see OVERLAY_DEFS.corner /
+     buildOverlayCharts()): currently bottom-left for all five charts. */
+  .overlay-inline-label {
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    line-height: 1;
+    background: rgba(255, 255, 255, 0.82);
+    padding: 2px 5px;
+    border-radius: 3px;
+  }
+  .overlay-inline-label.corner-top-right { top: 2px; right: 4px; }
+  .overlay-inline-label.corner-bottom-left { bottom: 2px; left: 4px; }
+  .overlay-inline-label .swatch {
+    display: inline-block;
+    width: 10px;
+    height: 2px;
+    background: currentColor;
+    flex: 0 0 auto;
+  }
+
+  .control { margin-bottom: 14px; }
+  .control:last-child { margin-bottom: 0; }
+  .control label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .control label span.val { font-weight: 400; color: #555; }
+  .control label span.sym { font-weight: 400; color: #888; }
+  .control label .left { display: flex; align-items: baseline; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .control input[type=range] { width: 100%; }
+  .control input[type=range]:disabled { cursor: not-allowed; }
+
+  /* Drought stress lives in its own thin third column -- too narrow for
+     buildControl()'s label+value row or a horizontal arrow layout, so it
+     gets a compact stacked label/slider/value instead
+     (buildThinDroughtControl() in the script). .drought-col is that
+     column's box; .drought-panel.disabled (toggled from JS via
+     DROUGHT_PANEL_ENABLED rather than hardcoded, so flipping that one flag
+     is enough to bring it back) dims it. */
+  .drought-col {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 14px 10px;
+  }
+  .drought-col h2 {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #888;
+    text-align: center;
+    margin: 0 0 12px;
+  }
+  .drought-panel.disabled { opacity: 0.55; }
+  .drought-panel .disabled-note { display: block; font-size: 0.62rem; font-weight: 400; text-transform: none; letter-spacing: normal; color: #999; margin-top: 2px; }
+
+  .thin-drought-control { margin-bottom: 24px; text-align: center; }
+  .thin-drought-control:last-child { margin-bottom: 0; }
+  .thin-drought-label { font-size: 0.68rem; font-weight: 600; color: #333; line-height: 1.25; margin-bottom: 8px; }
+  .thin-drought-val { font-size: 0.68rem; color: #555; margin-top: 6px; }
+  .thin-drought-control input[type=range] { width: 100%; }
+
+  /* Time range -- now the first thing in the sidebar (above the parameter
+     groups) instead of living in a since-removed third "plots" column. */
+  .rangeslider-block { margin-bottom: 20px; }
+  .rangeslider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 0 0 6px 0;
+  }
+  .rangeslider-header h2 { margin: 0; }
+  #rs_reset {
+    font-family: inherit;
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: #fff;
+    cursor: pointer;
+  }
+  #rs_reset:hover { background: #f2f2f2; }
+
+  .rangeslider { position: relative; }
+  .rs-window {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: rgba(37, 99, 235, 0.15);
+    border: 1px solid rgba(37, 99, 235, 0.65);
+    cursor: grab;
+    touch-action: none;
+  }
+  .rs-window:active { cursor: grabbing; }
+  .rs-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 9px;
+    cursor: ew-resize;
+    background: rgba(37, 99, 235, 0.65);
+    touch-action: none;
+  }
+  .rs-handle-left { left: -5px; }
+  .rs-handle-right { right: -5px; }
+
+  #debug {
+    white-space: pre-wrap;
+    font-family: ui-monospace, monospace;
+    font-size: 0.65rem;
+    background: #f6f6f6;
+    border-radius: 6px;
+    padding: 6px 8px;
+    display: none;
+    margin-top: 16px;
+    max-height: 120px;
+    overflow-y: auto;
+  }
+  #debug.show { display: block; }
+</style>
+</head>
+<body>
+
+<h1>Plant Hydraulics — Dashboard — based on the SimPHony Framework (link) </h1>
+<div id="status">Loading WASM module…</div>
+
+<div class="layout">
+  <div class="sidebar" id="sidebar">
+    <div class="rangeslider-block">
+      <div class="rangeslider-header">
+        <h2>Time range</h2>
+        <button id="rs_reset" type="button">Reset zoom</button>
+      </div>
+      <div class="rangeslider" id="rangeslider">
+        <div id="chart_overview"></div>
+        <div class="rs-window" id="rs_window">
+          <div class="rs-handle rs-handle-left" data-handle="left"></div>
+          <div class="rs-handle rs-handle-right" data-handle="right"></div>
+        </div>
+      </div>
+    </div>
+
+    <h2>Parameter</h2>
+    <!-- slider controls are generated into here from parameters.json, see buildSliders() below -->
+  </div>
+
+  <div class="schematic-col">
+    <div class="panel figure-panel">
+      <h2>Model schematic</h2>
+      <div class="schematic-stage" id="schematic_stage">
+        <img src="Figure_web_real.png"
+             alt="SimPHony model schematic: leaf and stem water potentials (psi_Leaf, psi_Stem) connected through xylem conductivity K_xyl and capacitances Gamma_Leaf/Gamma_Stem, down to per-layer soil water potentials (psi_Soil) via soil-to-stem conductivities K_Soil-Stem and lateral flow G. The figure has five empty boxes drawn into it -- two on the left (near psi_Leaf and psi_Stem_B), three on the right (near Transpiration T_Leaf, Stem flow J, and Lateral flow G) -- which is where the live mini-charts are placed.">
+        <!-- live mini-chart overlays (T, J, G, psi_Leaf, psi_Stem) are
+             built and positioned in main() from OVERLAY_DEFS below. -->
+      </div>
+      <p class="caption">Conductances (K), capacitances (Γ), and water potentials (ψ) at each compartment. Sliders on the left map onto a symbol here; the small live charts overlaid on the figure show that compartment's simulated time series. Drag the time range above the sliders to zoom all of them together.</p>
+    </div>
+  </div>
+
+  <div class="drought-col drought-panel" id="drought_panel">
+    <h2>Drought stress<span class="disabled-note" id="drought_disabled_note"></span></h2>
+    <!-- populated in main() from the parameters.json "Drought stress"
+         group, same as wasm-dashboard-v2.html -- disabled here (see
+         DROUGHT_PANEL_ENABLED in the script) until this version's
+         overlay-chart layout settles. Thin column, so a compact
+         stacked label/slider/value (buildThinDroughtControl()) instead
+         of wasm-dashboard-v2.html's arrow layout. -->
+    <div id="drought_controls"></div>
+  </div>
+</div>
+
+<pre id="debug"></pre>
+
+<script src="https://cdn.jsdelivr.net/npm/uplot@1.6.31/dist/uPlot.iife.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+
+<script>
+"use strict";
+
+// PATH #1 — the Emscripten JS glue file. Loaded dynamically by main() below
+// (loadGlueScript()) instead of a static <script src> tag, so it can share
+// the same cache-busting query param as the .wasm fetch -- see CACHE_BUST.
+
+// =======================================================================
+// PATH #2 / #3 — same convention as wasm-example.html.
+// =======================================================================
+
+// The glue .js (script tag/dynamic load) and the .wasm it fetches
+// internally can end up cached with different freshness lifetimes by the
+// browser. Reload at the wrong moment during active development (rebuild
+// the WASM, refresh the page) and you can get a *mix*: an old cached half
+// paired with a freshly-fetched other half. The two are then genuinely
+// incompatible builds, and instantiation fails with a confusing
+// `LinkError: ... function import requires a callable` -- even though
+// both files are individually fine and match on disk. Appending the same
+// one-time token to both fetch URLs below means every load either gets
+// both fresh or (served from cache) both from that same earlier pair --
+// never split. Cheap enough to just always do for a local dev tool like
+// this one, where reusing the HTTP cache across reloads isn't worth much
+// anyway.
+const CACHE_BUST = Date.now();
+
+async function loadGlueScript(src) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error(`failed to load ${src}`));
+    document.head.appendChild(script);
+  });
+}
+
+const GLUE_JS_PATH = `../build_web/SimPHony_Web.js?v=${CACHE_BUST}`;
+const WASM_PATH = `../build_web/SimPHony_Web.wasm?v=${CACHE_BUST}`;
+const FORCING_BIN_PATH = '../forcing.bin';
+const PARAMS_JSON_PATH = './parameters.json';
+
+// Canvas-drawn chart text (the time-range overview chart's axis ticks)
+// doesn't inherit page CSS, so it needs its own font config. The overlay
+// charts on the schematic have no axes at all (see OVERLAY_DEFS below), so
+// this is only used in one place now.
+const CHART_FONT = '12px "Avenir Next", -apple-system, BlinkMacSystemFont, sans-serif';
+
+// Flip to re-enable the drought-stress sliders (currently disabled -- see
+// the <style>/<body> comments on .drought-panel).
+const DROUGHT_PANEL_ENABLED = false;
+
+// =======================================================================
+// Parameter sliders are data-driven from PARAMS_JSON_PATH (parameters.json)
+// instead of being hardcoded here. Each entry there has:
+//   name        embind Parameters property name, OR the target field name
+//               for a soil property (see `setter` below)
+//   setter      only present for soil_layers fields: soil_layers isn't an
+//               embind-settable property, so these go through a dedicated
+//               Parameters method instead of `params[name] = value`
+//   group       sidebar heading
+//   label, unit, description, latex   display metadata
+//   min/max/step/default/decimals     slider range and formatting
+// To expose another tunable field, add an entry to parameters.json — no
+// code here needs to change.
+// =======================================================================
+
+// Flip to true (and reload) to see verbose per-run logging: WASM stdout
+// ([stdout] DEBUG ... lines), simulation-window/forcing-load details, and
+// per-frame perf timings. Left false, the log panel only ever shows actual
+// errors (stderr, uncaught exceptions) -- see logDebug() vs logError().
+const DEBUG = false;
+
+const statusEl = document.getElementById('status');
+const debugEl = document.getElementById('debug');
+
+function setStatus(msg, isError) {
+  statusEl.textContent = msg;
+  statusEl.classList.toggle('error', !!isError);
+}
+
+// Appends to the log panel and scrolls it to the newest line, always
+// mirroring to the devtools console too.
+function appendLog(msg, isConsoleError) {
+  debugEl.classList.add('show');
+  debugEl.textContent += msg + "\n";
+  debugEl.scrollTop = debugEl.scrollHeight;
+  (isConsoleError ? console.error : console.log)(msg);
+}
+
+// Verbose/informational logging -- a no-op entirely (panel and devtools
+// console both) unless DEBUG is on.
+function logDebug(msg) {
+  if (DEBUG) appendLog(msg, false);
+}
+
+// Real errors (stderr, uncaught exceptions, load failures) -- always shown,
+// regardless of DEBUG.
+function logError(msg) {
+  appendLog(msg, true);
+}
+
+// ---------------------------------------------------------------------
+// Fetch the slider catalogue (see PARAMS_JSON_PATH above).
+// ---------------------------------------------------------------------
+async function loadParamConfigs(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`failed to fetch ${url}: ${res.status} ${res.statusText}`);
+  return res.json();
+}
+
+// soil_k_sat_log10 also shows the linear m/s value alongside the log10
+// slider value — everything else just formats to cfg.decimals places.
+function formatValue(cfg, value) {
+  let text = value.toFixed(cfg.decimals ?? 2);
+  if (cfg.name === 'soil_k_sat_log10') {
+    text += ` (${Math.pow(10, value).toExponential(2)} m/s)`;
+  }
+  return text;
+}
+
+// ---------------------------------------------------------------------
+// Build a single slider control from a parameter config: label (+ optional
+// KaTeX symbol), value readout, and the range input itself. `description`/
+// `unit` become a native tooltip. Sets cfg.element/cfg.valElement so callers
+// (the param-apply loop and event wiring in main()) can read the live value.
+// ---------------------------------------------------------------------
+// Renders cfg.latex via KaTeX into a <span class="sym">, falling back to
+// plain text if KaTeX isn't loaded or throws. Used by buildControl().
+function renderLatexSymbol(latex) {
+  const symSpan = document.createElement('span');
+  symSpan.className = 'sym';
+  if (window.katex) {
+    try {
+      katex.render(latex, symSpan, { throwOnError: false });
+    } catch (e) {
+      symSpan.textContent = latex;
+    }
+  } else {
+    symSpan.textContent = latex;
+  }
+  return symSpan;
+}
+
+function buildControl(cfg) {
+  const wrap = document.createElement('div');
+  wrap.className = 'control';
+  wrap.title = cfg.unit ? `${cfg.description} [${cfg.unit}]` : cfg.description;
+
+  const label = document.createElement('label');
+  label.htmlFor = cfg.name;
+
+  const left = document.createElement('span');
+  left.className = 'left';
+  left.append(cfg.label);
+
+  if (cfg.latex) left.append(' (', renderLatexSymbol(cfg.latex), ')');
+
+  const valSpan = document.createElement('span');
+  valSpan.className = 'val';
+  valSpan.id = cfg.name + '_val';
+  valSpan.textContent = formatValue(cfg, cfg.default);
+
+  label.append(left, valSpan);
+
+  const input = document.createElement('input');
+  input.type = 'range';
+  input.id = cfg.name;
+  input.min = cfg.min;
+  input.max = cfg.max;
+  input.step = cfg.step;
+  input.value = cfg.default;
+
+  wrap.append(label, input);
+
+  cfg.element = input;
+  cfg.valElement = valSpan;
+
+  return wrap;
+}
+
+// ---------------------------------------------------------------------
+// The Drought stress column is very thin (see .drought-col in <style>) --
+// too narrow for buildControl()'s label+value row, let alone an arrow
+// layout -- so its two sliders get a compact stacked label/slider/value
+// instead. (Currently disabled by default -- see DROUGHT_PANEL_ENABLED.)
+// ---------------------------------------------------------------------
+function buildThinDroughtControl(cfg) {
+  const wrap = document.createElement('div');
+  wrap.className = 'control thin-drought-control';
+  wrap.title = cfg.unit ? `${cfg.description} [${cfg.unit}]` : cfg.description;
+
+  const label = document.createElement('div');
+  label.className = 'thin-drought-label';
+  label.textContent = cfg.label;
+
+  const input = document.createElement('input');
+  input.type = 'range';
+  input.id = cfg.name;
+  input.min = cfg.min;
+  input.max = cfg.max;
+  input.step = cfg.step;
+  input.value = cfg.default;
+
+  const valSpan = document.createElement('div');
+  valSpan.className = 'thin-drought-val';
+  valSpan.id = cfg.name + '_val';
+  valSpan.textContent = formatValue(cfg, cfg.default);
+
+  wrap.append(label, input, valSpan);
+
+  cfg.element = input;
+  cfg.valElement = valSpan;
+
+  return wrap;
+}
+
+// ---------------------------------------------------------------------
+// Build the sidebar sliders from the fetched parameter configs, grouped
+// under headings.
+// ---------------------------------------------------------------------
+function buildSliders(configs) {
+  const sidebar = document.getElementById('sidebar');
+  let lastGroup = null;
+  let groupEl = null; // <details> for the group currently being filled
+
+  for (const cfg of configs) {
+    if (cfg.group !== lastGroup) {
+      groupEl = document.createElement('details');
+      // Only the first group starts expanded -- with 5 groups / ~18
+      // sliders, showing them all at once was the exact "everything
+      // visible" problem this was meant to fix.
+      groupEl.open = lastGroup === null;
+      const summary = document.createElement('summary');
+      summary.textContent = cfg.group;
+      groupEl.appendChild(summary);
+      sidebar.appendChild(groupEl);
+      lastGroup = cfg.group;
+    }
+
+    groupEl.appendChild(buildControl(cfg));
+  }
+}
+
+// ---------------------------------------------------------------------
+// FRC2 binary forcing loader — identical to wasm-example.html.
+// ---------------------------------------------------------------------
+const FRC_MAGIC = 'FRC2';
+const HEADER_BYTES = 16;
+
+async function loadForcingData(Module, input, url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`failed to fetch ${url}: ${res.status} ${res.statusText}`);
+  const buf = await res.arrayBuffer();
+  const dv = new DataView(buf);
+
+  const magic = new TextDecoder().decode(new Uint8Array(buf, 0, 4));
+  if (magic !== FRC_MAGIC) throw new Error(`bad forcing binary magic "${magic}", expected "${FRC_MAGIC}"`);
+
+  const n = dv.getInt32(4, true);
+  const nLayers = dv.getInt32(8, true);
+  const bodyBytes = buf.byteLength - HEADER_BYTES;
+  const expectedBytes = n * 4 + n * 4 + n * 4 + n * 4 + n * nLayers * 4;
+  if (bodyBytes !== expectedBytes) {
+    throw new Error(`forcing binary size mismatch: got ${bodyBytes} bytes, expected ${expectedBytes} for n=${n}, nLayers=${nLayers}`);
+  }
+
+  const ptr = Module._malloc(bodyBytes);
+  try {
+    Module.HEAPU8.set(new Uint8Array(buf, HEADER_BYTES), ptr);
+    input.Set_Forcing_Data_Blob(ptr, n, nLayers);
+  } finally {
+    Module._free(ptr);
+  }
+
+  const timestamps = new Int32Array(buf.slice(HEADER_BYTES, HEADER_BYTES + n * 4));
+
+  return { n, nLayers, timestamps };
+}
+
+// ---------------------------------------------------------------------
+// Time range -- a fixed-domain overview chart (always shows the full
+// [startEpoch, endEpoch] window) with a draggable/resizable selection
+// overlay, now living at the top of the sidebar instead of a "plots"
+// column. Dragging it only calls setScale('x', ...) on the five overlay
+// charts on the schematic (see applyZoomRange()); it never touches the
+// simulation, so it's cheap regardless of drag rate.
+// ---------------------------------------------------------------------
+const SIDEBAR_PADDING = 16 * 2; // .sidebar's own left+right padding, see <style>
+
+function sidebarContentWidth() {
+  return document.getElementById('sidebar').clientWidth - SIDEBAR_PADDING;
+}
+
+let selMin, selMax; // current zoom window, epoch seconds
+let startEpoch, endEpoch; // full simulation window, set once in main()
+let overviewChart, rsWindowEl, rsHandleLeftEl, rsHandleRightEl;
+let charts; // { T, J, G, psiLeaf, psiStem } -- one uPlot instance per schematic overlay, set once in buildOverlayCharts()
+
+function makeOverviewChart(containerId) {
+  const opts = {
+    width: sidebarContentWidth(),
+    height: 70,
+    // Disables uPlot's default pixel-snapping of drawn paths, which keeps
+    // 1px lines crisp but makes diagonal/curved segments look stair-stepped
+    // (no antialiasing). Off, the canvas draws paths at their true
+    // sub-pixel position and the browser antialiases them normally.
+    pxAlign: 0,
+    scales: { x: { time: true } },
+    cursor: { show: false, drag: { x: false, y: false } },
+    legend: { show: false },
+    series: [
+      {},
+      { stroke: '#16a34a', width: 1 },
+      { stroke: '#ea580c', width: 1 },
+    ],
+    axes: [{ size: 24, font: CHART_FONT }, { show: false }],
+  };
+  const u = new uPlot(opts, [[], [], []], document.getElementById(containerId));
+  // uPlot clips its plotting layer by default (for the drag-select box we're
+  // not using here) — undo that so the handles can stick out a few px.
+  u.over.style.overflow = 'visible';
+  return u;
+}
+
+function updateRangeSliderVisual() {
+  const left = overviewChart.valToPos(selMin, 'x');
+  const right = overviewChart.valToPos(selMax, 'x');
+  rsWindowEl.style.left = `${left}px`;
+  rsWindowEl.style.width = `${Math.max(right - left, 6)}px`;
+}
+
+// Sets the shared zoom window on all five schematic-overlay charts and
+// moves the overlay to match. Called both from user drags and after each
+// simulation re-run (to re-assert whatever zoom the user already had).
+function applyZoomRange(min, max) {
+  selMin = Math.max(startEpoch, Math.min(min, max));
+  selMax = Math.min(endEpoch, Math.max(min, max));
+  for (const def of OVERLAY_DEFS) {
+    if (charts[def.key]) charts[def.key].setScale('x', { min: selMin, max: selMax });
+  }
+  syncGroupYRanges();
+  updateRangeSliderVisual();
+}
+
+function setupRangeSlider() {
+  rsWindowEl = document.getElementById('rs_window');
+  rsHandleLeftEl = rsWindowEl.querySelector('.rs-handle-left');
+  rsHandleRightEl = rsWindowEl.querySelector('.rs-handle-right');
+
+  function overPxToVal(clientX) {
+    const rect = overviewChart.over.getBoundingClientRect();
+    const px = Math.max(0, Math.min(clientX - rect.left, rect.width));
+    return overviewChart.posToVal(px, 'x');
+  }
+
+  function beginDrag(mode, downEvt) {
+    downEvt.preventDefault();
+    const startVal = overPxToVal(downEvt.clientX);
+    const initialMin = selMin;
+    const initialMax = selMax;
+
+    function onMove(moveEvt) {
+      const val = overPxToVal(moveEvt.clientX);
+      if (mode === 'left') {
+        applyZoomRange(Math.min(val, initialMax - 1), initialMax);
+      } else if (mode === 'right') {
+        applyZoomRange(initialMin, Math.max(val, initialMin + 1));
+      } else {
+        const delta = val - startVal;
+        const width = initialMax - initialMin;
+        let newMin = initialMin + delta;
+        let newMax = initialMax + delta;
+        if (newMin < startEpoch) { newMin = startEpoch; newMax = startEpoch + width; }
+        if (newMax > endEpoch) { newMax = endEpoch; newMin = endEpoch - width; }
+        applyZoomRange(newMin, newMax);
+      }
+    }
+    function onUp() {
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+    }
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
+  }
+
+  rsWindowEl.addEventListener('pointerdown', (e) => {
+    if (e.target === rsHandleLeftEl || e.target === rsHandleRightEl) return;
+    beginDrag('pan', e);
+  });
+  rsHandleLeftEl.addEventListener('pointerdown', (e) => beginDrag('left', e));
+  rsHandleRightEl.addEventListener('pointerdown', (e) => beginDrag('right', e));
+  rsWindowEl.addEventListener('dblclick', () => applyZoomRange(startEpoch, endEpoch));
+
+  document.getElementById('rs_reset').addEventListener('click', () => applyZoomRange(startEpoch, endEpoch));
+}
+
+// ---------------------------------------------------------------------
+// Model-schematic overlays -- small live charts, each placed exactly inside
+// one of the five empty boxes drawn into Figure_web_real.png itself (not
+// computed lanes -- the artwork already reserves the space). `box` is that
+// rectangle's position/size in the *image's own native pixels*, measured
+// once (see below) directly off the PNG; layoutOverlays() scales it by
+// whatever factor object-fit:contain is currently applying to the whole
+// image, so every chart tracks its box exactly as the stage resizes.
+//
+// Boxes were measured by thresholding the PNG for near-black pixels and
+// finding each rectangle's exact border rows/columns (script, not
+// eyeballed) -- all five are identical in size, 616x460 native px:
+//   psi_Leaf   (top-left,   near the ψ_Leaf node)     x=2,    y=144
+//   psi_Stem   (bottom-left, near the ψ_Stem_B node)  x=2,    y=760
+//   T          (top-right,  near "Transpiration T_Leaf") x=1364, y=4
+//   J          (mid-right,  near "Stem flow J")       x=1364, y=560
+//   G          (bottom-right, near "Lateral flow"/G)  x=1364, y=1118
+// ---------------------------------------------------------------------
+// `corner` picks which .overlay-inline-label.corner-* class the legend chip
+// gets (see the CSS above). `scale`, when present, is a display-only
+// multiplier applied to the raw model output before it's plotted (T/J are
+// shown in mmol H2O m-2 s-1 -- x1000 -- rather than the model's native mol
+// H2O m-2 s-1, since the numbers read more naturally at that scale here).
+const OVERLAY_DEFS = [
+  { key: 'psiLeaf', label: 'ψ Leaf', color: '#16a34a', unit: 'MPa', corner: 'bottom-left', box: { x: 2, y: 144, w: 616, h: 460 } },
+  { key: 'psiStem', label: 'ψ Stem', color: '#ea580c', unit: 'MPa', corner: 'bottom-left', box: { x: 2, y: 760, w: 616, h: 460 } },
+  { key: 'T', label: 'T', color: '#0891b2', unit: 'mmol H2O m-2 s-1', corner: 'bottom-left', scale: 1000, box: { x: 1364, y: 4, w: 616, h: 460 } },
+  { key: 'J', label: 'J', color: '#7c3aed', unit: 'mmol H2O m-2 s-1', corner: 'bottom-left', scale: 1000, box: { x: 1364, y: 560, w: 616, h: 460 } },
+  { key: 'G', label: 'G', color: '#000000', unit: 'mol H2O m-2 s-1', corner: 'bottom-left', scale: 1000, box: { x: 1364, y: 1118, w: 616, h: 460 } },
+];
+
+// Applies the matching OVERLAY_DEFS entry's `scale` (if any) to a raw
+// Get_*_view() typed-array view before it's handed to uPlot -- .slice()
+// first since the view is a live pointer into WASM heap memory that's only
+// valid until the next allocation, and scaling in place would corrupt it.
+function scaledSeries(view, key) {
+  const arr = view.slice();
+  const scale = OVERLAY_DEFS.find((d) => d.key === key).scale;
+  if (scale) {
+    for (let i = 0; i < arr.length; i++) arr[i] *= scale;
+  }
+  return arr;
+}
+
+// The two left-hand charts (both water potentials, MPa) and the three
+// right-hand charts (T/J/G) each share one y-axis range instead of
+// auto-ranging independently -- makes relative magnitudes within a side
+// directly comparable at a glance. Recomputed from whatever's currently
+// in view (see syncGroupYRanges()) any time the zoom window or the
+// underlying data changes, so the shared range still "resizes" rather
+// than being fixed once.
+const Y_SYNC_GROUPS = [
+  ['psiLeaf', 'psiStem'],
+  ['T', 'J', 'G'],
+];
+
+// Finds the combined min/max across `keys`' charts, restricted to x in
+// [xMin, xMax] (the current zoom window) -- so the shared range reflects
+// only the visible data, not the full simulation run. Returns null if no
+// chart in the group has any in-range data yet (e.g. before the first run).
+function groupYRange(keys, xMin, xMax) {
+  let lo = Infinity, hi = -Infinity;
+  for (const key of keys) {
+    const data = charts[key] && charts[key].data;
+    if (!data || !data[0]) continue;
+    const xs = data[0], ys = data[1];
+    for (let i = 0; i < xs.length; i++) {
+      if (xs[i] < xMin || xs[i] > xMax) continue;
+      const v = ys[i];
+      if (v == null || Number.isNaN(v)) continue;
+      if (v < lo) lo = v;
+      if (v > hi) hi = v;
+    }
+  }
+  if (!Number.isFinite(lo) || !Number.isFinite(hi)) return null;
+  if (lo === hi) { lo -= 1; hi += 1; } // flat series -- avoid a zero-height range
+  const pad = (hi - lo) * 0.05;
+  return { min: lo - pad, max: hi + pad };
+}
+
+function syncGroupYRanges() {
+  for (const group of Y_SYNC_GROUPS) {
+    const range = groupYRange(group, selMin, selMax);
+    if (!range) continue;
+    for (const key of group) {
+      if (charts[key]) charts[key].setScale('y', range);
+    }
+  }
+}
+
+// Figure_web_real.png's own pixel dimensions -- the reference aspect ratio
+// imageContentRect() fits within .schematic-stage's (possibly
+// differently-shaped) box, exactly like object-fit:contain does for the
+// <img> itself, and the scale factor every OVERLAY_DEFS box gets multiplied
+// by in layoutOverlays().
+const IMG_NATIVE_W = 1982;
+const IMG_NATIVE_H = 1674;
+
+// Where the image actually renders within #schematic_stage right now --
+// object-fit:contain's own math, done by hand since layoutOverlays() needs
+// the resulting scale factor to map each OVERLAY_DEFS.box from native image
+// pixels to actual on-screen pixels. This MUST match the <img> CSS exactly
+// (inset:0; width/height:100%; object-fit:contain -- see .schematic-stage >
+// img above): the image is contain-fit within the *entire* stage box, with
+// no extra margin reserved around it, so this can't shrink stageW/stageH by
+// any padding fraction first -- doing that once actually shifted every
+// overlay box off of its drawn rectangle in Figure_web_real.png, since the
+// image itself was still rendering edge-to-edge while this rect quietly
+// assumed it wasn't.
+function imageContentRect() {
+  const stage = document.getElementById('schematic_stage');
+  const stageW = stage.clientWidth;
+  const stageH = stage.clientHeight;
+
+  const imgRatio = IMG_NATIVE_W / IMG_NATIVE_H;
+  let width = stageW;
+  let height = width / imgRatio;
+  if (height > stageH) {
+    height = stageH;
+    width = height * imgRatio;
+  }
+  const left = (stageW - width) / 2;
+  const top = (stageH - height) / 2;
+  return { left, top, width, height };
+}
+
+// Builds the DOM (positioned box + plot mount + in-plot label) and the
+// uPlot instance for every OVERLAY_DEFS entry, appending each into
+// #schematic_stage and populating the module-level `charts` map. Actual
+// position/size is left to layoutOverlays() (called right after, and again
+// on every resize) rather than set here.
+function buildOverlayCharts() {
+  const stage = document.getElementById('schematic_stage');
+  charts = {};
+  for (const def of OVERLAY_DEFS) {
+    const box = document.createElement('div');
+    box.className = 'overlay-chart';
+
+    const plotEl = document.createElement('div');
+    plotEl.className = 'overlay-plot';
+
+    // Legend chip lives *inside* the plot (top-right corner, layered over
+    // the chart via z-index) instead of its own title row above it -- saves
+    // the height that row used to take, and a color swatch + label reads as
+    // a legend entry rather than a heading.
+    const label = document.createElement('div');
+    label.className = `overlay-inline-label corner-${def.corner}`;
+    label.style.color = def.color;
+    label.title = `${def.label} [${def.unit}]`;
+    const swatch = document.createElement('span');
+    swatch.className = 'swatch';
+    const text = document.createElement('span');
+    text.textContent = def.label;
+    label.append(swatch, text);
+    plotEl.appendChild(label);
+
+    box.appendChild(plotEl);
+    stage.appendChild(box);
+
+    charts[def.key] = new uPlot({
+      width: 1, height: 1, // placeholder -- layoutOverlays() sizes it for real
+      // See makeOverviewChart()'s pxAlign comment -- same reasoning here.
+      pxAlign: 0,
+      scales: { x: { time: true } },
+      cursor: { show: false },
+      legend: { show: false },
+      series: [{}, { stroke: def.color, width: 1, points: { show: false } }],
+      axes: [
+        { font: CHART_FONT, size: 22, stroke: '#999', grid: { stroke: '#eee', width: 1 } },
+        { font: CHART_FONT, size: 34, stroke: '#999', grid: { stroke: '#eee', width: 1 } },
+      ],
+    }, [[], []], plotEl);
+    def.boxEl = box;
+    def.plotEl = plotEl;
+  }
+}
+
+// Re-measures the image's actual rendered content rect (see
+// imageContentRect()) and uses that same letterboxing scale factor to place
+// every overlay chart exactly inside its OVERLAY_DEFS.box -- the rectangle
+// already drawn into Figure_web_real.png. Used for the very first paint and
+// on every resize (see the ResizeObserver set up in main()).
+function layoutOverlays() {
+  const img = imageContentRect();
+  const scaleX = img.width / IMG_NATIVE_W;
+  const scaleY = img.height / IMG_NATIVE_H;
+
+  for (const def of OVERLAY_DEFS) {
+    const { x, y, w, h } = def.box;
+    const left = img.left + x * scaleX;
+    const top = img.top + y * scaleY;
+    const width = Math.max(1, w * scaleX);
+    const height = Math.max(1, h * scaleY);
+
+    def.boxEl.style.left = `${left}px`;
+    def.boxEl.style.top = `${top}px`;
+    def.boxEl.style.width = `${width}px`;
+    def.boxEl.style.height = `${height}px`;
+
+    if (charts[def.key]) {
+      charts[def.key].setSize({
+        width: Math.max(1, def.plotEl.clientWidth),
+        height: Math.max(1, def.plotEl.clientHeight),
+      });
+    }
+  }
+}
+
+function fitAll() {
+  layoutOverlays();
+  if (overviewChart) {
+    overviewChart.setSize({ width: sidebarContentWidth(), height: 70 });
+    updateRangeSliderVisual();
+  }
+}
+
+// ---------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------
+async function main() {
+  setStatus(`Loading parameter catalogue (${PARAMS_JSON_PATH})…`);
+  const PARAM_CONFIGS = await loadParamConfigs(PARAMS_JSON_PATH);
+  // "Drought stress" has its own thin third column instead of a generic
+  // sidebar group -- pull its two entries out and mount them there.
+  // Disabled by default in this version (DROUGHT_PANEL_ENABLED) -- still
+  // built the same way so re-enabling later is a one-line flip.
+  const droughtCfgs = PARAM_CONFIGS.filter((cfg) => cfg.group === 'Drought stress');
+  const sidebarCfgs = PARAM_CONFIGS.filter((cfg) => cfg.group !== 'Drought stress');
+  buildSliders(sidebarCfgs);
+  const droughtControlsEl = document.getElementById('drought_controls');
+  for (const cfg of droughtCfgs) droughtControlsEl.appendChild(buildThinDroughtControl(cfg));
+  if (!DROUGHT_PANEL_ENABLED) {
+    document.getElementById('drought_panel').classList.add('disabled');
+    document.getElementById('drought_disabled_note').textContent = '(disabled for now)';
+    for (const cfg of droughtCfgs) cfg.element.disabled = true;
+  }
+
+  setStatus('Loading WASM glue script…');
+  await loadGlueScript(GLUE_JS_PATH);
+
+  if (typeof SimPHony !== 'function') {
+    throw new Error(
+      "SimPHony() not found — check that SimPHony_Web.js is the correct " +
+      "glue file and that CMakeLists.txt still sets -sEXPORT_NAME=SimPHony."
+    );
+  }
+
+  setStatus('Instantiating WASM module…');
+  const Module = await SimPHony({
+    locateFile: (path) => (path.endsWith('.wasm') ? WASM_PATH : path),
+    print: (text) => logDebug('[stdout] ' + text),
+    printErr: (text) => logError('[stderr] ' + text),
+  });
+
+  setStatus('Setting up simulation…');
+  const sim = new Module.Simulation_Single_Hainich();
+  sim.Init_config_web_hainich();
+  sim.Init_input_web();
+  const input = sim.Get_Input();
+
+  setStatus(`Loading forcing data (${FORCING_BIN_PATH})…`);
+  const { n, timestamps } = await loadForcingData(Module, input, FORCING_BIN_PATH);
+  logDebug(`Loaded forcing data: n=${n}, range=[${timestamps[0]}, ${timestamps[n - 1]}]`);
+
+  // Simulation window: 01/07 - 05/08/2023 (DD/MM), i.e. July 1 - August 5.
+  // Assigned to the module-level startEpoch/endEpoch (declared above,
+  // outside main()) since setupRangeSlider()/applyZoomRange() need them too.
+  startEpoch = Math.floor(Date.UTC(2023, 6, 1, 0, 0, 0) / 1000);  // month is 0-indexed: 6 = July
+  endEpoch = Math.floor(Date.UTC(2023, 7, 5, 0, 0, 0) / 1000);    // 7 = August
+
+  if (startEpoch < timestamps[0] || endEpoch > timestamps[n - 1]) {
+    throw new Error(
+      `Simulation window [${startEpoch}, ${endEpoch}] falls outside the loaded ` +
+      `forcing range [${timestamps[0]}, ${timestamps[n - 1]}].`
+    );
+  }
+
+  const startIdx = timestamps.findIndex((t) => t >= startEpoch);
+  logDebug(
+    `Simulation window: ${new Date(startEpoch * 1000).toISOString()} to ` +
+    `${new Date(endEpoch * 1000).toISOString()} (startIdx=${startIdx})`
+  );
+
+  // Baseline parameters/soil/initial water potentials — same reference
+  // setup as the Flask app's run_model() (3 soil layers at 0.08/0.16/0.32 m,
+  // Set_water_pot_initials(-1.0, -0.2)), applied once; sliders only touch
+  // the fields listed in PARAM_CONFIGS (parameters.json) from here on.
+  sim.Init_parameters_default();
+  sim.Init_soil_layers_default_hainich(); // always exactly 3 soil layers
+  sim.Set_water_pot_initials(-1.0, -0.2);
+
+  buildOverlayCharts();
+  layoutOverlays();
+
+  overviewChart = makeOverviewChart('chart_overview');
+  // The overview always shows the full window — fixed regardless of zoom —
+  // so its scale can be set once, immediately, without waiting for data.
+  overviewChart.setScale('x', { min: startEpoch, max: endEpoch });
+  setupRangeSlider();
+  applyZoomRange(startEpoch, endEpoch); // start fully zoomed out
+  // One rAF of insurance in case #schematic_stage's own box wasn't fully
+  // settled yet when buildOverlayCharts()/layoutOverlays() measured it
+  // above, so the very first paint already matches what a resize would
+  // produce.
+  requestAnimationFrame(fitAll);
+
+  // ResizeObserver on the two boxes that actually drive fitAll()'s math
+  // (the schematic stage sizes/positions the overlay charts; the sidebar's
+  // width sizes the overview chart) -- catches every way either can change
+  // size, not just a window resize: the grid columns reflowing, a
+  // <details> group opening/closing, fonts finishing load, the drought
+  // panel someday re-enabling, etc. A plain window 'resize' listener would
+  // miss all of those since the window itself never changes size in those
+  // cases.
+  const resizeObserver = new ResizeObserver(fitAll);
+  resizeObserver.observe(document.getElementById('schematic_stage'));
+  resizeObserver.observe(document.getElementById('sidebar'));
+
+  let rafPending = false;
+
+  function runAndRedraw() {
+    rafPending = false;
+    const frameStart = performance.now();
+
+    const paramSetStart = performance.now();
+    const params = sim.Get_parameters();
+    for (const cfg of PARAM_CONFIGS) {
+      const value = parseFloat(cfg.element.value);
+      cfg.valElement.textContent = formatValue(cfg, value);
+      if (cfg.setter) {
+        params[cfg.setter](value);
+      } else {
+        params[cfg.name] = value;
+      }
+    }
+    sim.Init_parameters(params);
+    params.delete(); // embind heap-allocates this on every call — free it
+    const paramSetEnd = performance.now();
+
+    const runStart = performance.now();
+    sim.Run_epoch(startEpoch, endEpoch);
+    const runEnd = performance.now();
+
+    const output = sim.Get_output();
+    try {
+      const psiLeafView = output.Get_psi_leaf_view();
+      const psiStemView = output.Get_psi_sap_view();
+
+      const len = psiLeafView.length;
+      let x;
+      if (startIdx >= 0 && startIdx + len <= n) {
+        x = timestamps.subarray(startIdx, startIdx + len);
+      } else {
+        logDebug(`warning: could not align output length ${len} to forcing timestamps (startIdx=${startIdx}), using synthetic time axis`);
+        x = Float64Array.from({ length: len }, (_, i) => startEpoch + i * 1800);
+      }
+
+      const psiLeafData = psiLeafView.slice();
+      const psiStemData = psiStemView.slice();
+
+      charts.psiLeaf.setData([x, psiLeafData]);
+      charts.psiStem.setData([x, psiStemData]);
+      charts.T.setData([x, scaledSeries(output.Get_T_view(), 'T')]);
+      charts.J.setData([x, scaledSeries(output.Get_J_view(), 'J')]);
+      charts.G.setData([x, scaledSeries(output.Get_G_view(), 'G')]);
+
+      overviewChart.setData([x, psiLeafData, psiStemData]);
+      overviewChart.setScale('x', { min: startEpoch, max: endEpoch });
+      // New data resets uPlot's own auto-range on the overlay charts — put
+      // the user's current zoom (from the time-range slider) back after
+      // every rerun, so tweaking a parameter slider doesn't silently zoom
+      // back out.
+      applyZoomRange(selMin, selMax);
+    } finally {
+      output.delete();
+    }
+    const drawEnd = performance.now();
+
+    const paramSetMs = (paramSetEnd - paramSetStart).toFixed(1);
+    const runMs = (runEnd - runStart).toFixed(1);
+    const readDrawMs = (drawEnd - runEnd).toFixed(1);
+    const totalMs = (drawEnd - frameStart).toFixed(1);
+    logDebug(`[perf] params=${paramSetMs}ms Run_epoch=${runMs}ms readOutput+draw=${readDrawMs}ms total=${totalMs}ms`);
+
+    setStatus(`Ready (${totalMs}ms)`);
+  }
+
+  function scheduleRun() {
+    if (rafPending) return;
+    rafPending = true;
+    requestAnimationFrame(runAndRedraw);
+  }
+
+  for (const cfg of PARAM_CONFIGS) {
+    cfg.element.addEventListener('input', scheduleRun);
+  }
+
+  scheduleRun();
+}
+
+main().catch(err => {
+  setStatus('Error — see debug output below', true);
+  logError(String(err && err.stack ? err.stack : err));
+});
+</script>
+</body>
+</html>
