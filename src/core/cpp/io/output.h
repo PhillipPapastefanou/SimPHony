@@ -48,6 +48,13 @@ public:
     void Add_vpd(double vpd);
     void Add_anet(double anet);
 
+    // Prognostic soil hydrology diagnostics [kg m-2 s-1] -- only populated when
+    // Parameters::use_prognostic_soil_hydrology is true.
+    void Add_precip(double precip);
+    void Add_infiltration(double infiltration);
+    void Add_runoff(double runoff);
+    void Add_drainage(double drainage);
+
     void Add_steps_psi_leaf(int steps_psi_leaf);
     void Add_steps_psi_stem_ground(int steps_psi_stem);
 
@@ -86,6 +93,11 @@ public:
 
     const vector<float> &Get_anet() const;
 
+    const vector<float> &Get_precip() const;
+    const vector<float> &Get_infiltration() const;
+    const vector<float> &Get_runoff() const;
+    const vector<float> &Get_drainage() const;
+
 
     vector<vector<float> > Get_ks_soil() const;
 
@@ -107,6 +119,10 @@ public:
     emscripten::val Get_gs_view() const;
     emscripten::val Get_vpd_view() const;
     emscripten::val Get_beta_view() const;
+    emscripten::val Get_precip_view() const;
+    emscripten::val Get_infiltration_view() const;
+    emscripten::val Get_runoff_view() const;
+    emscripten::val Get_drainage_view() const;
     #endif
 
 
@@ -186,6 +202,11 @@ private:
 
     vector<float> vpd_a;
     vector<float> anet_a;
+
+    vector<float> precip_a;
+    vector<float> infiltration_a;
+    vector<float> runoff_a;
+    vector<float> drainage_a;
 
     Flat_Matrix k_soil_aa;
     Flat_Matrix theta_aa;

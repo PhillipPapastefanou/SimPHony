@@ -32,6 +32,15 @@ public:
     /// Volumetric water content per soil layer [m3 m-3]
     vector<vector<float> > Get_theta();
 
+    /// Matric potential as a function of volumetric water content [m hydraulic head], for a
+    /// single layer/timestep. Used by Soil_hydrology_richards to evaluate the same
+    /// pedotransfer curve at prognostically-evolving theta values (i.e. not just the
+    /// observed-forcing values handled by CalculatePsiAndKs/ParseTheta).
+    virtual double Psi_from_theta(double theta, const Soil_layer& layer) const = 0;
+    /// Hydraulic conductivity as a function of volumetric water content [m s-1], for a
+    /// single layer/timestep. See Psi_from_theta.
+    virtual double K_from_theta(double theta, const Soil_layer& layer) const = 0;
+
 protected:
 
     void ParseTheta(int start_idx = 0, int end_idx = -1);

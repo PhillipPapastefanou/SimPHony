@@ -87,6 +87,12 @@ PYBIND11_MODULE(SimPHony, handle){
             def("Get_vpd", &Output::Get_vpd).
             def("Get_anet", &Output::Get_anet).
             def("Get_ks_soil", &Output::Get_ks_soil).
+            def("Get_theta_indiv", &Output::Get_theta_indiv).
+
+            def("Get_precip", &Output::Get_precip).
+            def("Get_infiltration", &Output::Get_infiltration).
+            def("Get_runoff", &Output::Get_runoff).
+            def("Get_drainage", &Output::Get_drainage).
 
             def("Get_steps_psi_leaf", &Output::Get_steps_psi_leaf).
             def("Get_steps_psi_stem", &Output::Get_steps_psi_stem).
@@ -156,6 +162,10 @@ PYBIND11_MODULE(SimPHony, handle){
             def_readwrite("soil_profile_index", &Parameters::soil_profile_index).
             def_readwrite("stem_flow_type", &Parameters::stem_flow_type).
             def_readwrite("soil_water_type", &Parameters::soil_water_type).
+            def_readwrite("use_prognostic_soil_hydrology", &Parameters::use_prognostic_soil_hydrology).
+            def_readwrite("surface_runoff_steepness", &Parameters::surface_runoff_steepness).
+            def_readwrite("max_drainage_conductivity", &Parameters::max_drainage_conductivity).
+            def_readwrite("precip_reduction_factor", &Parameters::precip_reduction_factor).
             def_readwrite("conductivity_fraction_type", &Parameters::conductivity_fraction_type).
 
 

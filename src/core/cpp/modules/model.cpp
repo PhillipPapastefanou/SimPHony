@@ -80,10 +80,32 @@ void Model::Set_derived_parameters_impl(int soil_start_idx, int soil_end_idx) {
         }
     }
 
-    soil_water_module->CalculatePsiAndKs(soil_start_idx, soil_end_idx);
-    input_k_soil = soil_water_module->Get_ks();
-    input_psi_soil = soil_water_module->Get_psi_soil_head();
-    input_theta = soil_water_module->Get_theta();
+    if (params.use_prognostic_soil_hydrology) {
+
+        if (params.soil_water_type == Soil_water_module_type::Saxton06) {
+            std::cout << "Prognostic soil hydrology (use_prognostic_soil_hydrology) does not support ";
+            std::cout << "the Saxton06 pedotransfer function yet -- select Van Genuchten or Campbell instead.";
+            std::cout << std::endl;
+            exit(99);
+        }
+
+        // Only parse/derive the very first row (soil_start_idx) from the observed forcing --
+        // it's used purely as a warm-start initial condition. From there on, soil moisture is
+        // simulated prognostically inside Run(), not read from the forcing at every timestep.
+        const int warm_start_idx = std::max(0, soil_start_idx);
+        soil_water_module->CalculatePsiAndKs(warm_start_idx, warm_start_idx + 1);
+        vector<float> theta0 = soil_water_module->Get_theta()[warm_start_idx];
+
+        soil_hydrology_richards = std::make_unique<Soil_hydrology_richards>(params, input_module, config,
+                                                                              *soil_water_module);
+        soil_hydrology_richards->Init(theta0);
+    }
+    else {
+        soil_water_module->CalculatePsiAndKs(soil_start_idx, soil_end_idx);
+        input_k_soil = soil_water_module->Get_ks();
+        input_psi_soil = soil_water_module->Get_psi_soil_head();
+        input_theta = soil_water_module->Get_theta();
+    }
 
     input_air_temperature = input_module.temp_air;
     input_sw_down = input_module.sw_rad;
@@ -159,9 +181,13 @@ void Model::Run(DateTime begin, DateTime end) {
         ivpd = input_vpd[time_index(ts)] * params.vpd_dryness_factor;
         isw_down = input_sw_down[time_index(ts)];
 
-        ipsi_soil = input_psi_soil[time_index(ts)];
-        ik_soil = input_k_soil[time_index(ts)];
-        itheta = input_theta[time_index(ts)];
+        if (params.use_prognostic_soil_hydrology) {
+            soil_hydrology_richards->Get_state(ipsi_soil, ik_soil, itheta);
+        } else {
+            ipsi_soil = input_psi_soil[time_index(ts)];
+            ik_soil = input_k_soil[time_index(ts)];
+            itheta = input_theta[time_index(ts)];
+        }
 
 
         if (params.verbose){
@@ -190,6 +216,22 @@ void Model::Run(DateTime begin, DateTime end) {
         auto t3 = clock::now();
         ns_solve += std::chrono::duration<double, std::nano>(t3 - t2).count();
         // ---------------------------
+
+        // Advance the prognostic soil moisture state for the next timestep, using this
+        // step's root water uptake (Gi) as the sink term. ipsi_soil/ik_soil/itheta above
+        // already hold the pre-step values used to drive this timestep's solve/output, so
+        // it's safe to mutate the underlying state here.
+        if (params.use_prognostic_soil_hydrology) {
+            // Drought-stress "precipitation" slider: constant multiplier on the observed
+            // precip forcing, applied here so it feeds both the actual infiltration/soil
+            // moisture solve below and the plotted precip series (Add_precip(iprecip) in
+            // add_output() uses this same scaled value).
+            iprecip = input_module.precip[time_index(ts)] * params.precip_reduction_factor;
+            soil_hydrology_richards->Step(iprecip, water_potential_solver->Get_root_uptake_indiv(), dts);
+            iinfiltration = soil_hydrology_richards->Get_infiltration();
+            irunoff = soil_hydrology_richards->Get_runoff();
+            idrainage = soil_hydrology_richards->Get_drainage();
+        }
 
 
         // ---- PROFILE_MODEL_RUN ----
@@ -234,6 +276,12 @@ void Model::add_output() {
 
     output.Add_vpd(ivpd);
 
+    if (params.use_prognostic_soil_hydrology) {
+        output.Add_precip(iprecip);
+        output.Add_infiltration(iinfiltration);
+        output.Add_runoff(irunoff);
+        output.Add_drainage(idrainage);
+    }
 
     //Todo add other forcings
 }

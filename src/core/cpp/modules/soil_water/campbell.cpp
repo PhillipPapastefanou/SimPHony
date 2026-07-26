@@ -36,34 +36,54 @@ void Campbell::CalculatePsiAndKs(int start_idx, int end_idx) {
 
             const Soil_layer &layer = parameters.soil_layers[s];
 
-            double Ks = layer.k_soil_sat;
-            double camp_b = layer.camp_b;
-            double theta_s = layer.theta_s;
-            double psi_soil_sat = layer.psi_soil_sat;
-
-            double base = theta[s] / theta_s;
+            // Preserve the original strict validation of observed forcing data here
+            // (Psi_from_theta/K_from_theta themselves just clamp, since they are also
+            // called by Soil_hydrology_richards with prognostically-evolving theta,
+            // e.g. for numerical-derivative probes slightly below the current state,
+            // where an exit(99) would be far too fragile).
+            double base = theta[s] / layer.theta_s;
             if (base < 0.0) {
                 std::cout << "Invalid water content or theta_s paramter: ";
                 std::cout << "Theta(t) is " << theta[s];
-                std::cout << " and Theta_s is " << theta_s;
+                std::cout << " and Theta_s is " << layer.theta_s;
                 std::cout << ". Exiting simulation..." << std::endl;
                 exit(99);
             }
 
-            // Fully saturated water
-            if (base > 1.0) {
-                base = 1.0;
-            }
-
-            psi_row[s] = psi_soil_sat * std::pow(base, -camp_b);
-
-            // Hydraulic conductivity in m s-1
-            k_row[s] = Ks * std::pow(base, 3.0 + 2.0 * camp_b);
+            psi_row[s] = Psi_from_theta(theta[s], layer);
+            k_row[s] = K_from_theta(theta[s], layer);
         }
 
         psi_soil_2D[i] = psi_row;
         ks_2D[i] = k_row;
     }
+}
+
+double Campbell::Psi_from_theta(double theta, const Soil_layer& layer) const {
+
+    double base = theta / layer.theta_s;
+    if (base < 1.0e-6) {
+        base = 1.0e-6;
+    }
+    if (base > 1.0) {
+        base = 1.0;
+    }
+
+    return layer.psi_soil_sat * std::pow(base, -layer.camp_b);
+}
+
+double Campbell::K_from_theta(double theta, const Soil_layer& layer) const {
+
+    double base = theta / layer.theta_s;
+    if (base < 1.0e-6) {
+        base = 1.0e-6;
+    }
+    if (base > 1.0) {
+        base = 1.0;
+    }
+
+    // Hydraulic conductivity in m s-1
+    return layer.k_soil_sat * std::pow(base, 3.0 + 2.0 * layer.camp_b);
 }
 
 

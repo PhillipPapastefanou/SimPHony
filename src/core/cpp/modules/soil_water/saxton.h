@@ -19,6 +19,14 @@ public:
     ~Saxton06();
     void CalculatePsiAndKs(int start_idx = 0, int end_idx = -1) override;
 
+    // Prognostic soil hydrology (Soil_hydrology_richards) is not supported with the
+    // Saxton06 pedotransfer function yet -- its coefficients (A, B, KS, ...) are derived
+    // once per observed-forcing timestep from sand/clay/organic-matter fractions, not
+    // from a simple closed-form psi(theta)/K(theta) the Richards solver could re-evaluate
+    // every layer every timestep. Both calls exit(99) with a clear message.
+    double Psi_from_theta(double theta, const Soil_layer& layer) const override;
+    double K_from_theta(double theta, const Soil_layer& layer) const override;
+
 private:
     double calc_theta_s(int si);
 

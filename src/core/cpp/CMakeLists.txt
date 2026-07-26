@@ -14,6 +14,8 @@ set(headers
         modules/soil_water/saxton.h
         modules/soil_water/campbell.h
         modules/soil_water/van_genuchten.h
+        modules/soil_water/soil_hydrology_richards.h
+        auxil/tridiagonal_solver.h
         modules/root_distribution_model.h
         io/input_swiss_mult_soils.h
         io/input_hainich.h
@@ -57,6 +59,8 @@ set(source
         modules/soil_water/saxton.cpp
         modules/soil_water/campbell.cpp
         modules/soil_water/van_genuchten.cpp
+        modules/soil_water/soil_hydrology_richards.cpp
+        auxil/tridiagonal_solver.cpp
         modules/root_distribution_model.cpp
         modules/conductivity_model.cpp
         modules/phot/assimilation_quincy.cpp

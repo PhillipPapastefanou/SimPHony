@@ -13,6 +13,9 @@ public:
 
     void CalculatePsiAndKs(int start_idx = 0, int end_idx = -1) override;
 
+    double Psi_from_theta(double theta, const Soil_layer& layer) const override;
+    double K_from_theta(double theta, const Soil_layer& layer) const override;
+
 private:
 
 

@@ -13,9 +13,9 @@ using namespace emscripten;
 // Helper function to safely extract the derived input pointer
 // This prevents you from having to modify your header files just for WebAssembly
 Input_Hainich* Get_Input_Hainich_Helper(Simulation_Single_Hainich& sim) {
-    // Assuming your base Simulation_Single class has `std::unique_ptr<Input> input;` 
+    // Assuming your base Simulation_Single class has `std::unique_ptr<Input> input;`
     // accessible or a getter for it. (If `input` is protected, you might need a public getter in the base class).
-    return static_cast<Input_Hainich*>(sim.Get_Input_Base_Pointer()); 
+    return static_cast<Input_Hainich*>(sim.Get_Input_Base_Pointer());
 }
 
 EMSCRIPTEN_BINDINGS(simphony_web_module) {
@@ -71,6 +71,10 @@ EMSCRIPTEN_BINDINGS(simphony_web_module) {
         .property("g1", &Parameters::g1)
         .property("vpd_dryness_factor", &Parameters::vpd_dryness_factor)
         .property("theta_moisture_factor", &Parameters::theta_moisture_factor)
+        .property("precip_reduction_factor", &Parameters::precip_reduction_factor)
+        .property("use_prognostic_soil_hydrology", &Parameters::use_prognostic_soil_hydrology)
+        .property("surface_runoff_steepness", &Parameters::surface_runoff_steepness)
+        .property("jackson_root_beta", &Parameters::jackson_root_beta)
         // Add any other properties you want to adjust from the web UI here
         // soil_layers itself isn't embind-settable (vector<Soil_layer> isn't
         // a bound value type), so the uniform-across-layers setters below
@@ -113,6 +117,12 @@ EMSCRIPTEN_BINDINGS(simphony_web_module) {
         .function("Get_gs_view", &Output::Get_gs_view)
         .function("Get_vpd_view", &Output::Get_vpd_view)
         .function("Get_beta_view", &Output::Get_beta_view)
+        // Prognostic soil hydrology diagnostics [kg m-2 s-1]; empty unless
+        // use_prognostic_soil_hydrology is enabled.
+        .function("Get_precip_view", &Output::Get_precip_view)
+        .function("Get_infiltration_view", &Output::Get_infiltration_view)
+        .function("Get_runoff_view", &Output::Get_runoff_view)
+        .function("Get_drainage_view", &Output::Get_drainage_view)
         // Not a *_view -- theta is stored per-layer (row-major, strided),
         // so there's no contiguous per-layer memory to hand back as a zero-
         // copy typed array view. VectorVectorFloat was already registered

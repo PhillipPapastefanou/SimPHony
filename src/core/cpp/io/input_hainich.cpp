@@ -72,15 +72,18 @@ void Input_Hainich::Set_Forcing_Data_Fast(uintptr_t ts_ptr, uintptr_t vpd_ptr,
     }
 }
 void Input_Hainich::Set_Forcing_Data_Blob(uintptr_t blob_ptr, int n, int n_layers) {
-    auto* base  = reinterpret_cast<uint8_t*>(blob_ptr);
-    auto* ts    = reinterpret_cast<int32_t*>(base);
-    auto* vpd   = reinterpret_cast<float*>(base + n * 4);
-    auto* rad   = reinterpret_cast<float*>(base + n * 8);
-    auto* temp  = reinterpret_cast<float*>(base + n * 12);
-    auto* theta = reinterpret_cast<float*>(base + n * 16); 
+    auto* base   = reinterpret_cast<uint8_t*>(blob_ptr);
+    auto* ts     = reinterpret_cast<int32_t*>(base);
+    auto* vpd    = reinterpret_cast<float*>(base + n * 4);
+    auto* rad    = reinterpret_cast<float*>(base + n * 8);
+    auto* temp   = reinterpret_cast<float*>(base + n * 12);
+    auto* theta  = reinterpret_cast<float*>(base + n * 16);
+    // FRC3: precipitation rate [kg m-2 s-1] trails theta, one value per timestep -- see
+    // src/contrib/wasm/wasm_binary_gen.py for the binary layout this mirrors.
+    auto* precip = reinterpret_cast<float*>(base + n * 16 + n * n_layers * 4);
 
     dates.clear(); this->vpd.clear(); sw_rad.clear();
-    theta_per_layer.clear(); temp_air.clear();
+    theta_per_layer.clear(); temp_air.clear(); this->precip.clear();
 
     for (int i = 0; i < n; ++i) {
         dates.push_back(DateTime(static_cast<time_t>(ts[i])));
@@ -90,6 +93,7 @@ void Input_Hainich::Set_Forcing_Data_Blob(uintptr_t blob_ptr, int n, int n_layer
         vector<float> row(theta + i*n_layers, theta + (i+1)*n_layers);
         for (auto& v : row) v /= 100.0f;
         theta_per_layer.push_back(std::move(row));
+        this->precip.push_back(precip[i]); // already a rate [kg m-2 s-1], see generator script
     }
 }
 
@@ -97,7 +101,8 @@ void Input_Hainich::Read_N_Parse() {
 
     forcing_parser = std::make_unique<InputCollection>(config.forcing_file.value, true, ',');
 
-    vector<int> forcing_indexes= {1, 2, 6, 7, 8, 9 }; // added 1 = Ta_4400 (air temperature)
+    // 1=Ta_4400 (air temp), 2=VPD_4400, 3=P_4400 (precipitation), 6=SWDR_4400, 7-9=SM_08/16/32
+    vector<int> forcing_indexes= {1, 2, 3, 6, 7, 8, 9 };
     string format = "%Y-%m-%d %H:%M:%S";
     forcing_parser->init_regular("datetime", format);
     vector<vector<float> > forcing_input = forcing_parser->get_data(forcing_indexes);
@@ -105,17 +110,21 @@ void Input_Hainich::Read_N_Parse() {
     DateTime tz_f = forcing_parser->dates.back();
 
     for (int i =0; i < forcing_parser->dates.size(); ++i) {
-        double rad_d = forcing_input[i][2]; // was [1] — SWDR_4400 shifted from index 1 to 2
+        double rad_d = forcing_input[i][3]; // SWDR_4400
         this->rad.push_back(rad_d);
     }
 
     for (int i =0; i < forcing_parser->dates.size(); ++i) {
         dates.push_back(forcing_parser->dates[i]);
-        this->temp_air.push_back(forcing_input[i][0]);        // NEW — Ta_4400
-        this->vpd.push_back(forcing_input[i][1] * 1000.0);    // was [0] — VPD shifted to index 1
+        this->temp_air.push_back(forcing_input[i][0]);        // Ta_4400
+        this->vpd.push_back(forcing_input[i][1] * 1000.0);    // VPD_4400
         this->sw_rad.push_back(rad[i]);
 
-        vector<float> theta_run(forcing_input[i].begin() + 3, forcing_input[i].end()); // was +2 — now skip Ta, VPD, SWDR
+        // P_4400 is a precipitation depth [mm] accumulated over one forcing timestep;
+        // convert to a rate [kg m-2 s-1] == [mm s-1] so it matches the Swiss "rainf" convention.
+        this->precip.push_back(forcing_input[i][2] / static_cast<float>(forcing_parser->time_res_sec));
+
+        vector<float> theta_run(forcing_input[i].begin() + 4, forcing_input[i].end()); // skip Ta, VPD, P, SWDR
 
         for (auto& value: theta_run) {
             value /= 100;

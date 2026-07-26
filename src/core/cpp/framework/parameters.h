@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <limits>
 #include "../modules/soil_layer.h"
 #include <numbers>
 
@@ -183,6 +184,27 @@ public:
     // Soil water module type [enum]
     Soil_water_module_type soil_water_type = Soil_water_module_type::VanGenuchten;
 
+    // Whether soil moisture is simulated prognostically (Soil_hydrology_richards: precipitation
+    // infiltration + Richards-equation vertical transport + root water uptake sink), instead of
+    // being read directly from the observed forcing time series. Off by default -- preserves the
+    // pre-existing observed-forcing behavior. Only Van Genuchten and Campbell soil_water_type
+    // are supported in prognostic mode.
+    bool use_prognostic_soil_hydrology = false;
+
+    // Subgrid steepness/slope parameter [-] limiting infiltration during heavy precipitation,
+    // following the JSBACH4 "Uniform_" scale infiltration scheme: infilt = min(precip,
+    // k_soil_sat_top * (1 - sin(steepness * pi/2))). 0.0 = infiltration capped only by k_soil_sat
+    // (no extra runoff); only used when use_prognostic_soil_hydrology is true.
+    double surface_runoff_steepness = 0.0;
+
+    // Maximum conductivity [m s-1] for drainage out of the lowest soil layer, analogous to
+    // JSBACH4's k_brock (fractured bedrock conductivity): drainage = min(K_bottom_layer,
+    // max_drainage_conductivity). Represents a restrictive layer/shallow water table limiting
+    // free drainage. Defaults to infinity (uncapped -- drainage is simply K of the bottom
+    // layer, the original free-drainage assumption); only used when
+    // use_prognostic_soil_hydrology is true.
+    double max_drainage_conductivity = std::numeric_limits<double>::infinity();
+
 
     // Index of current soil profile index if multiple water contents per sites are available
     // Only relevant for
@@ -202,8 +224,21 @@ public:
 
     // Drought-stress "soil moisture" control [-]: constant multiplier applied
     // to the observed theta forcing (every layer) before the psi_soil/k_soil
-    // pedotransfer functions run. 1.0 = observed theta unchanged.
+    // pedotransfer functions run. 1.0 = observed theta unchanged. Note: when
+    // use_prognostic_soil_hydrology is true, theta is no longer read from the
+    // forcing every timestep (see Soil_hydrology_richards), so this factor only
+    // still affects the one-time warm-start initial condition -- prefer
+    // precip_reduction_factor below for drought stress in that mode.
     double theta_moisture_factor = 1.0;
+
+    // Drought-stress "precipitation" control [-]: constant multiplier applied to
+    // the forcing precipitation rate every timestep, before it reaches the
+    // prognostic soil hydrology's infiltration partition (Model::Run). 1.0 =
+    // observed precipitation unchanged; below 1 = drought (reduced rain); above
+    // 1 = wetter than observed. Unlike theta_moisture_factor, this keeps acting
+    // on every timestep for the lifetime of the run, which is what actually
+    // drives drought stress once use_prognostic_soil_hydrology is true.
+    double precip_reduction_factor = 1.0;
 
     // Tree density [Trees m-2]
     // Used for output scaling onlny

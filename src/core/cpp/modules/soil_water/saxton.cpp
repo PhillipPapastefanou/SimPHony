@@ -192,3 +192,17 @@ double Saxton06::calc_KS(int is) {
 Saxton06::~Saxton06() {
 
 }
+
+double Saxton06::Psi_from_theta(double theta, const Soil_layer& layer) const {
+    std::cout << "Prognostic soil hydrology (Soil_hydrology_richards) does not support the Saxton06 ";
+    std::cout << "pedotransfer function yet -- select Van Genuchten or Campbell instead." << std::endl;
+    std::cout << "Exiting simulation..." << std::endl;
+    exit(99);
+}
+
+double Saxton06::K_from_theta(double theta, const Soil_layer& layer) const {
+    std::cout << "Prognostic soil hydrology (Soil_hydrology_richards) does not support the Saxton06 ";
+    std::cout << "pedotransfer function yet -- select Van Genuchten or Campbell instead." << std::endl;
+    std::cout << "Exiting simulation..." << std::endl;
+    exit(99);
+}

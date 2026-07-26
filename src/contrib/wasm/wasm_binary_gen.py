@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Convert the Hainich forcing-data CSV into a compact binary blob (FRC2) that
+Convert the Hainich forcing-data CSV into a compact binary blob (FRC3) that
 the WASM app can load with a single fetch + memcpy, with zero per-row
 parsing at runtime.
 
@@ -14,18 +14,29 @@ Expected CSV header (fixed, not configurable):
 Binary layout (all little-endian):
 
   Header (16 bytes):
-    char[4]  magic       = b"FRC2"
+    char[4]  magic       = b"FRC3"
     int32    n           = number of timesteps
     int32    n_layers    = number of theta (soil moisture) layers (3)
     int32    reserved    = 0
 
-  Body (n*4 + n*4 + n*4 + n*4 + n*n_layers*4 bytes), contiguous, no padding:
+  Body (n*4 + n*4 + n*4 + n*4 + n*n_layers*4 + n*4 bytes), contiguous, no padding:
     int32    timestamps[n]      unix seconds (UTC)
     float32  vpd[n]             raw units, same as CSV (C++ scales *1000)
     float32  rad[n]             raw units
     float32  temp[n]            deg C, raw (matches Output/temp_air convention)
     float32  theta[n*n_layers]  row-major: theta[i*n_layers + layer], raw
                                  (0-100 scale; C++ divides by 100)
+    float32  precip[n]          precipitation RATE [kg m-2 s-1] == [mm s-1] -- P_4400 is a
+                                 depth [mm] accumulated over one forcing timestep, converted
+                                 here (divided by the timestep length in seconds) so the C++
+                                 side (Input_Hainich::Set_Forcing_Data_Blob) can use it
+                                 directly, matching the convention used by the CSV-parsing
+                                 path (Input_Hainich::Read_N_Parse) and the Swiss "rainf"
+                                 forcing column (already a rate).
+
+FRC3 adds the trailing precip[n] block on top of FRC2 -- everything else is unchanged.
+Only used by the prognostic soil hydrology option (Parameters::use_prognostic_soil_hydrology);
+harmless/unused otherwise.
 """
 
 import csv
@@ -47,9 +58,9 @@ DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 TEMP_COL = "Ta_4400"
 VPD_COL = "VPD_4400"
 RAD_COL = "SWDR_4400"
+PRECIP_COL = "P_4400"
 THETA_COLS = ["SM_08", "SM_16", "SM_32"]
-
-MAGIC = b"FRC2"
+MAGIC = b"FRC3"
 
 
 def convert(input_csv: str, output_bin: str) -> None:
@@ -60,10 +71,11 @@ def convert(input_csv: str, output_bin: str) -> None:
     rad = []
     temp = []
     theta = []  # flat, row-major
+    precip_mm = []  # raw depth [mm] per timestep, converted to a rate below
 
     with open(input_csv, newline="") as f:
         reader = csv.DictReader(f)
-        required = [DATETIME_COL, TEMP_COL, VPD_COL, RAD_COL] + THETA_COLS
+        required = [DATETIME_COL, TEMP_COL, VPD_COL, RAD_COL, PRECIP_COL] + THETA_COLS
         missing = [c for c in required if c not in reader.fieldnames]
         if missing:
             sys.exit(f"error: columns not found in CSV header: {missing}\n"
@@ -84,6 +96,7 @@ def convert(input_csv: str, output_bin: str) -> None:
                 vpd.append(float(row[VPD_COL]))
                 rad.append(float(row[RAD_COL]))
                 temp.append(float(row[TEMP_COL]))
+                precip_mm.append(float(row[PRECIP_COL]))
                 for c in THETA_COLS:
                     theta.append(float(row[c]))
             except ValueError as e:
@@ -93,6 +106,12 @@ def convert(input_csv: str, output_bin: str) -> None:
     if n == 0:
         sys.exit("error: no rows parsed")
 
+    # Convert precipitation from a depth [mm] accumulated over one timestep to a rate
+    # [kg m-2 s-1] == [mm s-1], using the actual spacing between consecutive timestamps
+    # (constant for this regular-interval forcing) rather than assuming 1800s.
+    dt_seconds = timestamps[1] - timestamps[0] if n > 1 else 1800
+    precip = [p / dt_seconds for p in precip_mm]
+
     with open(output_bin, "wb") as f:
         f.write(MAGIC)
         f.write(struct.pack("<iii", n, n_layers, 0))
@@ -101,9 +120,10 @@ def convert(input_csv: str, output_bin: str) -> None:
         f.write(struct.pack(f"<{n}f", *rad))
         f.write(struct.pack(f"<{n}f", *temp))
         f.write(struct.pack(f"<{n * n_layers}f", *theta))
+        f.write(struct.pack(f"<{n}f", *precip))
 
-    total_bytes = 16 + n * 4 + n * 4 + n * 4 + n * 4 + n * n_layers * 4
-    print(f"wrote {output_bin}: n={n}, n_layers={n_layers}, "
+    total_bytes = 16 + n * 4 + n * 4 + n * 4 + n * 4 + n * n_layers * 4 + n * 4
+    print(f"wrote {output_bin}: n={n}, n_layers={n_layers}, dt={dt_seconds}s, "
           f"{total_bytes} bytes ({total_bytes/1024:.1f} KB)")
 
 
@@ -122,6 +142,7 @@ def verify(path: str) -> None:
     rad = struct.unpack_from(f"<{n}f", data, off); off += n * 4
     temp = struct.unpack_from(f"<{n}f", data, off); off += n * 4
     theta = struct.unpack_from(f"<{n * n_layers}f", data, off); off += n * n_layers * 4
+    precip = struct.unpack_from(f"<{n}f", data, off); off += n * 4
 
     expected_size = off
     actual_size = len(data)
@@ -132,6 +153,8 @@ def verify(path: str) -> None:
     print(f"verify: first timestamp={timestamps[0]} ({datetime.utcfromtimestamp(timestamps[0])})")
     print(f"verify: first vpd={vpd[0]}, first rad={rad[0]}, first temp={temp[0]}")
     print(f"verify: first theta row={theta[0:n_layers]}")
+    print(f"verify: precip rate range=[{min(precip)}, {max(precip)}] kg m-2 s-1, "
+          f"sum(precip)*dt~{sum(precip) * (timestamps[1]-timestamps[0]):.1f} mm total")
     print(f"verify: last timestamp={timestamps[-1]} ({datetime.utcfromtimestamp(timestamps[-1])})")
 
 

@@ -5,6 +5,7 @@ set(headers
 set(source
         general/water_flow_segments_approx_test.cpp
         general/soil_models_test.cpp
+        general/soil_hydrology_richards_test.cpp
         general/special_functions_test.cpp
 
         general/phot/test_photo_and_assim_functions_manon.cpp

@@ -59,7 +59,8 @@ void Input_Swiss_Multi_Soils::Read_N_Parse() {
 
     }
 
-    vector<int> forcing_indexes= {2,8,3};
+    // 2=swdown, 8=vpd, 3=tair, 4=rainf (precipitation rate, already kg m-2 s-1)
+    vector<int> forcing_indexes= {2,8,3,4};
     forcing_parser->init_regular("dt", format);
     vector<vector<float> > forcing_input = forcing_parser->get_data(forcing_indexes);
 
@@ -93,6 +94,7 @@ void Input_Swiss_Multi_Soils::Read_N_Parse() {
         this->sw_rad.push_back(rad_d);
         double air_temp_kelv = forcing_input[i][2];
         this->temp_air.push_back(air_temp_kelv - KTOC );
+        this->precip.push_back(forcing_input[i][3]); // rainf is already a rate [kg m-2 s-1]
     }
 
 

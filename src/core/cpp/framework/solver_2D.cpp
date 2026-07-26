@@ -123,8 +123,12 @@ double Solver_2D::d_psi_stem_ground(double psi_leaf, double psi_stem) {
         G += Gi[s];
     }
 
+    // G is per-unit-ground-area (via root_area_index) while J is per-unit-leaf-area (via
+    // huber_value) -- divide by leaf_area_index to bring G onto the same basis as J before
+    // combining them (see the matching comment in solver_indiv_eulerimp.cpp for the full
+    // reasoning). Gi/G themselves are left untouched (still per-ground-area).
     // Return the derivative of the stem water potential
-    return ((G - J) / (params.stem_hydraulic_capacitance_max * params.canopy_height * params.huber_value));
+    return ((G / params.leaf_area_index - J) / (params.stem_hydraulic_capacitance_max * params.canopy_height * params.huber_value));
 }
 
 //double Solver_2D::psi_stem_root(double psi_stem_target) {

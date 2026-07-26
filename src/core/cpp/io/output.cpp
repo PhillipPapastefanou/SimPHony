@@ -94,6 +94,22 @@ void Output::Add_anet(double anet) {
     anet_a.push_back(anet);
 }
 
+void Output::Add_precip(double precip) {
+    precip_a.push_back(precip);
+}
+
+void Output::Add_infiltration(double infiltration) {
+    infiltration_a.push_back(infiltration);
+}
+
+void Output::Add_runoff(double runoff) {
+    runoff_a.push_back(runoff);
+}
+
+void Output::Add_drainage(double drainage) {
+    drainage_a.push_back(drainage);
+}
+
 void Output::Add_Timestep(double t) {
     times.push_back(t);
 }
@@ -181,6 +197,22 @@ const vector<float> &Output::Get_anet() const {
     return anet_a;
 }
 
+const vector<float> &Output::Get_precip() const {
+    return precip_a;
+}
+
+const vector<float> &Output::Get_infiltration() const {
+    return infiltration_a;
+}
+
+const vector<float> &Output::Get_runoff() const {
+    return runoff_a;
+}
+
+const vector<float> &Output::Get_drainage() const {
+    return drainage_a;
+}
+
 
 
 void Output::Export_CSV(std::string filename) {
@@ -243,6 +275,18 @@ val Output::Get_vpd_view() const {
 val Output::Get_beta_view() const {
     return val(typed_memory_view(beta_a.size(), beta_a.data()));
 }
+val Output::Get_precip_view() const {
+    return val(typed_memory_view(precip_a.size(), precip_a.data()));
+}
+val Output::Get_infiltration_view() const {
+    return val(typed_memory_view(infiltration_a.size(), infiltration_a.data()));
+}
+val Output::Get_runoff_view() const {
+    return val(typed_memory_view(runoff_a.size(), runoff_a.data()));
+}
+val Output::Get_drainage_view() const {
+    return val(typed_memory_view(drainage_a.size(), drainage_a.data()));
+}
 #endif
 
 void Output::Clear() {
@@ -263,6 +307,10 @@ void Output::Clear() {
     beta_a.clear();
     vpd_a.clear();
     anet_a.clear();
+    precip_a.clear();
+    infiltration_a.clear();
+    runoff_a.clear();
+    drainage_a.clear();
     k_soil_aa.clear();
     theta_aa.clear();
     steps_psi_leaf_a.clear();

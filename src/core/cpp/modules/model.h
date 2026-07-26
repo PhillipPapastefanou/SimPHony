@@ -3,6 +3,7 @@
 #include "../io/input.h"
 #include <vector>
 #include "soil_water/soil_water_model.h"
+#include "soil_water/soil_hydrology_richards.h"
 #include "../auxil/solvers.h"
 #include "../io/output.h"
 #include "model.h"
@@ -48,6 +49,10 @@ private:
 
 
     std::unique_ptr<Soil_water_module> soil_water_module;
+    // Only constructed when params.use_prognostic_soil_hydrology is true; owns the
+    // per-timestep soil moisture state in that case instead of input_psi_soil/input_k_soil/
+    // input_theta (which stay only partially populated -- see Set_derived_parameters_impl).
+    std::unique_ptr<Soil_hydrology_richards> soil_hydrology_richards;
 
     // Driver values for this timestep
     // Vapour pressure deficit [Pa]
@@ -67,6 +72,13 @@ private:
     vector<double> ik_soil;
     // List of volumetric water contents per soil layer [m3 m-3]
     vector<float> itheta;
+
+    // Prognostic soil hydrology diagnostics for this timestep [kg m-2 s-1]; only meaningful
+    // (and only logged by add_output()) when params.use_prognostic_soil_hydrology is true.
+    double iprecip = 0.0;
+    double iinfiltration = 0.0;
+    double irunoff = 0.0;
+    double idrainage = 0.0;
 
     std::unique_ptr<Water_Potential_Solver> water_potential_solver;
 

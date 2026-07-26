@@ -27,6 +27,9 @@ public:
     // Volumetric water standard deviation [m3 m-3]
     // Currently only available for the Swiss sites
     std::vector<std::vector<float>> theta_sd_per_layer;
+    /// Precipitation rate [kg m-2 s-1], i.e. mm water per second. Only used by the
+    /// prognostic soil hydrology option (Soil_hydrology_richards); empty/unused otherwise.
+    std::vector<float> precip;
 protected:
     const Config& config;
 };

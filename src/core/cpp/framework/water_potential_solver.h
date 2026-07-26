@@ -31,6 +31,12 @@ public:
 
     void Update_output(Output& output);
 
+    /// Root water uptake per soil layer [mol H2O m-2 s-1], as computed for the timestep of
+    /// the most recent Update_water_potentials() call. Used to feed a sink term back into
+    /// a prognostic soil hydrology model (Soil_hydrology_richards) -- Gi itself is otherwise
+    /// only used for output/diagnostics.
+    const std::vector<double>& Get_root_uptake_indiv() const { return Gi; }
+
 protected:
     void init_base();
 
