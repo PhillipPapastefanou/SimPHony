@@ -128,6 +128,7 @@ public:
     emscripten::val Get_gs_view() const;
     emscripten::val Get_vpd_view() const;
     emscripten::val Get_beta_view() const;
+    emscripten::val Get_anet_view() const;
     emscripten::val Get_precip_view() const;
     emscripten::val Get_infiltration_view() const;
     emscripten::val Get_runoff_view() const;

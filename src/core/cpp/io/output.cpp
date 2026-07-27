@@ -296,6 +296,9 @@ val Output::Get_vpd_view() const {
 val Output::Get_beta_view() const {
     return val(typed_memory_view(beta_a.size(), beta_a.data()));
 }
+val Output::Get_anet_view() const {
+    return val(typed_memory_view(anet_a.size(), anet_a.data()));
+}
 val Output::Get_precip_view() const {
     return val(typed_memory_view(precip_a.size(), precip_a.data()));
 }

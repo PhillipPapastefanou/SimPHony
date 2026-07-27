@@ -105,7 +105,12 @@
      time range stays visible and reachable no matter how far the slider
      list is scrolled. */
   .sidebar { display: flex; flex-direction: column; min-height: 0; }
-  .schematic-col, .drought-col {
+  /* .middle-col is the actual grid item now -- it holds both
+     .schematic-col and .scientific-col, only one of which is display:none
+     at a time (see setViewMode() in the script below). Kept as a plain
+     always-present wrapper so the grid's column count/sizing never
+     changes when the view mode toggles. */
+  .middle-col, .drought-col {
     min-height: 0;
     overflow-y: auto;
     scrollbar-gutter: stable;
@@ -125,7 +130,7 @@
   @media (max-width: 1150px) {
     body { height: auto; }
     .layout { grid-template-columns: 1fr; flex: 0 0 auto; }
-    .schematic-col, .drought-col, .sidebar-params { overflow-y: visible; }
+    .middle-col, .drought-col, .sidebar-params { overflow-y: visible; }
   }
 
   .sidebar {
@@ -147,7 +152,45 @@
   .sidebar-params details:first-of-type summary { margin-top: 0; }
   .sidebar-params details[open] > summary { color: #555; }
 
-  .schematic-col { display: flex; flex-direction: column; gap: 20px; }
+  .middle-col { display: flex; flex-direction: column; }
+  .schematic-col, .scientific-col { display: flex; flex-direction: column; gap: 20px; flex: 1 1 auto; min-height: 0; }
+
+  /* Scientific view: 2x2 grid of independently-selectable variable plots,
+     replacing the schematic figure entirely (see setViewMode()). The time
+     range block (.rangeslider-block) is physically moved to sit right
+     above this grid when scientific mode is active -- see setViewMode()'s
+     DOM reparenting -- rather than duplicating the range-slider control. */
+  .scientific-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 16px;
+  }
+  .sci-chart-block {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .sci-chart-select-row { flex: 0 0 auto; margin-bottom: 8px; }
+  .sci-chart-select-row select {
+    font-family: inherit;
+    font-size: 0.82rem;
+    padding: 4px 6px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: #fff;
+    width: 100%;
+  }
+  .sci-chart-plot { flex: 1 1 auto; min-height: 0; position: relative; }
+  @media (max-width: 1150px) {
+    .scientific-grid { grid-template-columns: 1fr; grid-template-rows: none; }
+    .sci-chart-plot { height: 260px; }
+  }
 
   .panel {
     border: 1px solid #ddd;
@@ -210,12 +253,17 @@
     pointer-events: none;
   }
   .overlay-plot { position: relative; width: 100%; height: 100%; }
-  /* A small legend chip (colored line swatch + label) layered over a corner
-     of the plot (z-index, since uPlot's own canvas wrapper is inserted
-     after it in the DOM) instead of a title row above the chart -- saves
-     the height that row used to take, and reads as a legend entry rather
-     than a heading. Which corner is per-chart (see OVERLAY_DEFS.corner /
-     buildOverlayCharts()): currently bottom-left for all five charts. */
+  /* A small legend chip (colored line swatch + label, optionally followed by
+     a running-total "Σ ..." for flux variables -- see .legend-sum) layered
+     over a corner of the plot (z-index, since uPlot's own canvas wrapper is
+     inserted after it in the DOM) instead of a title row above the chart --
+     saves the height that row used to take, and reads as a legend entry
+     rather than a heading. Bottom-left for every chart (schematic overlays,
+     drought column, Scientific-view grid alike) -- the Σ total used to be a
+     separate chip pinned to the top-right corner, but that often sat over
+     empty header space above the plotted line rather than reading as part
+     of the chart; folding it into this same chip keeps everything anchored
+     over the actual data. */
   .overlay-inline-label {
     position: absolute;
     z-index: 2;
@@ -229,7 +277,6 @@
     padding: 2px 5px;
     border-radius: 3px;
   }
-  .overlay-inline-label.corner-top-right { top: 2px; right: 4px; }
   .overlay-inline-label.corner-bottom-left { bottom: 2px; left: 4px; }
   .overlay-inline-label .swatch {
     display: inline-block;
@@ -238,6 +285,7 @@
     background: currentColor;
     flex: 0 0 auto;
   }
+  .overlay-inline-label .legend-sum { font-weight: 400; opacity: 0.85; }
 
   .control { margin-bottom: 14px; }
   .control:last-child { margin-bottom: 0; }
@@ -391,7 +439,10 @@
       <button type="button" class="view-mode-btn" id="mode_scientific" aria-pressed="false">Scientific</button>
     </div>
 
-    <div class="rangeslider-block">
+    <!-- Reparented between here (schematic mode) and #scientific_view
+         (scientific mode) by setViewMode() -- one shared time-range
+         control rather than a duplicate per mode. -->
+    <div class="rangeslider-block" id="rangeslider_block">
       <div class="rangeslider-header">
         <h2>Time range</h2>
         <button id="rs_reset" type="button">Reset zoom</button>
@@ -411,14 +462,27 @@
     </div>
   </div>
 
-  <div class="schematic-col">
-    <div class="panel figure-panel">
-      <h2>Model schematic</h2>
-      <div class="schematic-stage" id="schematic_stage">
-        <img src="Figure_web_real.png"
-             alt="SimPHony model schematic: leaf and stem water potentials (psi_Leaf, psi_Stem) connected through xylem conductivity K_xyl and capacitances Gamma_Leaf/Gamma_Stem, down to per-layer soil water potentials (psi_Soil) via soil-to-stem conductivities K_Soil-Stem and lateral flow G. The figure has five empty boxes drawn into it -- two on the left (near psi_Leaf and psi_Stem_B), three on the right (near Transpiration T_Leaf, Stem flow J, and Lateral flow G) -- which is where the live mini-charts are placed.">
-        <!-- live mini-chart overlays (T, J, G, psi_Leaf, psi_Stem) are
-             built and positioned in main() from OVERLAY_DEFS below. -->
+  <!-- .middle-col is the fixed grid item; exactly one of its two children
+       is visible at a time (see setViewMode()). -->
+  <div class="middle-col" id="middle_col">
+    <div class="schematic-col" id="schematic_view">
+      <div class="panel figure-panel">
+        <h2>Model schematic</h2>
+        <div class="schematic-stage" id="schematic_stage">
+          <img src="Figure_web_real.png"
+               alt="SimPHony model schematic: leaf and stem water potentials (psi_Leaf, psi_Stem) connected through xylem conductivity K_xyl and capacitances Gamma_Leaf/Gamma_Stem, down to per-layer soil water potentials (psi_Soil) via soil-to-stem conductivities K_Soil-Stem and lateral flow G. The figure has five empty boxes drawn into it -- two on the left (near psi_Leaf and psi_Stem_B), three on the right (near Transpiration T_Leaf, Stem flow J, and Lateral flow G) -- which is where the live mini-charts are placed.">
+          <!-- live mini-chart overlays (T, J, G, psi_Leaf, psi_Stem) are
+               built and positioned in main() from OVERLAY_DEFS below. -->
+        </div>
+      </div>
+    </div>
+
+    <div class="scientific-col" id="scientific_view" style="display: none;">
+      <!-- #rangeslider_block is moved in here (above the grid) by
+           setViewMode() when scientific mode is active. -->
+      <div class="scientific-grid" id="scientific_grid">
+        <!-- four chart blocks (dropdown + plot) built by buildSciChartBlock()
+             in main(), one per VARIABLE_DEFS-driven slot. -->
       </div>
     </div>
   </div>
@@ -486,11 +550,22 @@ const WASM_PATH = `../build_web/SimPHony_Web.wasm?v=${CACHE_BUST}`;
 const FORCING_BIN_PATH = `../forcing.bin?v=${CACHE_BUST}`;
 const PARAMS_JSON_PATH = './parameters.json';
 
-// Canvas-drawn chart text (the time-range overview chart's axis ticks)
-// doesn't inherit page CSS, so it needs its own font config. The overlay
-// charts on the schematic have no axes at all (see OVERLAY_DEFS below), so
-// this is only used in one place now.
+// Canvas-drawn chart text (axis ticks) doesn't inherit page CSS, so it needs
+// its own font config -- shared by the overview chart and every uPlot axis
+// built below (overlay/drought/Scientific-grid charts alike).
 const CHART_FONT = '12px "Avenir Next", -apple-system, BlinkMacSystemFont, sans-serif';
+
+// uPlot's own auto-padding (the blank margin reserved around the plotted
+// data, inside the axes) resolves to 0 on any series with points hidden
+// (points: {show: false}, as every chart below sets) -- there's simply no
+// point-radius to pad for. With 0 padding the *last* time-axis tick's label
+// is centered exactly on the right edge of the plotting area, so roughly
+// its right half renders past the canvas boundary and is clipped outright
+// (same for the first tick's left half) -- this is what showed up as dates
+// looking "cut off". Explicit padding reserves that room back. Order is
+// uPlot's own [top, right, bottom, left]; horizontal ends need the most
+// since that's where the label text itself overhangs past the tick.
+const TIME_CHART_PADDING = [4, 16, 4, 16];
 
 // Flip to false to disable the drought-stress sliders again -- see the
 // <style>/<body> comments on .drought-panel.
@@ -768,10 +843,14 @@ async function loadForcingData(Module, input, url) {
 // charts on the schematic (see applyZoomRange()); it never touches the
 // simulation, so it's cheap regardless of drag rate.
 // ---------------------------------------------------------------------
-const SIDEBAR_PADDING = 16 * 2; // .sidebar's own left+right padding, see <style>
-
-function sidebarContentWidth() {
-  return document.getElementById('sidebar').clientWidth - SIDEBAR_PADDING;
+// #rangeslider_block (holding this chart) is reparented between the
+// sidebar (schematic mode) and the Scientific column (scientific mode) --
+// see setViewMode() -- so its available width has to be measured off
+// #rangeslider itself (100% of whichever parent it's currently in) rather
+// than a fixed ".sidebar minus its own padding" calculation that only held
+// while the block always lived inside .sidebar.
+function overviewContentWidth() {
+  return document.getElementById('rangeslider').clientWidth;
 }
 
 let selMin, selMax; // current zoom window, epoch seconds
@@ -781,13 +860,14 @@ let charts; // { T, J, G, psiLeaf, psiStem } -- one uPlot instance per schematic
 
 function makeOverviewChart(containerId) {
   const opts = {
-    width: sidebarContentWidth(),
+    width: overviewContentWidth(),
     height: 70,
     // Disables uPlot's default pixel-snapping of drawn paths, which keeps
     // 1px lines crisp but makes diagonal/curved segments look stair-stepped
     // (no antialiasing). Off, the canvas draws paths at their true
     // sub-pixel position and the browser antialiases them normally.
     pxAlign: 0,
+    padding: TIME_CHART_PADDING,
     scales: { x: { time: true } },
     cursor: { show: false, drag: { x: false, y: false } },
     legend: { show: false },
@@ -824,10 +904,13 @@ function updateRangeSliderVisual() {
 }
 
 // Schematic / Scientific view-mode toggle -- two mutually-exclusive buttons
-// (only one can be .active at a time). Doesn't change page content yet (no
-// "Scientific" layout has been built), just tracks/reflects which mode is
-// selected -- viewMode is exposed as a module-level variable so a future
-// alternate layout has something to read.
+// (only one can be .active at a time). Schematic shows the figure with its
+// five overlay mini-charts (#schematic_view, unchanged); Scientific replaces
+// it entirely with a 2x2 grid of dropdown-selectable variable plots
+// (#scientific_view, built in main() -- see buildSciChartBlock()). The one
+// shared #rangeslider_block is physically moved between the two (sidebar,
+// above the parameter list <-> above the Scientific grid) rather than
+// duplicated, since it's the same global zoom control either way.
 let viewMode = 'schematic';
 
 function setViewMode(mode) {
@@ -839,26 +922,49 @@ function setViewMode(mode) {
   scientificBtn.classList.toggle('active', !isSchematic);
   schematicBtn.setAttribute('aria-pressed', String(isSchematic));
   scientificBtn.setAttribute('aria-pressed', String(!isSchematic));
+
+  document.getElementById('schematic_view').style.display = isSchematic ? '' : 'none';
+  document.getElementById('scientific_view').style.display = isSchematic ? 'none' : '';
+
+  const rangesliderBlock = document.getElementById('rangeslider_block');
+  if (isSchematic) {
+    document.getElementById('sidebar_params').before(rangesliderBlock);
+  } else {
+    document.getElementById('scientific_grid').before(rangesliderBlock);
+  }
+
+  // Whichever column was just hidden had clientWidth/Height stuck at 0 the
+  // whole time (display:none), so anything sized off it -- overlay charts,
+  // the just-reparented overview chart, the sci grid -- needs a refit now
+  // that it's visible/measurable again. One rAF: fitAll() reads layout
+  // synchronously, but the display-toggle above needs a paint to land first.
+  if (typeof fitAll === 'function') requestAnimationFrame(fitAll);
 }
 
 function setupViewModeToggle() {
   document.getElementById('mode_schematic').addEventListener('click', () => setViewMode('schematic'));
   document.getElementById('mode_scientific').addEventListener('click', () => setViewMode('scientific'));
-  setViewMode('schematic'); // Schematic is the default/only wired-up view for now.
+  setViewMode('schematic'); // Schematic is the default view on load.
 }
 
-// Sets the shared zoom window on all five schematic-overlay charts and
-// moves the overlay to match. Called both from user drags and after each
-// simulation re-run (to re-assert whatever zoom the user already had).
+// Sets the shared zoom window on every chart -- the five schematic
+// overlays, the two drought charts, and the four Scientific-grid charts --
+// and moves the range-slider overlay to match. Called both from user drags
+// and after each simulation re-run (to re-assert whatever zoom the user
+// already had).
 function applyZoomRange(min, max) {
   selMin = Math.max(startEpoch, Math.min(min, max));
   selMax = Math.min(endEpoch, Math.max(min, max));
   for (const def of ALL_CHART_DEFS) {
     if (charts[def.key]) charts[def.key].setScale('x', { min: selMin, max: selMax });
   }
+  for (const sciChart of sciCharts) {
+    if (sciChart) sciChart.setScale('x', { min: selMin, max: selMax });
+  }
   syncGroupYRanges();
   updateRangeSliderVisual();
   updateFluxSums();
+  updateSciFluxSums();
 }
 
 function setupRangeSlider() {
@@ -979,10 +1085,13 @@ function formatFluxTotal(molPerM2) {
 }
 
 // Re-integrates T/J/G over the currently visible [selMin, selMax] window and
-// writes the result into each chart's Σ badge (def.sumEl, built in
-// buildOverlayCharts()). Called from applyZoomRange() -- i.e. on every zoom/
-// pan/reset as well as after every re-run (runAndRedraw() ends by calling
-// applyZoomRange() to re-assert the user's current zoom).
+// writes the result into each chart's Σ figure -- folded into the same
+// bottom-left legend chip as the series swatch/label (def.sumEl, built in
+// buildOverlayCharts()) rather than a separate corner badge, so it always
+// reads as part of the chart instead of floating over empty header space.
+// Called from applyZoomRange() -- i.e. on every zoom/pan/reset as well as
+// after every re-run (runAndRedraw() ends by calling applyZoomRange() to
+// re-assert the user's current zoom).
 function updateFluxSums() {
   const xs = fluxSumSeries.x;
   if (!xs || !xs.length) return;
@@ -1001,20 +1110,17 @@ function updateFluxSums() {
     // series is already x1000-scaled (mmol m-2 s-1) for display -- undo that
     // to get back to the model's native mol m-2 s-1 before integrating.
     const totalMolPerM2 = (sumScaled / def.scale) * MODEL_DT_SECONDS;
-    def.sumEl.textContent = `Σ ${formatFluxTotal(totalMolPerM2)}`;
+    def.sumEl.textContent = ` · Σ ${formatFluxTotal(totalMolPerM2)}`;
   }
 }
 
-// Applies the matching `defs` entry's `scale` (if any) to a raw
-// Get_*_view() typed-array view before it's handed to uPlot -- .slice()
-// first since the view is a live pointer into WASM heap memory that's only
-// valid until the next allocation, and scaling in place would corrupt it.
-// `defs` defaults to OVERLAY_DEFS (T/J/G's mol->mmol scaling); the
-// drought-column vpd chart passes DROUGHT_CHART_DEFS for its Pa->kPa one.
-function scaledSeries(view, key, defs = OVERLAY_DEFS) {
+// Scales a raw typed-array view (or plain array) by a fixed factor,
+// .slice()-ing first since Get_*_view() results are live pointers into WASM
+// heap memory that are only valid until the next allocation -- scaling in
+// place would corrupt them.
+function viewToScaledArray(view, scale = 1) {
   const arr = view.slice();
-  const scale = defs.find((d) => d.key === key).scale;
-  if (scale) {
+  if (scale !== 1) {
     for (let i = 0; i < arr.length; i++) arr[i] *= scale;
   }
   return arr;
@@ -1024,11 +1130,10 @@ function scaledSeries(view, key, defs = OVERLAY_DEFS) {
 // std::vector<float> -- not a typed-array view over WASM memory, so there's
 // no .slice() to lean on (see Output::Get_T_per_ground_area()'s comment: the
 // scaled values don't live in a persistent buffer). Walks it with
-// .size()/.get(i) instead, applying the same display scale as scaledSeries(),
-// and frees the embind vector when done (must be .delete()'d explicitly,
-// same as Get_theta_indiv()'s rows in meanThetaSeries()).
-function scaledVector(vec, key, defs = OVERLAY_DEFS) {
-  const scale = defs.find((d) => d.key === key).scale || 1;
+// .size()/.get(i) instead, and frees the embind vector when done (must be
+// .delete()'d explicitly, same as Get_theta_indiv()'s rows in
+// meanThetaSeries()).
+function vectorToScaledArray(vec, scale = 1) {
   try {
     const n = vec.size();
     const arr = new Float64Array(n);
@@ -1037,6 +1142,19 @@ function scaledVector(vec, key, defs = OVERLAY_DEFS) {
   } finally {
     vec.delete();
   }
+}
+
+// Thin wrappers over the two primitives above that look up `scale` from a
+// defs array by key instead of taking it directly -- what the schematic
+// overlay/drought charts use (OVERLAY_DEFS for T/J/G's mol->mmol scaling,
+// DROUGHT_CHART_DEFS for vpd's Pa->kPa one). The Scientific-grid charts
+// (VARIABLE_DEFS, below) call viewToScaledArray()/vectorToScaledArray()
+// directly instead, since each entry already knows its own scale.
+function scaledSeries(view, key, defs = OVERLAY_DEFS) {
+  return viewToScaledArray(view, defs.find((d) => d.key === key).scale || 1);
+}
+function scaledVector(vec, key, defs = OVERLAY_DEFS) {
+  return vectorToScaledArray(vec, defs.find((d) => d.key === key).scale || 1);
 }
 
 // The drought-stress column's two live charts -- VPD under the
@@ -1090,13 +1208,227 @@ function meanThetaSeries(output) {
   }
 }
 
+// ---------------------------------------------------------------------
+// Scientific view -- a 2x2 grid of independently dropdown-selectable
+// variable plots (see #scientific_grid / buildSciChartBlock() below),
+// replacing the schematic figure entirely when active (setViewMode()).
+// VARIABLE_DEFS is the shared catalogue every one of the 4 dropdowns is
+// built from: unlike OVERLAY_DEFS/DROUGHT_CHART_DEFS (each entry pinned to
+// one fixed chart), any entry here can end up in any of the 4 slots, so
+// each carries its own getData() (pulls + scales its series from `output`)
+// rather than main()'s runAndRedraw() special-casing every variable.
+// `isFlux` + `sumFormat` mirror OVERLAY_DEFS.isFlux/formatFluxTotal --
+// see updateSciFluxSums() -- but generalized to non-water-mol quantities
+// (mass-rate fluxes, CO2) since precip/infiltration/runoff/drainage/anet
+// aren't in mol H2O m-2 s-1 like T/J/G.
+// ---------------------------------------------------------------------
+
+// Grams of carbon per mole of CO2 -- converts Anet's native μmol CO2 m-2 s-1
+// into a carbon-mass flux (the GPP/NPP-style quantity ecologists usually
+// report) for its Σ total, the same way MOLAR_MASS_H2O_KG converts T/J/G's
+// mol H2O into kg.
+const MOLAR_MASS_CO2_C_G = 12.011;
+
+function formatWaterMassFluxTotal(kgPerM2) {
+  return Math.abs(kgPerM2) >= 1
+    ? `${kgPerM2.toFixed(2)} kg/m²`
+    : `${(kgPerM2 * 1000).toFixed(1)} g/m²`;
+}
+
+function formatCarbonFluxTotal(umolPerM2) {
+  const gCPerM2 = umolPerM2 * 1e-6 * MOLAR_MASS_CO2_C_G;
+  return Math.abs(gCPerM2) >= 1
+    ? `${gCPerM2.toFixed(2)} gC/m²`
+    : `${(gCPerM2 * 1000).toFixed(1)} mgC/m²`;
+}
+
+// key            <select> option value, and the sciSelectedKeys[] entry
+// label          full dropdown option text
+// shortLabel     compact form used in the plot's own legend chip
+// getData(output) returns a plain/typed array already in display units --
+//                same shape runAndRedraw() hands every other chart's
+//                setData(), so no per-variable-type branching is needed
+//                where these are consumed (rebuildSciChart()/runAndRedraw())
+// isFlux/sumFormat  see the block comment above
+const VARIABLE_DEFS = [
+  { key: 'psiLeaf', label: 'ψ Leaf — leaf water potential', shortLabel: 'ψ Leaf', unit: 'MPa', color: '#16a34a', isFlux: false,
+    getData: (output) => viewToScaledArray(output.Get_psi_leaf_view()) },
+  { key: 'psiStem', label: 'ψ Stem — stem water potential', shortLabel: 'ψ Stem', unit: 'MPa', color: '#ea580c', isFlux: false,
+    getData: (output) => viewToScaledArray(output.Get_psi_sap_view()) },
+  { key: 'T', label: 'T — transpiration (per ground area)', shortLabel: 'T', unit: 'mmol H2O m-2(ground) s-1', color: '#0891b2', isFlux: true, displayScale: 1000,
+    getData: (output) => vectorToScaledArray(output.Get_T_per_ground_area(), 1000), sumFormat: formatFluxTotal },
+  { key: 'J', label: 'J — stem flow (per ground area)', shortLabel: 'J', unit: 'mmol H2O m-2(ground) s-1', color: '#7c3aed', isFlux: true, displayScale: 1000,
+    getData: (output) => vectorToScaledArray(output.Get_J_per_ground_area(), 1000), sumFormat: formatFluxTotal },
+  { key: 'G', label: 'G — root/lateral water uptake (per ground area)', shortLabel: 'G', unit: 'mmol H2O m-2(ground) s-1', color: '#b45309', isFlux: true, displayScale: 1000,
+    getData: (output) => vectorToScaledArray(output.Get_G_per_ground_area(), 1000), sumFormat: formatFluxTotal },
+  { key: 'anet', label: 'Anet — net CO2 assimilation (GPP-like)', shortLabel: 'Anet', unit: 'μmol CO2 m-2(leaf) s-1', color: '#0d9488', isFlux: true, displayScale: 1,
+    getData: (output) => viewToScaledArray(output.Get_anet_view()), sumFormat: formatCarbonFluxTotal },
+  { key: 'precip', label: 'Precipitation', shortLabel: 'Precip', unit: 'kg m-2 s-1', color: '#2563eb', isFlux: true, displayScale: 1,
+    getData: (output) => viewToScaledArray(output.Get_precip_view()), sumFormat: formatWaterMassFluxTotal },
+  { key: 'infiltration', label: 'Infiltration', shortLabel: 'Infilt.', unit: 'kg m-2 s-1', color: '#059669', isFlux: true, displayScale: 1,
+    getData: (output) => viewToScaledArray(output.Get_infiltration_view()), sumFormat: formatWaterMassFluxTotal },
+  { key: 'runoff', label: 'Surface runoff', shortLabel: 'Runoff', unit: 'kg m-2 s-1', color: '#dc2626', isFlux: true, displayScale: 1,
+    getData: (output) => viewToScaledArray(output.Get_runoff_view()), sumFormat: formatWaterMassFluxTotal },
+  { key: 'drainage', label: 'Drainage', shortLabel: 'Drainage', unit: 'kg m-2 s-1', color: '#7c2d12', isFlux: true, displayScale: 1,
+    getData: (output) => viewToScaledArray(output.Get_drainage_view()), sumFormat: formatWaterMassFluxTotal },
+  { key: 'vpd', label: 'VPD — vapor pressure deficit', shortLabel: 'VPD', unit: 'kPa', color: '#000000', isFlux: false,
+    getData: (output) => viewToScaledArray(output.Get_vpd_view(), 0.001) },
+  { key: 'theta', label: 'θ — mean soil water content', shortLabel: 'θ', unit: 'm3 m-3', color: '#000000', isFlux: false,
+    getData: (output) => meanThetaSeries(output) },
+  { key: 'beta', label: 'β — stomatal closure', shortLabel: 'β', unit: '-', color: '#000000', isFlux: false,
+    getData: (output) => viewToScaledArray(output.Get_beta_view()) },
+  { key: 'gs', label: 'gs — stomatal conductance', shortLabel: 'gs', unit: 'mol H2O m-2 s-1', color: '#0d9488', isFlux: false,
+    getData: (output) => viewToScaledArray(output.Get_gs_view()) },
+];
+
+const SCI_DEFAULT_KEYS = ['psiLeaf', 'T', 'psiStem','J']; // one per grid slot, 0..3
+
+let sciSelectedKeys = SCI_DEFAULT_KEYS.slice();
+let sciCharts = [null, null, null, null];      // uPlot instances, rebuilt on selection change (rebuildSciChart())
+let sciPlotEls = [null, null, null, null];      // .sci-chart-plot mount divs
+let sciLegendEls = [null, null, null, null];    // { labelEl, swatchEl, textEl, sumEl } per slot
+let sciSelectEls = [null, null, null, null];    // <select> elements -- listener wired in main() (needs its local scheduleRun())
+let sciFluxSumSeries = [null, null, null, null]; // { x, values } per slot -- display-scaled, like fluxSumSeries
+
+function sciVariableDef(slotIndex) {
+  return VARIABLE_DEFS.find((d) => d.key === sciSelectedKeys[slotIndex]);
+}
+
+// (Re)creates the slotIndex-th uPlot instance for whatever variable is
+// currently selected there. Called once per slot at startup and again every
+// time that slot's <select> changes -- destroy+rebuild rather than mutating
+// series in place, since uPlot has no supported way to swap a series'
+// stroke color/label after construction (same pattern wasm-dashboard-v2.html
+// uses for its dropdown-selected primary/secondary charts).
+function rebuildSciChart(slotIndex) {
+  const def = sciVariableDef(slotIndex);
+  if (sciCharts[slotIndex]) sciCharts[slotIndex].destroy();
+
+  sciCharts[slotIndex] = new uPlot({
+    width: 1, height: 1, // placeholder -- layoutSciCharts() sizes it for real
+    pxAlign: 0,
+    padding: TIME_CHART_PADDING,
+    scales: { x: { time: true } },
+    cursor: { show: false },
+    legend: { show: false },
+    series: [{}, { stroke: def.color, width: 1, points: { show: false } }],
+    axes: [
+      { font: CHART_FONT, size: 22, stroke: '#999', grid: { stroke: '#eee', width: 1 } },
+      { font: CHART_FONT, size: 40, stroke: '#999', grid: { stroke: '#eee', width: 1 } },
+    ],
+  }, [[], []], sciPlotEls[slotIndex]);
+  if (selMin !== undefined) sciCharts[slotIndex].setScale('x', { min: selMin, max: selMax });
+
+  const legend = sciLegendEls[slotIndex];
+  legend.labelEl.style.color = def.color;
+  legend.labelEl.title = `${def.label} [${def.unit}]`;
+  legend.textEl.textContent = def.shortLabel;
+  legend.sumEl.textContent = ''; // filled in by the next updateSciFluxSums()
+  sciFluxSumSeries[slotIndex] = null;
+
+  layoutSciCharts();
+}
+
+// Builds one Scientific-grid chart block (dropdown + plot mount + legend
+// chip) into `parentEl` (#scientific_grid) and wires its <select> to
+// rebuildSciChart() + a fresh sim run (a new variable needs data pulled
+// from `output` that the previous run never fetched).
+function buildSciChartBlock(parentEl, slotIndex) {
+  const block = document.createElement('div');
+  block.className = 'sci-chart-block';
+
+  const selectRow = document.createElement('div');
+  selectRow.className = 'sci-chart-select-row';
+  const select = document.createElement('select');
+  for (const def of VARIABLE_DEFS) {
+    const opt = document.createElement('option');
+    opt.value = def.key;
+    opt.textContent = def.label;
+    select.appendChild(opt);
+  }
+  select.value = sciSelectedKeys[slotIndex];
+  selectRow.appendChild(select);
+  block.appendChild(selectRow);
+
+  const plotWrap = document.createElement('div');
+  plotWrap.className = 'sci-chart-plot';
+  block.appendChild(plotWrap);
+  sciPlotEls[slotIndex] = plotWrap;
+
+  parentEl.appendChild(block);
+
+  // Same bottom-left legend-chip treatment as the schematic overlays (see
+  // buildOverlayCharts()) -- swatch + short label, plus a Σ span for flux
+  // variables, filled in by updateSciFluxSums().
+  const labelEl = document.createElement('div');
+  labelEl.className = 'overlay-inline-label corner-bottom-left';
+  const swatchEl = document.createElement('span');
+  swatchEl.className = 'swatch';
+  const textEl = document.createElement('span');
+  const sumEl = document.createElement('span');
+  sumEl.className = 'legend-sum';
+  labelEl.append(swatchEl, textEl, sumEl);
+  plotWrap.appendChild(labelEl);
+  sciLegendEls[slotIndex] = { labelEl, swatchEl, textEl, sumEl };
+
+  // Not wired here: this file's scheduleRun()/rafPending are local to
+  // main() (they close over the wasm `sim`/`output` objects), so this
+  // function -- a top-level, pre-main() declaration -- can't reach them
+  // directly. main() wires the actual 'change' listener itself once it has
+  // scheduleRun() in scope; sciSelectEls[] is just how it finds this <select>.
+  sciSelectEls[slotIndex] = select;
+}
+
+// Sizes every Scientific-grid chart to whatever its (CSS-grid-driven) box
+// currently measures -- same role as layoutDroughtCharts(), just for the 4
+// sci slots. Called on the initial paint, on setViewMode() switching into
+// scientific mode (see the rAF there), and on every resize.
+function layoutSciCharts() {
+  for (let i = 0; i < sciCharts.length; i++) {
+    if (sciCharts[i] && sciPlotEls[i]) {
+      sciCharts[i].setSize({
+        width: Math.max(1, sciPlotEls[i].clientWidth),
+        height: Math.max(1, sciPlotEls[i].clientHeight),
+      });
+    }
+  }
+}
+
+// Re-integrates each flux-type slot over [selMin, selMax] and writes the
+// result into its legend chip's Σ span -- same integration approach as
+// updateFluxSums(), generalized over VARIABLE_DEFS' per-entry
+// displayScale/sumFormat instead of assuming mol H2O throughout. Called
+// from applyZoomRange().
+function updateSciFluxSums() {
+  for (let i = 0; i < sciCharts.length; i++) {
+    const def = sciVariableDef(i);
+    const sumEl = sciLegendEls[i] && sciLegendEls[i].sumEl;
+    if (!sumEl) continue;
+    if (!def.isFlux) { sumEl.textContent = ''; continue; }
+
+    const series = sciFluxSumSeries[i];
+    if (!series || !series.x || !series.x.length) continue;
+    const xs = series.x, ys = series.values;
+    let lo = 0, hi = xs.length;
+    while (lo < hi && xs[lo] < selMin) lo++;
+    while (hi > lo && xs[hi - 1] > selMax) hi--;
+
+    let sum = 0;
+    for (let j = lo; j < hi; j++) sum += ys[j];
+    const nativeTotal = (sum / (def.displayScale || 1)) * MODEL_DT_SECONDS;
+    sumEl.textContent = ` · Σ ${def.sumFormat(nativeTotal)}`;
+  }
+}
+
 // The two left-hand charts (both water potentials, MPa) and the three
 // right-hand charts (T/J/G) each share one y-axis range instead of
 // auto-ranging independently -- makes relative magnitudes within a side
 // directly comparable at a glance. Recomputed from whatever's currently
 // in view (see syncGroupYRanges()) any time the zoom window or the
 // underlying data changes, so the shared range still "resizes" rather
-// than being fixed once.
+// than being fixed once. Scientific-grid charts are deliberately excluded
+// -- each of the 4 slots can hold an unrelated variable, so there's no
+// fixed pairing to sync.
 const Y_SYNC_GROUPS = [
   ['psiLeaf', 'psiStem'],
   ['T', 'J', 'G'],
@@ -1187,10 +1519,15 @@ function buildOverlayCharts() {
     const plotEl = document.createElement('div');
     plotEl.className = 'overlay-plot';
 
-    // Legend chip lives *inside* the plot (top-right corner, layered over
+    // Legend chip lives *inside* the plot (bottom-left corner, layered over
     // the chart via z-index) instead of its own title row above it -- saves
     // the height that row used to take, and a color swatch + label reads as
-    // a legend entry rather than a heading.
+    // a legend entry rather than a heading. For the three flux charts
+    // (T/J/G; see OVERLAY_DEFS.isFlux) a Σ span is appended to this same
+    // chip (rather than a separate corner badge) so the running total reads
+    // as part of the chart, over the actual plotted line, instead of
+    // floating in empty header space -- filled in by updateFluxSums() once
+    // data/zoom exist.
     const label = document.createElement('div');
     label.className = `overlay-inline-label corner-${def.corner}`;
     label.style.color = def.color;
@@ -1200,19 +1537,13 @@ function buildOverlayCharts() {
     const text = document.createElement('span');
     text.textContent = def.label;
     label.append(swatch, text);
-    plotEl.appendChild(label);
-
-    // Running-total "Σ" badge, opposite corner from the legend chip -- only
-    // for the three flux charts (T/J/G; see OVERLAY_DEFS.isFlux). Text is
-    // filled in by updateFluxSums() once data/zoom exist; empty placeholder
-    // here just reserves the corner so nothing shifts on first update.
     if (def.isFlux) {
-      const sumLabel = document.createElement('div');
-      sumLabel.className = 'overlay-inline-label corner-top-right';
-      sumLabel.title = `Time-integrated total ${def.label} over the currently visible window`;
-      plotEl.appendChild(sumLabel);
-      def.sumEl = sumLabel;
+      const sumSpan = document.createElement('span');
+      sumSpan.className = 'legend-sum';
+      label.appendChild(sumSpan);
+      def.sumEl = sumSpan;
     }
+    plotEl.appendChild(label);
 
     box.appendChild(plotEl);
     stage.appendChild(box);
@@ -1221,6 +1552,7 @@ function buildOverlayCharts() {
       width: 1, height: 1, // placeholder -- layoutOverlays() sizes it for real
       // See makeOverviewChart()'s pxAlign comment -- same reasoning here.
       pxAlign: 0,
+      padding: TIME_CHART_PADDING,
       scales: { x: { time: true } },
       cursor: { show: false },
       legend: { show: false },
@@ -1297,6 +1629,7 @@ function buildDroughtChart(def, parentEl) {
   charts[def.key] = new uPlot({
     width: 1, height: 1, // placeholder -- layoutDroughtCharts() sizes it for real
     pxAlign: 0,
+    padding: TIME_CHART_PADDING,
     scales: { x: { time: true } },
     cursor: { show: false },
     legend: { show: false },
@@ -1327,8 +1660,9 @@ function layoutDroughtCharts() {
 function fitAll() {
   layoutOverlays();
   layoutDroughtCharts();
+  layoutSciCharts();
   if (overviewChart) {
-    overviewChart.setSize({ width: sidebarContentWidth(), height: 70 });
+    overviewChart.setSize({ width: overviewContentWidth(), height: 70 });
     updateRangeSliderVisual();
   }
 }
@@ -1355,6 +1689,14 @@ async function main() {
   // no need to wait for those.
   buildOverlayCharts();
   layoutOverlays();
+
+  // Scientific-grid chart blocks (dropdown + plot, one per VARIABLE_DEFS
+  // slot) -- built once up front, same as the schematic overlays, so
+  // they're ready to receive data on the very first runAndRedraw() below
+  // regardless of which view mode the user is currently in.
+  const sciGridEl = document.getElementById('scientific_grid');
+  for (let i = 0; i < sciCharts.length; i++) buildSciChartBlock(sciGridEl, i);
+  for (let i = 0; i < sciCharts.length; i++) rebuildSciChart(i);
 
   const droughtControlsEl = document.getElementById('drought_controls');
   for (const cfg of droughtCfgs) {
@@ -1465,6 +1807,12 @@ async function main() {
   resizeObserver.observe(document.getElementById('schematic_stage'));
   resizeObserver.observe(document.getElementById('sidebar'));
   resizeObserver.observe(document.getElementById('drought_controls'));
+  // scientific_grid sizes the 4 sci charts (layoutSciCharts()); rangeslider
+  // itself is observed directly since #rangeslider_block moves between two
+  // different-width parents (setViewMode()) -- its own clientWidth is what
+  // overviewContentWidth() actually reads, regardless of which one.
+  resizeObserver.observe(document.getElementById('scientific_grid'));
+  resizeObserver.observe(document.getElementById('rangeslider'));
 
   let rafPending = false;
 
@@ -1529,6 +1877,18 @@ async function main() {
       // touching the wasm module again -- see fluxSumSeries' declaration.
       fluxSumSeries = { x, T: TData, J: JData, G: GData };
 
+      // Scientific-grid charts -- each slot pulls whatever variable its own
+      // dropdown currently has selected via VARIABLE_DEFS.getData(), so
+      // there's no per-variable branching needed here (unlike the schematic
+      // block above, which is always exactly T/J/G/psiLeaf/psiStem).
+      for (let i = 0; i < sciCharts.length; i++) {
+        const def = sciVariableDef(i);
+        if (!sciCharts[i]) continue;
+        const yData = def.getData(output);
+        sciCharts[i].setData([x, yData]);
+        sciFluxSumSeries[i] = def.isFlux ? { x, values: yData } : null;
+      }
+
       overviewChart.setData([x, psiLeafData, psiStemData]);
       overviewChart.setScale('x', { min: startEpoch, max: endEpoch });
       // New data resets uPlot's own auto-range on the overlay charts — put
@@ -1559,6 +1919,18 @@ async function main() {
 
   for (const cfg of PARAM_CONFIGS) {
     cfg.element.addEventListener('input', scheduleRun);
+  }
+
+  // Wired here rather than in buildSciChartBlock() (a top-level, pre-main()
+  // function) since rebuildSciChart()/scheduleRun() -- scheduleRun in
+  // particular -- only exist once main() has run this far; see
+  // buildSciChartBlock()'s own comment on sciSelectEls[].
+  for (let i = 0; i < sciSelectEls.length; i++) {
+    sciSelectEls[i].addEventListener('change', () => {
+      sciSelectedKeys[i] = sciSelectEls[i].value;
+      rebuildSciChart(i);
+      scheduleRun();
+    });
   }
 
   scheduleRun();

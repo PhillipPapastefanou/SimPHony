@@ -123,6 +123,7 @@ EMSCRIPTEN_BINDINGS(simphony_web_module) {
         .function("Get_gs_view", &Output::Get_gs_view)
         .function("Get_vpd_view", &Output::Get_vpd_view)
         .function("Get_beta_view", &Output::Get_beta_view)
+        .function("Get_anet_view", &Output::Get_anet_view)
         // Prognostic soil hydrology diagnostics [kg m-2 s-1]; empty unless
         // use_prognostic_soil_hydrology is enabled.
         .function("Get_precip_view", &Output::Get_precip_view)
