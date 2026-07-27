@@ -53,6 +53,7 @@ EMSCRIPTEN_BINDINGS(simphony_web_module) {
         .constructor<>()
         .property("id", &Parameters::id)
         .property("root_area_index", &Parameters::root_area_index)
+        .property("leaf_area_index", &Parameters::leaf_area_index)
         .property("canopy_height", &Parameters::canopy_height)
         .property("stem_flow_type", &Parameters::stem_flow_type)
         .property("soil_water_type", &Parameters::soil_water_type)
@@ -75,6 +76,7 @@ EMSCRIPTEN_BINDINGS(simphony_web_module) {
         .property("use_prognostic_soil_hydrology", &Parameters::use_prognostic_soil_hydrology)
         .property("surface_runoff_steepness", &Parameters::surface_runoff_steepness)
         .property("jackson_root_beta", &Parameters::jackson_root_beta)
+        .property("g_stem_res", &Parameters::g_stem_res)
         // Add any other properties you want to adjust from the web UI here
         // soil_layers itself isn't embind-settable (vector<Soil_layer> isn't
         // a bound value type), so the uniform-across-layers setters below
@@ -109,9 +111,13 @@ EMSCRIPTEN_BINDINGS(simphony_web_module) {
         .function("Get_psi_leaf", &Output::Get_psi_leaf)
         .function("Get_gs", &Output::Get_gs)
 
-        .function("Get_T_view", &Output::Get_T_view)
-        .function("Get_J_view", &Output::Get_J_view)
-        .function("Get_G_view", &Output::Get_G_view)
+        .function("Get_T_per_leaf_area_view", &Output::Get_T_per_leaf_area_view)
+        .function("Get_J_per_leaf_area_view", &Output::Get_J_per_leaf_area_view)
+        .function("Get_G_per_leaf_area_view", &Output::Get_G_per_leaf_area_view)
+        // Computed (not zero-copy) -- see Output::Get_T_per_ground_area()'s comment.
+        .function("Get_T_per_ground_area", &Output::Get_T_per_ground_area)
+        .function("Get_J_per_ground_area", &Output::Get_J_per_ground_area)
+        .function("Get_G_per_ground_area", &Output::Get_G_per_ground_area)
         .function("Get_psi_leaf_view", &Output::Get_psi_leaf_view)
         .function("Get_psi_sap_view", &Output::Get_psi_sap_view)
         .function("Get_gs_view", &Output::Get_gs_view)

@@ -66,8 +66,12 @@ double Solver_RKF::d_psi_stem_ground(double psi_leaf, double psi_stem) {
         // Convert from MPA to hydraulic head
         double psi_stem_hh = psi_stem * params.constants.MPaToHydraulicHeadM;
 
+        // See the matching comment in solver_indiv_eulerimp.cpp: root_area_index makes
+        // this formula naturally per-unit-GROUND-area, but every other flux here (J) is
+        // per-unit-LEAF-area, so divide by leaf_area_index right at the source to keep
+        // Gi/G on that same basis wherever they're used or reported.
         Gi[s] = sl.root_fraction * k_soil * std::sqrt(params.root_area_index) /
-                params.constants.PI / sl.depth * (psi_soil_sl[s] - psi_stem_hh);
+                params.constants.PI / sl.depth * (psi_soil_sl[s] - psi_stem_hh) / params.leaf_area_index;
 
         // Avoid water from flowing down from the stem via roots to the soil
         if (Gi[s] < 0.0)
@@ -76,12 +80,9 @@ double Solver_RKF::d_psi_stem_ground(double psi_leaf, double psi_stem) {
         G += Gi[s];
     }
 
-    // G is per-unit-ground-area (via root_area_index) while J is per-unit-leaf-area (via
-    // huber_value) -- divide by leaf_area_index to bring G onto the same basis as J before
-    // combining them (see the matching comment in solver_indiv_eulerimp.cpp for the full
-    // reasoning). Gi/G themselves are left untouched (still per-ground-area).
-    // Return the derivative of the stem water potential
-    return ((G / params.leaf_area_index - J) / (params.stem_hydraulic_capacitance_max * params.canopy_height * params.huber_value));
+    // Return the derivative of the stem water potential -- G is already per-leaf-area
+    // (see the Gi[s] computation above), matching J, so no further scaling here.
+    return ((G - J) / (params.stem_hydraulic_capacitance_max * params.canopy_height * params.huber_value));
 }
 
 void Solver_RKF::Update_water_potentials(DateTime time) {

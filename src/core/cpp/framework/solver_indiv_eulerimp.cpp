@@ -137,8 +137,20 @@ double Solver_Indiv_Euler_Imp::d_psi_stem_ground(double psi_leaf, double psi_ste
         // Convert from MPA to hydraulic head
         double psi_stem_hh = psi_stem * params.constants.MPaToHydraulicHeadM;
 
+        // root_area_index is conventionally a root-area-per-unit-GROUND-area index (the
+        // root analog of LAI), so this conductance formula naturally comes out as a
+        // per-unit-GROUND-area flux. Every other flux in this model (T, J, T_res) is
+        // per-unit-LEAF-area instead (J is rescaled by huber_value = sapwood area / leaf
+        // area; T -- see update_transpiration() -- is "per unit leaf area" by
+        // construction), so dividing by leaf_area_index here, right at the source, keeps
+        // Gi/G on that same basis everywhere they're used or reported: the
+        // G_per_leaf_area/T/T_res combination below, Output::Add_G(_indiv), and
+        // Get_root_uptake_indiv(). The one place that genuinely needs the ground-area
+        // version back (Soil_hydrology_richards's sink term, since it depletes a real 1m^2
+        // soil column) re-multiplies by leaf_area_index at that specific point of use --
+        // see Model::Run()'s call to Soil_hydrology_richards::Step().
         Gi[s] = sl.root_fraction * k_soil * std::sqrt(params.root_area_index) /
-                params.constants.PI / sl.depth * (psi_soil_sl[s] - psi_stem_hh);
+                params.constants.PI / sl.depth * (psi_soil_sl[s] - psi_stem_hh) / params.leaf_area_index;
 
         // Avoid water from flowing down from the stem via roots to the soil
         if (Gi[s] < 0.0)
@@ -161,19 +173,9 @@ double Solver_Indiv_Euler_Imp::d_psi_stem_ground(double psi_leaf, double psi_ste
     const double denom = 1.0 + std::pow(ratio, slope);
     const double gamma_stem =  gamma_diff / denom + gamma_min;
 
-    // G (and Gi) is a per-unit-GROUND-area flux -- it's built from root_area_index alone
-    // (no huber_value/leaf_area_index factor, see the loop above), and root_area_index is
-    // conventionally a root-area-per-unit-ground-area index (the root analog of LAI). J and
-    // T_res, on the other hand, are per-unit-LEAF-area (J is rescaled by huber_value =
-    // sapwood area / leaf area; T -- see update_transpiration() -- is "per unit leaf area"
-    // by construction). Dividing G by leaf_area_index here brings it onto the same
-    // per-leaf-area basis as J/T_res before they're combined; Gi/G themselves are left
-    // untouched (still per-ground-area) since that's what output/Add_G_indiv reports and
-    // what a prognostic soil water balance needs to deplete a soil column correctly.
-    const double G_per_leaf_area = G / params.leaf_area_index;
-
-    // Return the derivative of the stem water potential
-    return ((G_per_leaf_area - J + O - T_res)  / (gamma_stem * params.canopy_height * params.huber_value));
+    // Return the derivative of the stem water potential -- G is already per-leaf-area
+    // (see the Gi[s] computation above), matching J/T_res, so no further scaling here.
+    return ((G - J + O - T_res)  / (gamma_stem * params.canopy_height * params.huber_value));
 }
 
 double Solver_Indiv_Euler_Imp::update_transpiration() {

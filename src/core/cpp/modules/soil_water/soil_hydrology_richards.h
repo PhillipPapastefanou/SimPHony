@@ -31,9 +31,11 @@ public:
 
     /// Advances the soil moisture state by one timestep: partitions precip_rate [kg m-2 s-1]
     /// into infiltration/runoff, solves the implicit vertical Richards transport with
-    /// root_uptake [mol H2O m-2 s-1 per layer] as a sink term, and updates the internal state
-    /// (queried afterwards via Get_state()) as well as the infiltration/runoff/drainage
-    /// diagnostics below.
+    /// root_uptake [mol H2O m-2 s-1 per layer, per unit GROUND area -- NOT the per-leaf-area
+    /// basis Water_Potential_Solver::Get_root_uptake_indiv() returns; Model::Run() converts
+    /// before calling this] as a sink term, and updates the internal state (queried
+    /// afterwards via Get_state()) as well as the infiltration/runoff/drainage diagnostics
+    /// below.
     void Step(double precip_rate, const std::vector<double>& root_uptake, double dt);
 
     /// Diagnostics from the most recent Step() call, all in [kg m-2 s-1] (same convention as

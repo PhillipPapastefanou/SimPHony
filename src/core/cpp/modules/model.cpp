@@ -227,7 +227,19 @@ void Model::Run(DateTime begin, DateTime end) {
             // moisture solve below and the plotted precip series (Add_precip(iprecip) in
             // add_output() uses this same scaled value).
             iprecip = input_module.precip[time_index(ts)] * params.precip_reduction_factor;
-            soil_hydrology_richards->Step(iprecip, water_potential_solver->Get_root_uptake_indiv(), dts);
+
+            // Get_root_uptake_indiv() (Gi) is per-unit-LEAF-area, matching T/J/Output --
+            // see the comment on its computation in solver_indiv_eulerimp.cpp. The soil
+            // water balance below needs a per-unit-GROUND-area sink instead, to correctly
+            // deplete a real 1 m^2 soil column, so convert back here at this specific
+            // point of use (the one place the two area bases meet).
+            const vector<double>& root_uptake_per_leaf_area = water_potential_solver->Get_root_uptake_indiv();
+            vector<double> root_uptake_per_ground_area(root_uptake_per_leaf_area.size());
+            for (size_t s = 0; s < root_uptake_per_leaf_area.size(); ++s) {
+                root_uptake_per_ground_area[s] = root_uptake_per_leaf_area[s] * params.leaf_area_index;
+            }
+
+            soil_hydrology_richards->Step(iprecip, root_uptake_per_ground_area, dts);
             iinfiltration = soil_hydrology_richards->Get_infiltration();
             irunoff = soil_hydrology_richards->Get_runoff();
             idrainage = soil_hydrology_richards->Get_drainage();

@@ -39,6 +39,36 @@
   #status { font-size: 0.85rem; color: #666; margin: 0 0 16px; flex: 0 0 auto; }
   #status.error { color: #b00020; }
 
+  /* Schematic / Scientific view-mode toggle -- two big, mutually-exclusive
+     buttons in one row (see setViewMode() in the script below). Only the
+     .active button's styling actually differs right now; switching mode
+     doesn't change page content yet -- it's a placeholder for a future
+     alternate ("Scientific") layout. */
+  .view-mode-row {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0 16px 0;
+  }
+  .view-mode-btn {
+    flex: 1 1 0;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 12px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    color: #444;
+    cursor: pointer;
+  }
+  .view-mode-btn:hover { background: #f2f2f2; }
+  .view-mode-btn.active {
+    border-color: #2563eb;
+    background: #2563eb;
+    color: #fff;
+  }
+  .view-mode-btn.active:hover { background: #1d4ed8; }
+
   /* Two columns: sliders (time range on top, then the parameter groups) |
      schematic with live mini-charts overlaid on it. v2's third "plots"
      column is gone -- T, J, G, psi_Leaf and psi_Stem now render as small
@@ -351,10 +381,16 @@
 <body>
 
 <h1>Plant Hydraulics — Dashboard — based on the SimPHony Framework (link) </h1>
+
 <div id="status">Loading WASM module…</div>
 
 <div class="layout">
   <div class="sidebar" id="sidebar">
+    <div class="view-mode-row" id="view_mode_row" role="group" aria-label="View mode">
+      <button type="button" class="view-mode-btn" id="mode_schematic" aria-pressed="true">Schematic</button>
+      <button type="button" class="view-mode-btn" id="mode_scientific" aria-pressed="false">Scientific</button>
+    </div>
+
     <div class="rangeslider-block">
       <div class="rangeslider-header">
         <h2>Time range</h2>
@@ -787,6 +823,30 @@ function updateRangeSliderVisual() {
   rsWindowEl.style.width = `${Math.max(right - left, 6)}px`;
 }
 
+// Schematic / Scientific view-mode toggle -- two mutually-exclusive buttons
+// (only one can be .active at a time). Doesn't change page content yet (no
+// "Scientific" layout has been built), just tracks/reflects which mode is
+// selected -- viewMode is exposed as a module-level variable so a future
+// alternate layout has something to read.
+let viewMode = 'schematic';
+
+function setViewMode(mode) {
+  viewMode = mode;
+  const schematicBtn = document.getElementById('mode_schematic');
+  const scientificBtn = document.getElementById('mode_scientific');
+  const isSchematic = mode === 'schematic';
+  schematicBtn.classList.toggle('active', isSchematic);
+  scientificBtn.classList.toggle('active', !isSchematic);
+  schematicBtn.setAttribute('aria-pressed', String(isSchematic));
+  scientificBtn.setAttribute('aria-pressed', String(!isSchematic));
+}
+
+function setupViewModeToggle() {
+  document.getElementById('mode_schematic').addEventListener('click', () => setViewMode('schematic'));
+  document.getElementById('mode_scientific').addEventListener('click', () => setViewMode('scientific'));
+  setViewMode('schematic'); // Schematic is the default/only wired-up view for now.
+}
+
 // Sets the shared zoom window on all five schematic-overlay charts and
 // moves the overlay to match. Called both from user drags and after each
 // simulation re-run (to re-assert whatever zoom the user already had).
@@ -798,6 +858,7 @@ function applyZoomRange(min, max) {
   }
   syncGroupYRanges();
   updateRangeSliderVisual();
+  updateFluxSums();
 }
 
 function setupRangeSlider() {
@@ -872,16 +933,77 @@ function setupRangeSlider() {
 // ---------------------------------------------------------------------
 // `corner` picks which .overlay-inline-label.corner-* class the legend chip
 // gets (see the CSS above). `scale`, when present, is a display-only
-// multiplier applied to the raw model output before it's plotted (T/J are
+// multiplier applied to the raw model output before it's plotted (T/J/G are
 // shown in mmol H2O m-2 s-1 -- x1000 -- rather than the model's native mol
 // H2O m-2 s-1, since the numbers read more naturally at that scale here).
+// `isFlux` marks the three water-flux charts (as opposed to the two water
+// potential ones) as eligible for the running-total "Σ" badge -- see
+// updateFluxSums()/buildOverlayCharts() below. T/J/G are plotted per unit
+// GROUND area (Output::Get_*_per_ground_area(), i.e. the model's native
+// per-leaf-area values x leaf_area_index) rather than per-leaf-area, so
+// they're comparable to a stand/ecosystem footprint and scale with LAI --
+// see runAndRedraw()'s vecToScaledArray() calls.
 const OVERLAY_DEFS = [
   { key: 'psiLeaf', label: 'ψ Leaf', color: '#16a34a', unit: 'MPa', corner: 'bottom-left', box: { x: 2, y: 144, w: 616, h: 460 } },
   { key: 'psiStem', label: 'ψ Stem', color: '#ea580c', unit: 'MPa', corner: 'bottom-left', box: { x: 2, y: 760, w: 616, h: 460 } },
-  { key: 'T', label: 'T', color: '#0891b2', unit: 'mmol H2O m-2 s-1', corner: 'bottom-left', scale: 1000, box: { x: 1364, y: 4, w: 616, h: 460 } },
-  { key: 'J', label: 'J', color: '#7c3aed', unit: 'mmol H2O m-2 s-1', corner: 'bottom-left', scale: 1000, box: { x: 1364, y: 560, w: 616, h: 460 } },
-  { key: 'G', label: 'G', color: '#000000', unit: 'mol H2O m-2 s-1', corner: 'bottom-left', scale: 1000, box: { x: 1364, y: 1118, w: 616, h: 460 } },
+  { key: 'T', label: 'T', color: '#0891b2', unit: 'mmol H2O m-2(ground) s-1', corner: 'bottom-left', scale: 1000, isFlux: true, box: { x: 1364, y: 4, w: 616, h: 460 } },
+  { key: 'J', label: 'J', color: '#7c3aed', unit: 'mmol H2O m-2(ground) s-1', corner: 'bottom-left', scale: 1000, isFlux: true, box: { x: 1364, y: 560, w: 616, h: 460 } },
+  { key: 'G', label: 'G', color: '#000000', unit: 'mmol H2O m-2(ground) s-1', corner: 'bottom-left', scale: 1000, isFlux: true, box: { x: 1364, y: 1118, w: 616, h: 460 } },
 ];
+
+// Model timestep -- matches params.dts_input/dts (30 min, per the forcing
+// binary and every AHLLO/Set_derived_parameters debug line) -- used only to
+// turn a sum of instantaneous flux samples (mol m-2 s-1) into a physically
+// meaningful time-integrated total (mol m-2) for the Σ badges below. Same
+// fixed-30-min assumption already made by the synthetic-time-axis fallback
+// in runAndRedraw() (`startEpoch + i * 1800`).
+const MODEL_DT_SECONDS = 1800;
+
+// Holds the exact (already display-scaled, mmol m-2 s-1) arrays handed to
+// charts.T/J/G.setData() in the most recent runAndRedraw(), plus their shared
+// x-axis -- so updateFluxSums() can re-integrate over just the currently
+// zoomed window without re-fetching anything from the wasm module. Rebuilt
+// every run; read (never mutated) on every zoom change.
+let fluxSumSeries = { x: null, T: null, J: null, G: null };
+
+// Molar mass of water -- converts the model's native mol H2O m-2 into a mass
+// per area instead. Also numerically equal to mm of water depth (1 kg water
+// over 1 m2 = 1 mm), which is why kg/m2 reads naturally here.
+const MOLAR_MASS_H2O_KG = 0.0180153;
+
+function formatFluxTotal(molPerM2) {
+  const kgPerM2 = molPerM2 * MOLAR_MASS_H2O_KG;
+  return Math.abs(kgPerM2) >= 1
+    ? `${kgPerM2.toFixed(2)} kg/m²`
+    : `${(kgPerM2 * 1000).toFixed(1)} g/m²`;
+}
+
+// Re-integrates T/J/G over the currently visible [selMin, selMax] window and
+// writes the result into each chart's Σ badge (def.sumEl, built in
+// buildOverlayCharts()). Called from applyZoomRange() -- i.e. on every zoom/
+// pan/reset as well as after every re-run (runAndRedraw() ends by calling
+// applyZoomRange() to re-assert the user's current zoom).
+function updateFluxSums() {
+  const xs = fluxSumSeries.x;
+  if (!xs || !xs.length) return;
+
+  // xs is sorted ascending -- narrow to the [selMin, selMax] slice with a
+  // linear scan (a few thousand points at most, not worth a binary search).
+  let lo = 0, hi = xs.length;
+  while (lo < hi && xs[lo] < selMin) lo++;
+  while (hi > lo && xs[hi - 1] > selMax) hi--;
+
+  for (const def of OVERLAY_DEFS) {
+    if (!def.isFlux || !def.sumEl) continue;
+    const series = fluxSumSeries[def.key];
+    let sumScaled = 0;
+    for (let i = lo; i < hi; i++) sumScaled += series[i];
+    // series is already x1000-scaled (mmol m-2 s-1) for display -- undo that
+    // to get back to the model's native mol m-2 s-1 before integrating.
+    const totalMolPerM2 = (sumScaled / def.scale) * MODEL_DT_SECONDS;
+    def.sumEl.textContent = `Σ ${formatFluxTotal(totalMolPerM2)}`;
+  }
+}
 
 // Applies the matching `defs` entry's `scale` (if any) to a raw
 // Get_*_view() typed-array view before it's handed to uPlot -- .slice()
@@ -896,6 +1018,25 @@ function scaledSeries(view, key, defs = OVERLAY_DEFS) {
     for (let i = 0; i < arr.length; i++) arr[i] *= scale;
   }
   return arr;
+}
+
+// Get_*_per_ground_area() (unlike the _view getters) returns an embind
+// std::vector<float> -- not a typed-array view over WASM memory, so there's
+// no .slice() to lean on (see Output::Get_T_per_ground_area()'s comment: the
+// scaled values don't live in a persistent buffer). Walks it with
+// .size()/.get(i) instead, applying the same display scale as scaledSeries(),
+// and frees the embind vector when done (must be .delete()'d explicitly,
+// same as Get_theta_indiv()'s rows in meanThetaSeries()).
+function scaledVector(vec, key, defs = OVERLAY_DEFS) {
+  const scale = defs.find((d) => d.key === key).scale || 1;
+  try {
+    const n = vec.size();
+    const arr = new Float64Array(n);
+    for (let i = 0; i < n; i++) arr[i] = vec.get(i) * scale;
+    return arr;
+  } finally {
+    vec.delete();
+  }
 }
 
 // The drought-stress column's two live charts -- VPD under the
@@ -1061,6 +1202,18 @@ function buildOverlayCharts() {
     label.append(swatch, text);
     plotEl.appendChild(label);
 
+    // Running-total "Σ" badge, opposite corner from the legend chip -- only
+    // for the three flux charts (T/J/G; see OVERLAY_DEFS.isFlux). Text is
+    // filled in by updateFluxSums() once data/zoom exist; empty placeholder
+    // here just reserves the corner so nothing shifts on first update.
+    if (def.isFlux) {
+      const sumLabel = document.createElement('div');
+      sumLabel.className = 'overlay-inline-label corner-top-right';
+      sumLabel.title = `Time-integrated total ${def.label} over the currently visible window`;
+      plotEl.appendChild(sumLabel);
+      def.sumEl = sumLabel;
+    }
+
     box.appendChild(plotEl);
     stage.appendChild(box);
 
@@ -1184,6 +1337,8 @@ function fitAll() {
 // Main
 // ---------------------------------------------------------------------
 async function main() {
+  setupViewModeToggle();
+
   setStatus(`Loading parameter catalogue (${PARAMS_JSON_PATH})…`);
   const PARAM_CONFIGS = await loadParamConfigs(PARAMS_JSON_PATH);
   // "Drought stress" has its own third column instead of a generic sidebar
@@ -1360,18 +1515,27 @@ async function main() {
 
       charts.psiLeaf.setData([x, psiLeafData]);
       charts.psiStem.setData([x, psiStemData]);
-      charts.T.setData([x, scaledSeries(output.Get_T_view(), 'T')]);
-      charts.J.setData([x, scaledSeries(output.Get_J_view(), 'J')]);
-      charts.G.setData([x, scaledSeries(output.Get_G_view(), 'G')]);
+      const TData = scaledVector(output.Get_T_per_ground_area(), 'T');
+      const JData = scaledVector(output.Get_J_per_ground_area(), 'J');
+      const GData = scaledVector(output.Get_G_per_ground_area(), 'G');
+      charts.T.setData([x, TData]);
+      charts.J.setData([x, JData]);
+      charts.G.setData([x, GData]);
       charts.vpd.setData([x, scaledSeries(output.Get_vpd_view(), 'vpd', DROUGHT_CHART_DEFS)]);
       charts.theta.setData([x, meanThetaSeries(output)]);
+
+      // Keep these (already display-scaled) series + shared x-axis around so
+      // updateFluxSums() can re-integrate over just the zoomed window without
+      // touching the wasm module again -- see fluxSumSeries' declaration.
+      fluxSumSeries = { x, T: TData, J: JData, G: GData };
 
       overviewChart.setData([x, psiLeafData, psiStemData]);
       overviewChart.setScale('x', { min: startEpoch, max: endEpoch });
       // New data resets uPlot's own auto-range on the overlay charts — put
       // the user's current zoom (from the time-range slider) back after
       // every rerun, so tweaking a parameter slider doesn't silently zoom
-      // back out.
+      // back out. Also re-integrates the Σ badges for the new data (see
+      // applyZoomRange()'s call to updateFluxSums()).
       applyZoomRange(selMin, selMax);
     } finally {
       output.delete();

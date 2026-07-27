@@ -31,10 +31,13 @@ public:
 
     void Update_output(Output& output);
 
-    /// Root water uptake per soil layer [mol H2O m-2 s-1], as computed for the timestep of
-    /// the most recent Update_water_potentials() call. Used to feed a sink term back into
-    /// a prognostic soil hydrology model (Soil_hydrology_richards) -- Gi itself is otherwise
-    /// only used for output/diagnostics.
+    /// Root water uptake per soil layer [mol H2O m-2 s-1 per unit LEAF area, matching
+    /// T/J/Output -- see its computation in solver_indiv_eulerimp.cpp's d_psi_stem_ground],
+    /// as computed for the timestep of the most recent Update_water_potentials() call. Used
+    /// to feed a sink term back into a prognostic soil hydrology model
+    /// (Soil_hydrology_richards) -- Model::Run() converts it to a per-ground-area value at
+    /// that point of use, since a soil water balance needs to deplete a real 1 m^2 column.
+    /// Otherwise only used for output/diagnostics.
     const std::vector<double>& Get_root_uptake_indiv() const { return Gi; }
 
 protected:

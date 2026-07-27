@@ -110,10 +110,19 @@ public:
     void Export_CSV(std::string filename);
 
 
+    // Per-ground-area versions of the model's native per-leaf-area T/J/G series
+    // (multiplied by leaf_area_index -- see the comment on Get_T_per_ground_area()'s
+    // implementation for the full reasoning). Not zero-copy views like the _view
+    // getters below (the scaled values don't live in a persistent buffer), so these
+    // return an ordinary vector like Get_theta_indiv() does.
+    vector<float> Get_T_per_ground_area() const;
+    vector<float> Get_J_per_ground_area() const;
+    vector<float> Get_G_per_ground_area() const;
+
     #ifdef __EMSCRIPTEN__
-    emscripten::val Get_T_view() const;
-    emscripten::val Get_J_view() const;
-    emscripten::val Get_G_view() const;
+    emscripten::val Get_T_per_leaf_area_view() const;
+    emscripten::val Get_J_per_leaf_area_view() const;
+    emscripten::val Get_G_per_leaf_area_view() const;
     emscripten::val Get_psi_leaf_view() const;
     emscripten::val Get_psi_sap_view() const;
     emscripten::val Get_gs_view() const;

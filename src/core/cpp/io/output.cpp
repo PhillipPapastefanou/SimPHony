@@ -250,14 +250,35 @@ vector<float> Output::Get_J_per_area() const {
     return Ja_adapted;
 }
 
+// T/J/G are stored per unit LEAF area (see the Gi[s] computation comment in
+// solver_indiv_eulerimp.cpp's d_psi_stem_ground -- true for all three since the
+// leaf_area_index fix that made G consistent with T/J). Multiplying by
+// leaf_area_index here converts to per unit GROUND area, the same conversion
+// Model::Run() applies at the soil-hydrology coupling point.
+vector<float> Output::Get_T_per_ground_area() const {
+    vector<float> out(Ta.size());
+    for (size_t i = 0; i < Ta.size(); ++i) out[i] = Ta[i] * parameters.leaf_area_index;
+    return out;
+}
+vector<float> Output::Get_J_per_ground_area() const {
+    vector<float> out(Ja.size());
+    for (size_t i = 0; i < Ja.size(); ++i) out[i] = Ja[i] * parameters.leaf_area_index;
+    return out;
+}
+vector<float> Output::Get_G_per_ground_area() const {
+    vector<float> out(Ga.size());
+    for (size_t i = 0; i < Ga.size(); ++i) out[i] = Ga[i] * parameters.leaf_area_index;
+    return out;
+}
+
 #ifdef __EMSCRIPTEN__
-val Output::Get_T_view() const {
+val Output::Get_T_per_leaf_area_view() const {
     return val(typed_memory_view(Ta.size(), Ta.data()));
 }
-val Output::Get_J_view() const {
+val Output::Get_J_per_leaf_area_view() const {
     return val(typed_memory_view(Ja.size(), Ja.data()));
 }
-val Output::Get_G_view() const {
+val Output::Get_G_per_leaf_area_view() const {
     return val(typed_memory_view(Ga.size(), Ga.data()));
 }
 val Output::Get_psi_leaf_view() const {
