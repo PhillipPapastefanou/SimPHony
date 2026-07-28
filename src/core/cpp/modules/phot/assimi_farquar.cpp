@@ -161,8 +161,11 @@ void Assimi_Farquar::Solve_Anet_gs(double ppfd, double catm, double vpd, double 
     // ran up to 100 times per timestep for an identical result each time.
     double GT = gammaTemp(tleaf);
     double Km = KmTemp(tleaf, O2_conc);
-    double Vmax = VmaxTemp(parameters.vmax25, tleaf);
-    double Jmax = JmaxTemp(parameters.jmax25, tleaf);
+    // beta (soil moisture stress) discounts photosynthetic capacity directly,
+    // mirroring QUINCY's beta_ps scaling of n1/n2 (electron transport / Rubisco
+    // rate)
+    double Vmax = VmaxTemp(parameters.vmax25, tleaf) * beta;
+    double Jmax = JmaxTemp(parameters.jmax25, tleaf) * beta;
 
     double gs_prev = 0.0;
     gs = 0.1;

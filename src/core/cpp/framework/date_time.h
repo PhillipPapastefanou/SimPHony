@@ -30,8 +30,16 @@ public:
     time_t t;
 
 private:
+    // Fixed CET offset (UTC+1, no daylight saving) applied when deriving the
+    // year/month/day/hour/min/sec fields from `t`. All forcing data is
+    // timestamped in true UTC; the model and dashboard need those fields in
+    // Central European time. A fixed offset (rather than real CET/CEST with
+    // DST transitions) avoids an artificial 1-hour jump appearing mid-run
+    // purely from a calendar rule. `t` itself always stays true UTC epoch
+    // seconds, so arithmetic/comparisons/AddSeconds are unaffected.
+    static constexpr long CET_OFFSET_SECONDS = 3600;
     void create_time();
-    void populate_fields(); 
+    void populate_fields();
 };
 
 long operator -(DateTime t1, DateTime t2);

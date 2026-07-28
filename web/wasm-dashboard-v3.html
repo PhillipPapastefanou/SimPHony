@@ -567,6 +567,27 @@ const CHART_FONT = '12px "Avenir Next", -apple-system, BlinkMacSystemFont, sans-
 // since that's where the label text itself overhangs past the tick.
 const TIME_CHART_PADDING = [4, 16, 4, 16];
 
+// Forcing timestamps (see loadForcingData/wasm_binary_gen.py) are UTC epoch
+// seconds whose UTC calendar fields already ARE the intended CET wall-clock
+// reading -- the project's fixed-offset, no-DST convention (date_time.cpp).
+// uPlot's default axis/cursor/legend formatters read the LOCAL getters
+// (getHours() etc.) of the Date they're given, which pulls in the browser's
+// real, DST-observing timezone on top of that and drags every label around
+// with it (e.g. a true 4pm peak rendering as 6pm under summer DST). This
+// tzDate hands uPlot a Date whose LOCAL getters read back the UTC fields
+// instead, so displayed hours match the fixed-CET convention regardless of
+// the viewer's system timezone or time of year.
+const TZ_DATE_UTC = (ts) => {
+  const d = new Date(ts * 1000);
+  return new Date(d.getTime() + d.getTimezoneOffset() * 60000);
+};
+
+// theta layers get one series each, colored distinctly (cycles past 5 in
+// case someone configures more soil layers than that) -- shared between the
+// drought-column θ chart and the Scientific-grid θ dropdown entry, same
+// palette as wasm-dashboard-v2.html's makeThetaChart.
+const THETA_LAYER_COLORS = ['#2563eb', '#7c3aed', '#db2777', '#059669', '#d97706'];
+
 // Flip to false to disable the drought-stress sliders again -- see the
 // <style>/<body> comments on .drought-panel.
 const DROUGHT_PANEL_ENABLED = true;
@@ -869,6 +890,7 @@ function makeOverviewChart(containerId) {
     pxAlign: 0,
     padding: TIME_CHART_PADDING,
     scales: { x: { time: true } },
+    tzDate: TZ_DATE_UTC,
     cursor: { show: false, drag: { x: false, y: false } },
     legend: { show: false },
     series: [
@@ -1132,7 +1154,7 @@ function viewToScaledArray(view, scale = 1) {
 // scaled values don't live in a persistent buffer). Walks it with
 // .size()/.get(i) instead, and frees the embind vector when done (must be
 // .delete()'d explicitly, same as Get_theta_indiv()'s rows in
-// meanThetaSeries()).
+// thetaLayerSeries()).
 function vectorToScaledArray(vec, scale = 1) {
   try {
     const n = vec.size();
@@ -1168,9 +1190,18 @@ function scaledVector(vec, key, defs = OVERLAY_DEFS) {
 // `scale` on vpd converts Output::Get_vpd_view()'s native Pa to the kPa
 // shown here (see input_hainich.cpp's `vpd_in[i] * 1000.0` -- the model
 // stores/computes in Pa internally).
+// `yRange` (theta only) fixes the y-axis to a constant [min, max] instead of
+// uPlot's default auto-range-to-data -- soil water content only ever moves
+// within a narrow physical band, and letting the axis auto-scale to
+// whatever's currently in view made small, unremarkable fluctuations look
+// dramatic. 0.05-0.4 comfortably brackets the Soil group's theta_r/theta_s
+// slider ranges (0-0.2 / 0.3-0.65) without being so wide the line goes flat.
+// `layers` (theta only) draws one series per soil layer (THETA_LAYER_COLORS)
+// via thetaLayerSeries() instead of the single-series def.color/getData
+// path every other entry here uses.
 const DROUGHT_CHART_DEFS = [
   { key: 'vpd', afterParam: 'vpd_dryness_factor', label: 'VPD', color: '#000000', unit: 'kPa', scale: 0.001 },
-  { key: 'theta', afterParam: 'precip_reduction_factor', label: 'θ', color: '#000000', unit: 'm3 m-3' },
+  { key: 'theta', afterParam: 'precip_reduction_factor', label: 'θ', unit: 'm3 m-3', yRange: [0.05, 0.4], layers: true },
 ];
 
 // Both schematic-overlay and drought-column charts live in the one shared
@@ -1183,23 +1214,20 @@ const ALL_CHART_DEFS = OVERLAY_DEFS.concat(DROUGHT_CHART_DEFS);
 // counterpart (soil water content is stored per-layer, strided -- see its
 // C++ binding comment), so it returns a fresh embind vector-of-vectors
 // (outer index = timestep, inner = soil layer) that has to be walked with
-// .get()/.size() and explicitly .delete()'d rather than .slice()'d.
-// Averaged across layers here for a single representative series -- with
-// the prognostic soil hydraulic model always on, the three layers respond
-// to precip_reduction_factor (the Precipitation-stress slider) with some
-// lag/damping between them rather than moving in lockstep, but one mean
-// line is still enough to see the overall wetting/drying response.
-function meanThetaSeries(output) {
+// .get()/.size() and explicitly .delete()'d rather than .slice()'d. Returns
+// an array of Float64Arrays, one per soil layer (see THETA_LAYER_COLORS).
+function thetaLayerSeries(output) {
   const rows = output.Get_theta_indiv();
   try {
     const n = rows.size();
-    const out = new Float64Array(n);
+    if (n === 0) return [];
+    const firstRow = rows.get(0);
+    const nLayers = firstRow.size();
+    firstRow.delete();
+    const out = Array.from({ length: nLayers }, () => new Float64Array(n));
     for (let i = 0; i < n; i++) {
       const row = rows.get(i);
-      const nLayers = row.size();
-      let sum = 0;
-      for (let j = 0; j < nLayers; j++) sum += row.get(j);
-      out[i] = nLayers ? sum / nLayers : NaN;
+      for (let j = 0; j < nLayers; j++) out[j][i] = row.get(j);
       row.delete();
     }
     return out;
@@ -1273,8 +1301,8 @@ const VARIABLE_DEFS = [
     getData: (output) => viewToScaledArray(output.Get_drainage_view()), sumFormat: formatWaterMassFluxTotal },
   { key: 'vpd', label: 'VPD — vapor pressure deficit', shortLabel: 'VPD', unit: 'kPa', color: '#000000', isFlux: false,
     getData: (output) => viewToScaledArray(output.Get_vpd_view(), 0.001) },
-  { key: 'theta', label: 'θ — mean soil water content', shortLabel: 'θ', unit: 'm3 m-3', color: '#000000', isFlux: false,
-    getData: (output) => meanThetaSeries(output) },
+  { key: 'theta', label: 'θ — soil water content (per layer)', shortLabel: 'θ', unit: 'm3 m-3', color: '#000000', isFlux: false, layers: true,
+    getData: (output) => thetaLayerSeries(output) },
   { key: 'beta', label: 'β — stomatal closure', shortLabel: 'β', unit: '-', color: '#000000', isFlux: false,
     getData: (output) => viewToScaledArray(output.Get_beta_view()) },
   { key: 'gs', label: 'gs — stomatal conductance', shortLabel: 'gs', unit: 'mol H2O m-2 s-1', color: '#0d9488', isFlux: false,
@@ -1286,7 +1314,7 @@ const SCI_DEFAULT_KEYS = ['psiLeaf', 'T', 'psiStem','J']; // one per grid slot, 
 let sciSelectedKeys = SCI_DEFAULT_KEYS.slice();
 let sciCharts = [null, null, null, null];      // uPlot instances, rebuilt on selection change (rebuildSciChart())
 let sciPlotEls = [null, null, null, null];      // .sci-chart-plot mount divs
-let sciLegendEls = [null, null, null, null];    // { labelEl, swatchEl, textEl, sumEl } per slot
+let sciLegendEls = [null, null, null, null];    // { labelEl, sumEl } per slot -- rebuildSciChart() (re)builds the swatch/label pairs themselves
 let sciSelectEls = [null, null, null, null];    // <select> elements -- listener wired in main() (needs its local scheduleRun())
 let sciFluxSumSeries = [null, null, null, null]; // { x, values } per slot -- display-scaled, like fluxSumSeries
 
@@ -1304,25 +1332,46 @@ function rebuildSciChart(slotIndex) {
   const def = sciVariableDef(slotIndex);
   if (sciCharts[slotIndex]) sciCharts[slotIndex].destroy();
 
+  // Layered variables (theta) get one series per soil layer
+  // (THETA_LAYER_COLORS), everything else gets a single series in def.color.
+  const colors = def.layers ? THETA_LAYER_COLORS.slice(0, 3) : [def.color];
+  const series = [{}, ...colors.map((color) => ({ stroke: color, width: 1, points: { show: false } }))];
+
   sciCharts[slotIndex] = new uPlot({
     width: 1, height: 1, // placeholder -- layoutSciCharts() sizes it for real
     pxAlign: 0,
     padding: TIME_CHART_PADDING,
     scales: { x: { time: true } },
+    tzDate: TZ_DATE_UTC,
     cursor: { show: false },
     legend: { show: false },
-    series: [{}, { stroke: def.color, width: 1, points: { show: false } }],
+    series,
     axes: [
       { font: CHART_FONT, size: 22, stroke: '#999', grid: { stroke: '#eee', width: 1 } },
       { font: CHART_FONT, size: 40, stroke: '#999', grid: { stroke: '#eee', width: 1 } },
     ],
-  }, [[], []], sciPlotEls[slotIndex]);
+  }, [[], ...colors.map(() => [])], sciPlotEls[slotIndex]);
   if (selMin !== undefined) sciCharts[slotIndex].setScale('x', { min: selMin, max: selMax });
 
+  // Legend chip: one swatch+label pair per series (three for theta's soil
+  // layers, one everywhere else) -- rebuilt from scratch each time since the
+  // pair count itself can change between variables.
   const legend = sciLegendEls[slotIndex];
-  legend.labelEl.style.color = def.color;
   legend.labelEl.title = `${def.label} [${def.unit}]`;
-  legend.textEl.textContent = def.shortLabel;
+  while (legend.labelEl.firstChild && legend.labelEl.firstChild !== legend.sumEl) {
+    legend.labelEl.removeChild(legend.labelEl.firstChild);
+  }
+  const pairLabels = def.layers ? colors.map((_, i) => `L${i + 1}`) : [def.shortLabel];
+  colors.forEach((color, i) => {
+    const swatch = document.createElement('span');
+    swatch.className = 'swatch';
+    swatch.style.background = color;
+    const text = document.createElement('span');
+    text.style.color = color;
+    text.textContent = pairLabels[i];
+    legend.labelEl.insertBefore(swatch, legend.sumEl);
+    legend.labelEl.insertBefore(text, legend.sumEl);
+  });
   legend.sumEl.textContent = ''; // filled in by the next updateSciFluxSums()
   sciFluxSumSeries[slotIndex] = null;
 
@@ -1358,18 +1407,18 @@ function buildSciChartBlock(parentEl, slotIndex) {
   parentEl.appendChild(block);
 
   // Same bottom-left legend-chip treatment as the schematic overlays (see
-  // buildOverlayCharts()) -- swatch + short label, plus a Σ span for flux
-  // variables, filled in by updateSciFluxSums().
+  // buildOverlayCharts()) -- swatch(es) + label, plus a Σ span for flux
+  // variables filled in by updateSciFluxSums(). The swatch/label pairs
+  // themselves are (re)built by rebuildSciChart() -- their count depends on
+  // the selected variable (3 for theta's soil layers, 1 otherwise) -- so
+  // only the container and the persistent Σ span are created here.
   const labelEl = document.createElement('div');
   labelEl.className = 'overlay-inline-label corner-bottom-left';
-  const swatchEl = document.createElement('span');
-  swatchEl.className = 'swatch';
-  const textEl = document.createElement('span');
   const sumEl = document.createElement('span');
   sumEl.className = 'legend-sum';
-  labelEl.append(swatchEl, textEl, sumEl);
+  labelEl.appendChild(sumEl);
   plotWrap.appendChild(labelEl);
-  sciLegendEls[slotIndex] = { labelEl, swatchEl, textEl, sumEl };
+  sciLegendEls[slotIndex] = { labelEl, sumEl };
 
   // Not wired here: this file's scheduleRun()/rafPending are local to
   // main() (they close over the wasm `sim`/`output` objects), so this
@@ -1554,6 +1603,7 @@ function buildOverlayCharts() {
       pxAlign: 0,
       padding: TIME_CHART_PADDING,
       scales: { x: { time: true } },
+      tzDate: TZ_DATE_UTC,
       cursor: { show: false },
       legend: { show: false },
       series: [{}, { stroke: def.color, width: 1, points: { show: false } }],
@@ -1614,31 +1664,46 @@ function buildDroughtChart(def, parentEl) {
 
   const label = document.createElement('div');
   label.className = 'overlay-inline-label corner-bottom-left';
-  label.style.color = def.color;
   label.title = `${def.label} [${def.unit}]`;
-  const swatch = document.createElement('span');
-  swatch.className = 'swatch';
-  const text = document.createElement('span');
-  text.textContent = def.label;
-  label.append(swatch, text);
+  // Layered variables (theta) get one swatch+label pair per series
+  // (THETA_LAYER_COLORS), plain ones get a single pair in def.color.
+  const colors = def.layers ? THETA_LAYER_COLORS.slice(0, 3) : [def.color];
+  const pairLabels = def.layers ? colors.map((_, i) => `L${i + 1}`) : [def.label];
+  if (!def.layers) label.style.color = def.color;
+  colors.forEach((color, i) => {
+    const swatch = document.createElement('span');
+    swatch.className = 'swatch';
+    if (def.layers) swatch.style.background = color;
+    const text = document.createElement('span');
+    if (def.layers) text.style.color = color;
+    text.textContent = pairLabels[i];
+    label.append(swatch, text);
+  });
   plotEl.appendChild(label);
 
   box.appendChild(plotEl);
   parentEl.appendChild(box);
 
+  const series = [{}, ...colors.map((color) => ({ stroke: color, width: 1, points: { show: false } }))];
+
   charts[def.key] = new uPlot({
     width: 1, height: 1, // placeholder -- layoutDroughtCharts() sizes it for real
     pxAlign: 0,
     padding: TIME_CHART_PADDING,
-    scales: { x: { time: true } },
+    // def.yRange (theta only) pins the y-scale to a fixed [min, max] instead
+    // of uPlot's default auto-range-to-data -- see DROUGHT_CHART_DEFS.
+    scales: def.yRange
+      ? { x: { time: true }, y: { range: def.yRange } }
+      : { x: { time: true } },
+    tzDate: TZ_DATE_UTC,
     cursor: { show: false },
     legend: { show: false },
-    series: [{}, { stroke: def.color, width: 1, points: { show: false } }],
+    series,
     axes: [
       { font: CHART_FONT, size: 22, stroke: '#999', grid: { stroke: '#eee', width: 1 } },
       { font: CHART_FONT, size: 34, stroke: '#999', grid: { stroke: '#eee', width: 1 } },
     ],
-  }, [[], []], plotEl);
+  }, [[], ...colors.map(() => [])], plotEl);
   def.plotEl = plotEl;
 }
 
@@ -1870,7 +1935,7 @@ async function main() {
       charts.J.setData([x, JData]);
       charts.G.setData([x, GData]);
       charts.vpd.setData([x, scaledSeries(output.Get_vpd_view(), 'vpd', DROUGHT_CHART_DEFS)]);
-      charts.theta.setData([x, meanThetaSeries(output)]);
+      charts.theta.setData([x, ...thetaLayerSeries(output)]);
 
       // Keep these (already display-scaled) series + shared x-axis around so
       // updateFluxSums() can re-integrate over just the zoomed window without
@@ -1880,12 +1945,14 @@ async function main() {
       // Scientific-grid charts -- each slot pulls whatever variable its own
       // dropdown currently has selected via VARIABLE_DEFS.getData(), so
       // there's no per-variable branching needed here (unlike the schematic
-      // block above, which is always exactly T/J/G/psiLeaf/psiStem).
+      // block above, which is always exactly T/J/G/psiLeaf/psiStem) beyond
+      // theta's getData() returning one array per soil layer (def.layers)
+      // instead of a single series.
       for (let i = 0; i < sciCharts.length; i++) {
         const def = sciVariableDef(i);
         if (!sciCharts[i]) continue;
         const yData = def.getData(output);
-        sciCharts[i].setData([x, yData]);
+        sciCharts[i].setData(def.layers ? [x, ...yData] : [x, yData]);
         sciFluxSumSeries[i] = def.isFlux ? { x, values: yData } : null;
       }
 

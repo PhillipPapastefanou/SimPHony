@@ -88,12 +88,20 @@ void DateTime::populate_fields() {
 }
 
 void DateTime::create_time() {
+    // tmt holds the wall-clock fields as given (parsed from a UTC-labelled
+    // string, or a caller-supplied tm), so timegm() here yields the true UTC
+    // epoch. Re-derive tmt below from the CET-shifted epoch so the exposed
+    // year/month/day/hour/min/sec fields are in CET, matching the epoch-based
+    // constructor below.
     t = timegm(&tmt);
+    time_t local = static_cast<time_t>(t + CET_OFFSET_SECONDS);
+    gmtime_r(&local, &tmt);
     populate_fields();
 }
 
 DateTime::DateTime(time_t epoch_seconds) {
     t = epoch_seconds;
-    gmtime_r(&t, &tmt);  
+    time_t local = static_cast<time_t>(t + CET_OFFSET_SECONDS);
+    gmtime_r(&local, &tmt);
     populate_fields();
 }

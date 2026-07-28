@@ -112,10 +112,9 @@
   {
     "name": "g0",
     "group": "Stomatal",
-    "label": "Min. stomatal conductance",
+    "label": "g_0 (ecosystem)",
     "unit": "mol m-2 s-1",
     "description": "Medlyn et al. 2011 model minimum/cuticular stomatal conductance g0 (residual conductance as photosynthesis approaches zero). Medlyn 2011: 0-0.05.",
-    "latex": "g_0",
     "min": 0.0, "max": 0.05, "step": 0.001, "default": 0.005, "decimals": 3
   },
   {
